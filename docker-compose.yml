@@ -3,18 +3,20 @@ version: "3"
 services:
   caddy:
     container_name: caddy
-    image: caddy:alpine
+    image: chuxubank/caddy-cloudflare
     restart: unless-stopped
     ports:
       - "80:80"
       - "433:433"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - /site:/srv
+      - ./site:/srv
       - caddy_data:/data
       - caddy_config:/config
-    links:
-      - v2ray
+    environment:
+      CF_API_TOKEN: Ce5IBLFCroR8ca2cXa3v1iFncYeydxe4LyK_MNvu
+      EMAIL: chuxubank@qq.com
+
   v2ray:
     container_name: v2ray
     image: v2fly/v2fly-core
@@ -22,7 +24,7 @@ services:
     expose:
       - "10000"
     volumes:
-      - ./config.json:/etc/v2ray/config.json
+      - ./v2ray:/etc/v2ray
 
 volumes:
   caddy_data:
