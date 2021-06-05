@@ -5,10 +5,11 @@ chuxubank.top {
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}
+	file_server
 	@v2ray_websocket {
 		path /ray
 		header Connection *Upgrade*
 		header Upgrade websocket
 	}
-	reverse_proxy @v2ray_websocket v2ray:10000
+	reverse_proxy @v2ray_websocket {env.V2RAY_ADDRESS}
 }
