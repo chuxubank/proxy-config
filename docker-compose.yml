@@ -28,10 +28,8 @@ services:
   xray:
     container_name: xray
     image: teddysun/xray
+    ports:
+      - "8443:8443"
     volumes:
       - ./xray:/etc/xray
       - ./caddy/data:/caddy/data
-
-volumes:
-  caddy_data:
-  caddy_config:
