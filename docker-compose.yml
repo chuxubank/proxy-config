@@ -9,10 +9,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./site:/srv
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/site:/srv
+      - ./caddy/data:/data
+      - ./caddy/config:/config
     environment:
       CF_API_TOKEN: Ce5IBLFCroR8ca2cXa3v1iFncYeydxe4LyK_MNvu
       EMAIL: chuxubank@qq.com
@@ -24,6 +24,13 @@ services:
     restart: always
     volumes:
       - ./v2ray:/etc/v2ray
+
+  xray:
+    container_name: xray
+    image: teddysun/xray
+    volumes:
+      - ./xray:/etc/xray
+      - ./caddy/data:/caddy/data
 
 volumes:
   caddy_data:
