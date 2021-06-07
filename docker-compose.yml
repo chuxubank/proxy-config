@@ -28,6 +28,7 @@ services:
   xray:
     container_name: xray
     image: teddysun/xray
+    restart: always
     ports:
       - "8443:8443"
     volumes:
