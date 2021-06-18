@@ -2,6 +2,7 @@
 	email {env.EMAIL}
 }
 chuxubank.top {
+	log
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}
