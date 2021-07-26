@@ -8,9 +8,9 @@ chuxubank.top {
 	}
 	file_server
 	@v2ray_websocket {
-		path /ray
+		path /listen_to_both_side
 		header Connection *Upgrade*
 		header Upgrade websocket
 	}
-	reverse_proxy @v2ray_websocket {env.V2RAY_ADDRESS}
+	# reverse_proxy @v2ray_websocket {env.V2RAY_ADDRESS}
 }

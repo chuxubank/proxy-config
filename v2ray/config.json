@@ -7,14 +7,14 @@
       "settings": {
         "clients": [
           {
-            "id": "77926c07-efe9-44c6-b848-fa9150d253b1"
+            "id": "78e5f256-7b6f-d3be-479e-86508dce0c58"
           }
         ]
       },
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/ray"
+          "path": "/listen_to_both_side"
         }
       }
     }
