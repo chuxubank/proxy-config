@@ -17,6 +17,11 @@ services:
       CF_API_TOKEN: Ce5IBLFCroR8ca2cXa3v1iFncYeydxe4LyK_MNvu
       EMAIL: chuxubank@qq.com
       V2RAY_ADDRESS: v2ray:10000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 
   # v2ray:
   #   container_name: v2ray
@@ -31,6 +36,12 @@ services:
     restart: always
     ports:
       - "8443:8443"
+      - "8445:8443"
     volumes:
       - ./xray:/etc/xray
       - ./caddy/data:/caddy/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
