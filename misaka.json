@@ -1,0 +1,48 @@
+{
+    "log": {
+        "loglevel": "debug"
+    },
+    "inbounds": [
+        {
+            "port": 10800,
+            "listen": "127.0.0.1",
+            "protocol": "socks",
+            "settings": {
+                "udp": true
+            }
+        },
+	{
+            "port": 8889,
+            "listen": "127.0.0.1",
+            "protocol": "http"
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vless",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "74.121.150.27", // 换成你的域名或服务器 IP（发起请求时无需解析域名了）
+                        "port": 8445,
+                        "users": [
+                            {
+                                "id": "6dce7d51-9719-46f1-8707-6bc5d892a76d", // 填写你的 UUID
+                                "flow": "xtls-rprx-direct",
+                                "encryption": "none",
+                                "level": 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "xtls", // 需要使用 XTLS
+                "xtlsSettings": {
+                    "serverName": "chuxubank.top" // 换成你的域名
+                }
+            }
+        }
+    ]
+}
