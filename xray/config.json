@@ -21,12 +21,12 @@
 	    "xver": 1
 	  },
 	  {
-	    "path": "/misaka_vless_ws", // 必须换成自定义的 PATH
+	    "path": "/misaka_vless_ws",
 	    "dest": 1234,
 	    "xver": 1
 	  },
 	  {
-	    "path": "/misaka_vmess_ws", // 必须换成自定义的 PATH
+	    "path": "/misaka_vmess_ws",
 	    "dest": 3456,
 	    "xver": 1
 	  }
@@ -41,8 +41,8 @@
 	  ],
 	  "certificates": [
 	    {
-	      "certificateFile": "/caddy/data/caddy/certificates/acme.zerossl.com-v2-dv90/chuxubank.top/chuxubank.top.crt", // 换成你的证书，绝对路径
-	      "keyFile": "/caddy/data/caddy/certificates/acme.zerossl.com-v2-dv90/chuxubank.top/chuxubank.top.key" // 换成你的私钥，绝对路径
+	      "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
+	      "keyFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.key"
 	    }
 	  ]
 	}
@@ -55,13 +55,13 @@
       "settings": {
 	"clients": [
 	  {
-	    "password": "30490e90-2f1e-48c9-a33e-04aaf13fa431", // 填写你的密码
+	    "password": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
 	    "level": 0
 	  }
 	],
 	"fallbacks": [
 	  {
-	    "dest": "caddy:80" // 或者回落到其它也防探测的代理
+	    "dest": "caddy:80"
 	  }
 	]
       },
@@ -69,8 +69,8 @@
 	"network": "ws",
 	"security": "none",
 	"wsSettings": {
-	  "acceptProxyProtocol": true, // 提醒：若你用 Nginx/Caddy 等反代 WS，需要删掉这行
-	  "path": "/misaka_trojan_ws" // 必须换成自定义的 PATH，需要和分流的一致
+	    "acceptProxyProtocol": true,
+	    "path": "/misaka_trojan_ws"
 	}
       }
     },
@@ -81,7 +81,7 @@
       "settings": {
 	"clients": [
 	  {
-	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431", // 填写你的 UUID
+	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
 	    "level": 0
 	  }
 	],
@@ -91,8 +91,8 @@
 	"network": "ws",
 	"security": "none",
 	"wsSettings": {
-	  "acceptProxyProtocol": true, // 提醒：若你用 Nginx/Caddy 等反代 WS，需要删掉这行
-	  "path": "/misaka_vless_ws" // 必须换成自定义的 PATH，需要和分流的一致
+	  "acceptProxyProtocol": true,
+	  "path": "/misaka_vless_ws"
 	}
       }
     },
@@ -103,7 +103,7 @@
       "settings": {
 	"clients": [
 	  {
-	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431", // 填写你的 UUID
+	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
 	    "level": 0
 	  }
 	]
@@ -112,8 +112,8 @@
 	"network": "ws",
 	"security": "none",
 	"wsSettings": {
-	  "acceptProxyProtocol": true, // 提醒：若你用 Nginx/Caddy 等反代 WS，需要删掉这行
-	  "path": "/misaka_vmess_ws" // 必须换成自定义的 PATH，需要和分流的一致
+	  "acceptProxyProtocol": true,
+	  "path": "/misaka_vmess_ws"
 	}
       }
     }
