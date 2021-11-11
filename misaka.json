@@ -1,6 +1,7 @@
 {
     "log": {
-        "loglevel": "debug"
+	// Log level, one of "debug", "info", "warning", "error", "none"
+	"loglevel": "debug"
     },
     "inbounds": [
         {
@@ -15,20 +16,7 @@
             "port": 8889,
             "listen": "127.0.0.1",
             "protocol": "http"
-        },
-	{
-	    "port": 12345,
-	    "protocol": "dokodemo-door",
-	    "settings": {
-		"network": "tcp,udp",
-		"followRedirect": true
-	    },
-	    "streamSettings": {
-		"sockopt": {
-		    "tproxy": "tproxy"
-		}
-	    }
-	}
+        }
     ],
     "outbounds": [
         {
@@ -41,7 +29,7 @@
                         "users": [
                             {
                                 "id": "6dce7d51-9719-46f1-8707-6bc5d892a76d",
-                                "flow": "xtls-rprx-splice",
+                                "flow": "xtls-rprx-direct",
                                 "encryption": "none",
                                 "level": 0
                             }
