@@ -3,6 +3,39 @@
 	// Log level, one of "debug", "info", "warning", "error", "none"
 	"loglevel": "debug"
     },
+    "dns": {
+	"servers": [
+	    "223.5.5.5",
+	    "8.8.8.8",
+	    "localhost"
+	]
+    },
+    "routing": {
+	"rules": [
+	    {
+                "type" : "field",
+                "outboundTag" : "Block",
+                "domain" : [
+                    "geosite:category-ads"
+                ]
+            },
+	    {
+		"type": "field",
+		"outboundTag": "Direct",
+		"ip": [
+		    "geoip:cn",
+		    "geoip:private"
+		]
+	    },
+	    {
+		"type": "field",
+		"outboundTag": "Direct",
+		"domain": [
+		    "geosite:cn"
+		]
+	    }
+	]
+    },
     "inbounds": [
         {
             "port": 10800,
@@ -10,12 +43,10 @@
             "protocol": "socks",
             "settings": {
                 "udp": true
-            }
-        },
-	{
-            "port": 8889,
-            "listen": "127.0.0.1",
-            "protocol": "http"
+            },
+	    "sniffing": {
+		"enabled": true
+	    }
         }
     ],
     "outbounds": [
@@ -37,6 +68,7 @@
                     }
                 ]
             },
+	    "tag": "Proxy",
             "streamSettings": {
                 "network": "tcp",
                 "security": "xtls",
@@ -44,6 +76,14 @@
                     "serverName": "chuxubank.top"
                 }
             }
+        },
+	{
+	    "protocol": "freedom",
+	    "tag": "Direct"
+	},
+        {
+            "tag": "Block",
+            "protocol": "blackhole"
         }
     ]
 }
