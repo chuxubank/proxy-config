@@ -8,8 +8,25 @@
     },
     "dns": {
 	"servers": [
-	    "223.5.5.5",
-	    "8.8.8.8",
+	    {
+		"address": "119.29.29.29",
+		"port": 53,
+		"domains": [
+		    "geosite:cn"
+		],
+		"expectIPs": [
+		    "geoip:cn"
+		]
+	    },
+	    {
+		"address": "8.8.8.8",
+		"port": 53,
+		"domains": [
+		    "geosite:geolocation-!cn",
+		    "geosite:speedtest"
+		]
+	    },
+	    "1.1.1.1",
 	    "localhost"
 	]
     },
@@ -25,16 +42,17 @@
 	    {
 		"type": "field",
 		"outboundTag": "Direct",
-		"ip": [
-		    "geoip:cn",
-		    "geoip:private"
+		"domain": [
+		    "geosite:cn",
+		    "geosite:apple"
 		]
 	    },
 	    {
 		"type": "field",
 		"outboundTag": "Direct",
-		"domain": [
-		    "geosite:cn"
+		"ip": [
+		    "geoip:cn",
+		    "geoip:private"
 		]
 	    }
 	]
@@ -48,7 +66,8 @@
 		"udp": true
 	    },
 	    "sniffing": {
-		"enabled": true
+		"enabled": true,
+		"destOverride": ["http", "tls"]
 	    }
 	}
     ],
