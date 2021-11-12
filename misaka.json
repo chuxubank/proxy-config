@@ -2,7 +2,6 @@
     "log": {
 	"access": "/usr/local/var/log/xray/access.log",
 	"error": "/usr/local/var/log/xray/error.log",
-	// Log level, one of "debug", "info", "warning", "error", "none"
 	"loglevel": "debug",
 	"dnsLog": true
     },
