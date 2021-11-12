@@ -30,6 +30,7 @@
 	]
     },
     "routing": {
+	"domainStrategy": "IPIfNonMatch",
 	"rules": [
 	    {
 		"type": "field",
