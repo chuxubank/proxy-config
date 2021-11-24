@@ -1,126 +1,49 @@
 {
-  "log": {
-    "loglevel": "debug"
-  },
-  "inbounds": [
-    {
-      "port": 8443,
-      "protocol": "vless",
-      "settings": {
-	"clients": [
-	  {
-	    "id": "6dce7d51-9719-46f1-8707-6bc5d892a76d",
-	    "flow": "xtls-rprx-direct",
-	    "level": 0
-	  }
-	],
-	"decryption": "none",
-	"fallbacks": [
-	  {
-	    "dest": 1310,
-	    "xver": 1
-	  },
-	  {
-	    "path": "/misaka_vless_ws",
-	    "dest": 1234,
-	    "xver": 1
-	  },
-	  {
-	    "path": "/misaka_vmess_ws",
-	    "dest": 3456,
-	    "xver": 1
-	  }
-	]
-      },
-      "streamSettings": {
-	"network": "tcp",
-	"security": "xtls",
-	"xtlsSettings": {
-	  "alpn": [
-	    "http/1.1"
-	  ],
-	  "certificates": [
-	    {
-	      "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
-	      "keyFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.key"
+    "log": {
+	"loglevel": "warning"
+    },
+    "inbounds": [
+	{
+	    "port": 2022,
+	    "protocol": "vless",
+	    "settings": {
+		"clients": [
+		    {
+			"id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1"
+		    }
+		],
+		"decryption": "none"
+	    },
+	    "streamSettings": {
+		"network": "grpc",
+		"grpcSettings": {
+		    "serviceName": "listen-to-both-sides"
+		}
 	    }
-	  ]
 	}
-      }
-    },
-    {
-      "port": 1310,
-      "listen": "127.0.0.1",
-      "protocol": "trojan",
-      "settings": {
-	"clients": [
-	  {
-	    "password": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
-	    "level": 0
-	  }
-	],
-	"fallbacks": [
-	  {
-	    "dest": "caddy:80"
-	  }
+    ],
+    "outbounds": [
+	{
+	    "tag": "direct",
+	    "protocol": "freedom",
+	    "settings": {}
+	},
+	{
+	    "tag": "blocked",
+	    "protocol": "blackhole",
+	    "settings": {}
+	}
+    ],
+    "routing": {
+	"domainStrategy": "AsIs",
+	"rules": [
+	    {
+		"type": "field",
+		"ip": [
+		    "geoip:private"
+		],
+		"outboundTag": "blocked"
+	    }
 	]
-      },
-      "streamSettings": {
-	"network": "ws",
-	"security": "none",
-	"wsSettings": {
-	    "acceptProxyProtocol": true,
-	    "path": "/misaka_trojan_ws"
-	}
-      }
-    },
-    {
-      "port": 1234,
-      "listen": "127.0.0.1",
-      "protocol": "vless",
-      "settings": {
-	"clients": [
-	  {
-	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
-	    "level": 0
-	  }
-	],
-	"decryption": "none"
-      },
-      "streamSettings": {
-	"network": "ws",
-	"security": "none",
-	"wsSettings": {
-	  "acceptProxyProtocol": true,
-	  "path": "/misaka_vless_ws"
-	}
-      }
-    },
-    {
-      "port": 3456,
-      "listen": "127.0.0.1",
-      "protocol": "vmess",
-      "settings": {
-	"clients": [
-	  {
-	    "id": "30490e90-2f1e-48c9-a33e-04aaf13fa431",
-	    "level": 0
-	  }
-	]
-      },
-      "streamSettings": {
-	"network": "ws",
-	"security": "none",
-	"wsSettings": {
-	  "acceptProxyProtocol": true,
-	  "path": "/misaka_vmess_ws"
-	}
-      }
     }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom"
-    }
-  ]
 }
