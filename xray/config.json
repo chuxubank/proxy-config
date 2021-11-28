@@ -20,6 +20,37 @@
 		    "serviceName": "listen-to-both-sides"
 		}
 	    }
+	},
+	{
+	    "port": 8443,
+	    "protocol": "vless",
+	    "settings": {
+		"clients": [
+		    {
+			"id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
+			"flow": "xtls-rprx-direct"
+		    }
+		],
+		"decryption": "none",
+		"fallbacks": [
+		    {
+			"dest": "caddy:80"
+		    }
+		]
+	    },
+	    "streamSettings": {
+		"network": "tcp",
+		"security": "xtls",
+		"xtlsSettings": {
+		    "serverName": "chuxubank.top",
+		    "certificates": [
+			{
+			    "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
+			    "keyFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.key"
+			}
+		    ]
+		}
+	    }
 	}
     ],
     "outbounds": [
