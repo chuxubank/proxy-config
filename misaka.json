@@ -54,6 +54,13 @@
 		    "geoip:cn",
 		    "geoip:private"
 		]
+	    },
+	    {
+		"type": "field",
+		"outboundTag": "Proxy-grpc",
+		"domain": [
+		    "githubusercontent.com"
+		]
 	    }
 	]
     },
@@ -90,7 +97,7 @@
 		    }
 		]
 	    },
-	    "tag": "Proxy-IP",
+	    "tag": "Proxy-xtls",
 	    "streamSettings": {
 		"network": "tcp",
 		"security": "xtls",
@@ -115,7 +122,7 @@
 		    }
 		]
 	    },
-	    "tag": "Proxy-Domain",
+	    "tag": "Proxy-grpc",
 	    "streamSettings": {
 		"network": "grpc",
 		"security": "tls",
