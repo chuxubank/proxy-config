@@ -27,7 +27,8 @@
 	    },
 	    "1.1.1.1",
 	    "localhost"
-	]
+	],
+	"queryStrategy": "UseIPv4"
     },
     "routing": {
 	"domainStrategy": "IPIfNonMatch",
@@ -59,7 +60,7 @@
 		"type": "field",
 		"outboundTag": "Proxy-grpc",
 		"domain": [
-		    "githubusercontent.com"
+		    "geosite:github"
 		]
 	    }
 	]
