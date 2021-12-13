@@ -45,7 +45,8 @@
 		"outboundTag": "Direct",
 		"domain": [
 		    "geosite:cn",
-		    "geosite:apple"
+		    "geosite:apple",
+		    "geosite:jetbrains"
 		]
 	    },
 	    {
