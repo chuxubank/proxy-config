@@ -1,0 +1,146 @@
+{
+    "log": {
+	"access": "/usr/local/var/log/xray/access.log",
+	"error": "/usr/local/var/log/xray/error.log",
+	"loglevel": "debug",
+	"dnsLog": true
+    },
+    "dns": {
+	"servers": [
+	    {
+		"address": "223.5.5.5",
+		"port": 53,
+		"domains": [
+		    "geosite:cn"
+		],
+		"expectIPs": [
+		    "geoip:cn"
+		]
+	    },
+	    {
+		"address": "8.8.8.8",
+		"port": 53,
+		"domains": [
+		    "geosite:geolocation-!cn",
+		    "geosite:speedtest"
+		]
+	    },
+	    "1.1.1.1",
+	    "localhost"
+	],
+	"queryStrategy": "UseIPv4"
+    },
+    "routing": {
+	"domainStrategy": "IPIfNonMatch",
+	"rules": [
+	    {
+		"type": "field",
+		"outboundTag": "Block",
+		"domain": [
+		    "geosite:category-ads"
+		]
+	    },
+	    {
+		"type": "field",
+		"outboundTag": "Direct",
+		"domain": [
+		    "geosite:cn",
+		    "geosite:apple",
+		    "geosite:jetbrains",
+		    "geosite:microsoft"
+		]
+	    },
+	    {
+		"type": "field",
+		"outboundTag": "Direct",
+		"ip": [
+		    "geoip:cn",
+		    "geoip:private"
+		]
+	    },
+	    {
+		"type": "field",
+		"outboundTag": "Proxy-grpc",
+		"domain": [
+		    "geosite:github"
+		]
+	    }
+	]
+    },
+    "inbounds": [
+	{
+	    "port": 10800,
+	    "listen": "127.0.0.1",
+	    "protocol": "socks",
+	    "settings": {
+		"udp": true
+	    },
+	    "sniffing": {
+		"enabled": true,
+		"destOverride": ["http", "tls"]
+	    }
+	}
+    ],
+    "outbounds": [
+	{
+	    "protocol": "vless",
+	    "settings": {
+		"vnext": [
+		    {
+			"address": "chuxubank.top",
+			"port": 443,
+			"users": [
+			    {
+				"id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1",
+				"encryption": "none"
+			    }
+			]
+		    }
+		]
+	    },
+	    "tag": "Proxy-grpc",
+	    "streamSettings": {
+		"network": "grpc",
+		"security": "tls",
+		"grpcSettings": {
+		    "serviceName": "listen-to-both-sides"
+		}
+	    }
+	},
+	{
+	    "protocol": "vless",
+	    "settings": {
+		"vnext": [
+		    {
+			"address": "74.121.150.27",
+			"port": 8445,
+			"users": [
+			    {
+				"id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
+				"flow": "xtls-rprx-direct",
+				"encryption": "none",
+				"level": 0
+			    }
+			]
+		    }
+		]
+	    },
+	    "tag": "Proxy-xtls",
+	    "streamSettings": {
+		"network": "tcp",
+		"security": "xtls",
+		"xtlsSettings": {
+		    "serverName": "chuxubank.top"
+		}
+	    }
+	},
+	{
+	    "protocol": "freedom",
+	    "tag": "Direct"
+	},
+	{
+	    "tag": "Block",
+	    "protocol": "blackhole"
+	}
+    ]
+}

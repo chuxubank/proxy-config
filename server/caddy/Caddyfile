@@ -1,0 +1,15 @@
+{
+	email {env.EMAIL}
+}
+chuxubank.top {
+	log
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+	}
+	file_server
+	@grpc {
+		protocol grpc
+		path /listen-to-both-sides/*
+	}
+	reverse_proxy @grpc h2c://xray:2022
+}

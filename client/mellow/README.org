@@ -1,0 +1,12 @@
+* Mellow Config
+** Usage
+*** macOS
+#+begin_src sh
+  cd ~/Library/ApplicationSupport/Mellow/config
+  git init
+  git remote add origin https://github.com/chuxubank/Proxy-Config.git
+  git fetch origin mellow
+  git reset origin/mellow
+  git checkout -t origin/mellow
+  git branch -d master
+#+end_src
