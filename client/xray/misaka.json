@@ -45,9 +45,12 @@
 		"outboundTag": "Direct",
 		"domain": [
 		    "geosite:cn",
+		    "geosite:google@cn",
 		    "geosite:apple",
 		    "geosite:jetbrains",
-		    "geosite:microsoft"
+		    "geosite:microsoft",
+		    "geosite:notion",
+		    "geosite:logitech"
 		]
 	    },
 	    {
@@ -62,7 +65,7 @@
 		"type": "field",
 		"outboundTag": "Proxy-grpc",
 		"domain": [
-		    "geosite:github"
+		    "geosite:geolocation-!cn"
 		]
 	    }
 	]
