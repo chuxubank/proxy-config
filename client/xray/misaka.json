@@ -48,9 +48,12 @@
 		    "geosite:google@cn",
 		    "geosite:apple",
 		    "geosite:jetbrains",
-		    "geosite:microsoft",
+		    "geosite:microsoft@cn",
 		    "geosite:notion",
-		    "geosite:logitech"
+		    "geosite:logitech",
+		    "domain:zscaler.com",
+		    "domain:zscloud.net",
+		    "domain:documentfoundation.org"
 		]
 	    },
 	    {
@@ -90,32 +93,7 @@
 	    "settings": {
 		"vnext": [
 		    {
-			"address": "chuxubank.top",
-			"port": 443,
-			"users": [
-			    {
-				"id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1",
-				"encryption": "none"
-			    }
-			]
-		    }
-		]
-	    },
-	    "tag": "Proxy-grpc",
-	    "streamSettings": {
-		"network": "grpc",
-		"security": "tls",
-		"grpcSettings": {
-		    "serviceName": "listen-to-both-sides"
-		}
-	    }
-	},
-	{
-	    "protocol": "vless",
-	    "settings": {
-		"vnext": [
-		    {
-			"address": "74.121.150.27",
+			"address": "104.244.89.79",
 			"port": 8445,
 			"users": [
 			    {
@@ -134,6 +112,31 @@
 		"security": "xtls",
 		"xtlsSettings": {
 		    "serverName": "chuxubank.top"
+		}
+	    }
+	},
+	{
+	    "protocol": "vless",
+	    "settings": {
+		"vnext": [
+		    {
+			"address": "chuxubank.top",
+			"port": 443,
+			"users": [
+			    {
+				"id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1",
+				"encryption": "none"
+			    }
+			]
+		    }
+		]
+	    },
+	    "tag": "Proxy-grpc",
+	    "streamSettings": {
+		"network": "grpc",
+		"security": "tls",
+		"grpcSettings": {
+		    "serviceName": "listen-to-both-sides"
 		}
 	    }
 	},
