@@ -51,9 +51,9 @@
 		    "geosite:microsoft@cn",
 		    "geosite:notion",
 		    "geosite:logitech",
-		    "domain:zscaler.com",
-		    "domain:zscloud.net",
-		    "domain:documentfoundation.org"
+		    "domain:documentfoundation.org",
+		    "domain:bwh88.net",
+		    "domain:64clouds.com"
 		]
 	    },
 	    {
@@ -93,7 +93,7 @@
 	    "settings": {
 		"vnext": [
 		    {
-			"address": "104.244.89.79",
+			"address": "74.121.150.27",
 			"port": 8445,
 			"users": [
 			    {
