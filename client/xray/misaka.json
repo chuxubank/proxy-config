@@ -16,7 +16,7 @@
       {
         "address": "8.8.8.8",
         "port": 53,
-        "domains": ["geosite:geolocation-!cn", "geosite:speedtest"]
+        "domains": ["geosite:geolocation-!cn"]
       },
       "1.1.1.1",
       "localhost"
@@ -49,13 +49,18 @@
       },
       {
         "type": "field",
-        "outboundTag": "Direct",
-        "ip": ["geoip:cn", "geoip:private"]
+        "outboundTag": "Proxy-grpc",
+        "domain": ["geosite:github"]
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-grpc",
+        "outboundTag": "Proxy-xtls",
         "domain": ["geosite:geolocation-!cn"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "ip": ["geoip:cn", "geoip:private"]
       }
     ]
   },
@@ -79,7 +84,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "74.121.150.27",
+            "address": "107.182.185.65",
             "port": 8445,
             "users": [
               {
