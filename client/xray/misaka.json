@@ -106,6 +106,34 @@
       "settings": {
         "vnext": [
           {
+            "address": "107.182.185.65",
+            "port": 8443,
+            "users": [
+              {
+                "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "quic",
+        "quicSettings": {
+          "header": {
+            "type": "srtp"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "servername": "chuxubank.top"
+        }
+      }
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
             "address": "chuxubank.top",
             "port": 443,
             "users": [

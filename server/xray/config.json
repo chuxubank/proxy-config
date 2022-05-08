@@ -27,6 +27,34 @@
       "settings": {
         "clients": [
           {
+            "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be"
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "quic",
+        "quicSettings": {
+          "header": {
+            "type": "srtp"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
+              "keyFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.key"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "port": 8445,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
             "id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
             "flow": "xtls-rprx-direct"
           }
