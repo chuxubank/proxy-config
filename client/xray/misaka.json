@@ -84,7 +84,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "107.182.185.65",
+            "address": "104.225.237.72",
             "port": 8445,
             "users": [
               {
@@ -111,7 +111,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "107.182.185.65",
+            "address": "chuxubank.top",
             "port": 8443,
             "users": [
               {
@@ -125,6 +125,8 @@
       "streamSettings": {
         "network": "quic",
         "quicSettings": {
+          "security": "none",
+          "key": "",
           "header": {
             "type": "srtp"
           }

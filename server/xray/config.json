@@ -35,12 +35,15 @@
       "streamSettings": {
         "network": "quic",
         "quicSettings": {
+          "security": "none",
+          "key": "",
           "header": {
             "type": "srtp"
           }
         },
         "security": "tls",
         "tlsSettings": {
+          "serverName": "chuxubank.top",
           "certificates": [
             {
               "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
