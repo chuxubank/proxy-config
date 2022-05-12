@@ -29,7 +29,8 @@
           {
             "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be"
           }
-        ]
+        ],
+        "decryption": "none"
       },
       "streamSettings": {
         "network": "quic",
