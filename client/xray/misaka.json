@@ -107,21 +107,22 @@
       }
     },
     {
-      "protocol": "vless",
+      "protocol": "vmess",
       "settings": {
         "vnext": [
           {
-            "address": "chuxubank.top",
+            "address": "104.225.237.72",
             "port": 8443,
             "users": [
               {
                 "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be",
-                "encryption": "none"
+                "security": "zero"
               }
             ]
           }
         ]
       },
+      "tag": "Proxy-quic",
       "streamSettings": {
         "network": "quic",
         "quicSettings": {
