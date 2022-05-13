@@ -34,7 +34,7 @@ services:
     image: teddysun/xray
     restart: always
     ports:
-      - "8443:8443"
+      - "8443:8443/udp"
       - "8445:8445"
     expose:
       - "2022"
