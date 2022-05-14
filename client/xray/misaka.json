@@ -107,7 +107,7 @@
       }
     },
     {
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "vnext": [
           {
@@ -116,7 +116,7 @@
             "users": [
               {
                 "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be",
-                "security": "zero"
+                "encryption": "none"
               }
             ]
           }

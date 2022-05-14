@@ -24,13 +24,14 @@
     },
     {
       "port": 8443,
-      "protocol": "vmess",
+      "protocol": "vless",
       "settings": {
         "clients": [
           {
             "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be"
           }
-        ]
+        ],
+        "decryption": "none"
       },
       "streamSettings": {
         "network": "quic",
@@ -43,6 +44,7 @@
         },
         "security": "tls",
         "tlsSettings": {
+          "serverName": "chuxubank.top",
           "certificates": [
             {
               "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
