@@ -44,17 +44,13 @@
           "geosite:logitech",
           "domain:documentfoundation.org",
           "domain:bwh88.net",
-          "domain:64clouds.com"
+          "domain:64clouds.com",
+          "domain:justmysocks5.net"
         ]
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-grpc",
-        "domain": ["geosite:github"]
-      },
-      {
-        "type": "field",
-        "outboundTag": "Proxy-xtls",
+        "outboundTag": "Proxy-JMS",
         "domain": ["geosite:geolocation-!cn"]
       },
       {
@@ -79,6 +75,26 @@
     }
   ],
   "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "c55s3.jamjams.net",
+            "port": 6518,
+            "users": [
+              {
+                "id": "f6ec29ec-d2cb-49f9-82cc-b8ee6e3fe4cc",
+                "alterId": 0,
+                "security": "auto",
+                "level": 0
+              }
+            ]
+          }
+        ]
+      },
+      "tag": "Proxy-JMS"
+    },
     {
       "protocol": "vless",
       "settings": {
