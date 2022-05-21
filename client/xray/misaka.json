@@ -40,6 +40,7 @@
           "geosite:apple",
           "geosite:jetbrains",
           "geosite:microsoft@cn",
+          "domain:teams.microsoft.com",
           "geosite:notion",
           "geosite:logitech",
           "domain:documentfoundation.org",
@@ -50,7 +51,7 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-JMS",
+        "outboundTag": "Proxy-xtls",
         "domain": ["geosite:geolocation-!cn"]
       },
       {
@@ -75,26 +76,6 @@
     }
   ],
   "outbounds": [
-    {
-      "protocol": "vmess",
-      "settings": {
-        "vnext": [
-          {
-            "address": "c55s3.jamjams.net",
-            "port": 6518,
-            "users": [
-              {
-                "id": "f6ec29ec-d2cb-49f9-82cc-b8ee6e3fe4cc",
-                "alterId": 0,
-                "security": "auto",
-                "level": 0
-              }
-            ]
-          }
-        ]
-      },
-      "tag": "Proxy-JMS"
-    },
     {
       "protocol": "vless",
       "settings": {
