@@ -1,7 +1,5 @@
 {
   "log": {
-    "access": "/usr/local/var/log/xray/access.log",
-    "error": "/usr/local/var/log/xray/error.log",
     "loglevel": "debug",
     "dnsLog": true
   },
@@ -38,6 +36,7 @@
           "geosite:cn",
           "geosite:google@cn",
           "geosite:apple",
+          "geosite:docker",
           "geosite:jetbrains",
           "geosite:microsoft@cn",
           "domain:teams.microsoft.com",
