@@ -39,10 +39,12 @@
           "geosite:docker",
           "geosite:jetbrains",
           "geosite:microsoft@cn",
-          "domain:teams.microsoft.com",
           "geosite:notion",
           "geosite:logitech",
+          "domain:teams.microsoft.com",
           "domain:documentfoundation.org",
+          "domain:cn.msi.com",
+          "domain:ping.pe",
           "domain:bwh88.net",
           "domain:64clouds.com",
           "domain:justmysocks5.net"
@@ -50,7 +52,7 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-xtls",
+        "outboundTag": "Proxy-grpc",
         "domain": ["geosite:geolocation-!cn"]
       },
       {
