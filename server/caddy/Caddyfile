@@ -18,3 +18,9 @@ chuxubank.top {
 	}
 	reverse_proxy @grpc h2c://xray:2022
 }
+rss.chuxubank.top {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+	}
+	reverse_proxy http://freshrss
+}
