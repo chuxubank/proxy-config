@@ -16,7 +16,7 @@ services:
         max-size: 10m
     volumes:
       - data:/var/www/FreshRSS/data
-      - extensions:/var/www/FreshRSS/extensions
+      - ./rss/extensions:/var/www/FreshRSS/extensions
     environment:
       TZ: Asia/Shanghai
       CRON_MIN: '3,33'
