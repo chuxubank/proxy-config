@@ -72,16 +72,14 @@
         ]
       },
       "streamSettings": {
+        "show": true,
         "network": "tcp",
-        "security": "tls",
-        "tlsSettings": {
-          "serverName": "chuxubank.top",
-          "certificates": [
-            {
-              "certificateFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.crt",
-              "keyFile": "/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/chuxubank.top/chuxubank.top.key"
-            }
-          ]
+        "security": "reality",
+        "realitySettings": {
+          "dest": "caddy:80",
+          "serverNames": ["chuxubank.top", "rss.chuxubank.top"],
+          "privateKey": "uF0uB0kYrCgRmDKzs7yqWIh9l6_DNqtmRCk4tRqyYWM",
+          "shortIds": [""]
         }
       }
     }
