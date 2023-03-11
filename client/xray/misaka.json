@@ -95,12 +95,16 @@
           }
         ]
       },
-      "tag": "Proxy-xtls",
+      "tag": "Proxy-reality",
       "streamSettings": {
         "network": "tcp",
-        "security": "xtls",
-        "xtlsSettings": {
-          "serverName": "chuxubank.top"
+        "security": "reality",
+        "realitySettings": {
+          "fingerprint": "chrome",
+          "serverName": "chuxubank.top",
+          "publicKey": "Y9km7nftCB69BIT3f6t-vqyrvotd0rK0L1QcMuCToS8",
+          "shortId": "",
+          "spiderX": "/index.html"
         }
       }
     },
@@ -109,7 +113,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "66.112.223.26",
+            "address": "104.243.19.111",
             "port": 8443,
             "users": [
               {
