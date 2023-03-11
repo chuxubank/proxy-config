@@ -82,12 +82,12 @@
       "settings": {
         "vnext": [
           {
-            "address": "66.112.223.26",
+            "address": "104.243.19.111",
             "port": 8445,
             "users": [
               {
                 "id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
-                "flow": "xtls-rprx-direct",
+                "flow": "xtls-rprx-vision",
                 "encryption": "none",
                 "level": 0
               }

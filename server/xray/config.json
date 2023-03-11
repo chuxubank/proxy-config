@@ -61,7 +61,7 @@
         "clients": [
           {
             "id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
-            "flow": "xtls-rprx-direct"
+            "flow": "xtls-rprx-vision"
           }
         ],
         "decryption": "none",
@@ -73,8 +73,8 @@
       },
       "streamSettings": {
         "network": "tcp",
-        "security": "xtls",
-        "xtlsSettings": {
+        "security": "tls",
+        "tlsSettings": {
           "serverName": "chuxubank.top",
           "certificates": [
             {
