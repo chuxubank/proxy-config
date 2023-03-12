@@ -82,14 +82,13 @@
       "settings": {
         "vnext": [
           {
-            "address": "104.243.19.111",
+            "address": "66.112.223.26",
             "port": 8445,
             "users": [
               {
                 "id": "dcd639c1-3413-5af8-fdd4-62ee8bee9fcd",
-                "flow": "xtls-rprx-vision",
                 "encryption": "none",
-                "level": 0
+                "flow": "xtls-rprx-vision"
               }
             ]
           }
@@ -100,11 +99,10 @@
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "fingerprint": "chrome",
-          "serverName": "chuxubank.top",
-          "publicKey": "Y9km7nftCB69BIT3f6t-vqyrvotd0rK0L1QcMuCToS8",
-          "shortId": "",
-          "spiderX": "/index.html"
+          "publicKey": "YC2qo1k_HL8KuE7RN758n4uSDEXjWyUirovdXcnCwgs",
+          "shortId": "3f4d573ec4ce481c",
+          "serverName": "www.microsoft.com",
+          "fingerprint": "randomized"
         }
       }
     },
@@ -113,7 +111,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "104.243.19.111",
+            "address": "66.112.223.26",
             "port": 8443,
             "users": [
               {

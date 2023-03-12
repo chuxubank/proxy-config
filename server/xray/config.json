@@ -3,6 +3,16 @@
     "loglevel": "debug",
     "dnsLog": true
   },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:cn"],
+        "outboundTag": "blocked"
+      }
+    ]
+  },
   "inbounds": [
     {
       "port": 2022,
@@ -64,22 +74,16 @@
             "flow": "xtls-rprx-vision"
           }
         ],
-        "decryption": "none",
-        "fallbacks": [
-          {
-            "dest": "caddy:80"
-          }
-        ]
+        "decryption": "none"
       },
       "streamSettings": {
-        "show": true,
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "dest": "caddy:80",
-          "serverNames": ["chuxubank.top", "rss.chuxubank.top"],
-          "privateKey": "uF0uB0kYrCgRmDKzs7yqWIh9l6_DNqtmRCk4tRqyYWM",
-          "shortIds": [""]
+          "privateKey": "-AshIsF7qB6RIc9ChSUisY-m1XNO6R32Kz1TOC1TKHk",
+          "shortIds": ["3f4d573ec4ce481c"],
+          "dest": "23.35.196.245:443",
+          "serverNames": ["www.microsoft.com"]
         }
       }
     }
