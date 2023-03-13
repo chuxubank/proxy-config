@@ -36,6 +36,7 @@ services:
     ports:
       - "8443:8443/udp"
       - "8445:8445"
+      - "8446:8446"
     expose:
       - "2022"
     volumes:
