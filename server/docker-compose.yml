@@ -42,6 +42,8 @@ services:
     volumes:
       - ./xray:/etc/xray
       - ./caddy/data:/caddy/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:

@@ -8,8 +8,13 @@
     "rules": [
       {
         "type": "field",
-        "ip": ["geoip:cn"],
-        "outboundTag": "blocked"
+        "outboundTag": "blocked",
+        "ip": ["geoip:cn", "geoip:private"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "warp",
+        "domain": ["geosite:netflix", "geosite:openai"]
       }
     ]
   },
@@ -126,19 +131,21 @@
       "settings": {}
     },
     {
+      "tag": "warp",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "host.docker.internal",
+            "port": 40000
+          }
+        ]
+      }
+    },
+    {
       "tag": "blocked",
       "protocol": "blackhole",
       "settings": {}
     }
-  ],
-  "routing": {
-    "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  ]
 }
