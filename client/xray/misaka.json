@@ -112,6 +112,33 @@
         "vnext": [
           {
             "address": "66.112.223.26",
+            "port": 8446,
+            "users": [
+              {
+                "id": "45d66f5d-2ef5-4477-b9b2-afdcee145c76",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "tag": "Proxy-xtls",
+      "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "chuxubank.top",
+          "fingerprint": "randomized"
+        }
+      }
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "66.112.223.26",
             "port": 8443,
             "users": [
               {
