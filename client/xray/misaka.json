@@ -82,6 +82,63 @@
       "settings": {
         "vnext": [
           {
+            "address": "chuxubank.top",
+            "port": 443,
+            "users": [
+              {
+                "id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "tag": "Proxy-grpc",
+      "streamSettings": {
+        "network": "grpc",
+        "security": "tls",
+        "grpcSettings": {
+          "serviceName": "listen-to-both-sides"
+        }
+      }
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "66.112.223.26",
+            "port": 8443,
+            "users": [
+              {
+                "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "tag": "Proxy-quic",
+      "streamSettings": {
+        "network": "quic",
+        "quicSettings": {
+          "security": "none",
+          "key": "",
+          "header": {
+            "type": "srtp"
+          }
+        },
+        "security": "tls",
+        "tlsSettings": {
+          "servername": "chuxubank.top"
+        }
+      }
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
             "address": "66.112.223.26",
             "port": 8445,
             "users": [
@@ -130,63 +187,6 @@
         "tlsSettings": {
           "serverName": "chuxubank.top",
           "fingerprint": "randomized"
-        }
-      }
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "66.112.223.26",
-            "port": 8443,
-            "users": [
-              {
-                "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be",
-                "encryption": "none"
-              }
-            ]
-          }
-        ]
-      },
-      "tag": "Proxy-quic",
-      "streamSettings": {
-        "network": "quic",
-        "quicSettings": {
-          "security": "none",
-          "key": "",
-          "header": {
-            "type": "srtp"
-          }
-        },
-        "security": "tls",
-        "tlsSettings": {
-          "servername": "chuxubank.top"
-        }
-      }
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "chuxubank.top",
-            "port": 443,
-            "users": [
-              {
-                "id": "be9f4d8c-bdcf-3bea-564e-738a370c1eb1",
-                "encryption": "none"
-              }
-            ]
-          }
-        ]
-      },
-      "tag": "Proxy-grpc",
-      "streamSettings": {
-        "network": "grpc",
-        "security": "tls",
-        "grpcSettings": {
-          "serviceName": "listen-to-both-sides"
         }
       }
     },
