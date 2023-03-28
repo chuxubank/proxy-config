@@ -26,8 +26,13 @@
     "rules": [
       {
         "type": "field",
+        "outboundTag": "Direct",
+        "domain": ["geosite:umeng"]
+      },
+      {
+        "type": "field",
         "outboundTag": "Block",
-        "domain": ["geosite:category-ads"]
+        "domain": ["geosite:category-ads", "domain:zscloud.net"]
       },
       {
         "type": "field",
@@ -49,6 +54,11 @@
           "domain:64clouds.com",
           "domain:justmysocks5.net"
         ]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Proxy-http",
+        "domain": ["geosite:openai"]
       },
       {
         "type": "field",
@@ -188,6 +198,18 @@
           "serverName": "chuxubank.top",
           "fingerprint": "randomized"
         }
+      }
+    },
+    {
+      "protocol": "http",
+      "tag": "Proxy-http",
+      "settings": {
+        "servers": [
+          {
+            "address": "10.29.248.90",
+            "port": 80
+          }
+        ]
       }
     },
     {
