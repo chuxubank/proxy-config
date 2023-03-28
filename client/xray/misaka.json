@@ -107,7 +107,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "66.112.223.26",
+            "address": "direct.chuxubank.top",
             "port": 8443,
             "users": [
               {
@@ -139,7 +139,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "66.112.223.26",
+            "address": "direct.chuxubank.top",
             "port": 8445,
             "users": [
               {
@@ -168,7 +168,7 @@
       "settings": {
         "vnext": [
           {
-            "address": "66.112.223.26",
+            "address": "direct.chuxubank.top",
             "port": 8446,
             "users": [
               {
