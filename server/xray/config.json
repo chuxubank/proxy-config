@@ -136,8 +136,8 @@
       "settings": {
         "servers": [
           {
-            "address": "host.docker.internal",
-            "port": 40000
+            "address": "warp",
+            "port": 9091
           }
         ]
       }

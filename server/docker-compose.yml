@@ -42,10 +42,24 @@ services:
     volumes:
       - ./xray:/etc/xray
       - ./caddy/data:/caddy/data
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
+
+  warp:
+    container_name: warp
+    image: monius/docker-warp-socks
+    privileged: true
+    restart: always
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv4.conf.all.src_valid_mark=1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    expose:
+      - "9091"
+    volumes:
+      - /lib/modules:/lib/modules
