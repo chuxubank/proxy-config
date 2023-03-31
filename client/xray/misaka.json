@@ -57,11 +57,6 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-http",
-        "domain": ["geosite:openai"]
-      },
-      {
-        "type": "field",
         "outboundTag": "Proxy-grpc",
         "domain": ["geosite:geolocation-!cn"]
       },
