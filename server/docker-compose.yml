@@ -52,14 +52,16 @@ services:
     container_name: warp
     image: monius/docker-warp-socks
     privileged: true
-    restart: always
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv4.conf.all.src_valid_mark=1
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
+      - SYS_ADMIN
     expose:
       - "9091"
-    volumes:
-      - /lib/modules:/lib/modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://www.cloudflare.com/cdn-cgi/trace"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
