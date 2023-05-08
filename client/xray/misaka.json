@@ -36,6 +36,11 @@
       },
       {
         "type": "field",
+        "outboundTag": "Proxy-grpc",
+        "domain": ["geosite:bing"]
+      },
+      {
+        "type": "field",
         "outboundTag": "Direct",
         "domain": [
           "geosite:cn",
