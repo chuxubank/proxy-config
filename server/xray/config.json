@@ -14,7 +14,7 @@
       {
         "type": "field",
         "outboundTag": "warp",
-        "domain": ["geosite:netflix", "full:chat.openai.com"]
+        "domain": ["geosite:netflix", "geosite:openai"]
       }
     ]
   },
