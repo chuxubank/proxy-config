@@ -8,6 +8,11 @@
     "rules": [
       {
         "type": "field",
+        "outboundTag": "direct",
+        "domain": ["geosite:geolocation-!cn"]
+      },
+      {
+        "type": "field",
         "outboundTag": "blocked",
         "ip": ["geoip:cn", "geoip:private"]
       },
@@ -136,8 +141,8 @@
       "settings": {
         "servers": [
           {
-            "address": "warp",
-            "port": 9091
+            "address": "host.docker.internal",
+            "port": 40000
           }
         ]
       }
