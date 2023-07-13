@@ -8,6 +8,11 @@
     "rules": [
       {
         "type": "field",
+        "outboundTag": "warp",
+        "domain": ["geosite:netflix", "domain:chat.openai.com"]
+      },
+      {
+        "type": "field",
         "outboundTag": "direct",
         "domain": ["geosite:geolocation-!cn"]
       },
@@ -15,11 +20,6 @@
         "type": "field",
         "outboundTag": "blocked",
         "ip": ["geoip:cn", "geoip:private"]
-      },
-      {
-        "type": "field",
-        "outboundTag": "warp",
-        "domain": ["geosite:netflix", "domain:chat.openai.com"]
       }
     ]
   },
