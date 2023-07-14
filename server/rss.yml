@@ -1,11 +1,10 @@
-version: "2.4"
+version: "3"
 
 volumes:
   data:
   extensions:
 
 services:
-
   freshrss:
     image: freshrss/freshrss
     container_name: freshrss
@@ -19,4 +18,4 @@ services:
       - ./rss/extensions:/var/www/FreshRSS/extensions
     environment:
       TZ: Asia/Shanghai
-      CRON_MIN: '3,33'
+      CRON_MIN: "3,33"
