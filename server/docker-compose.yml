@@ -42,8 +42,21 @@ services:
     expose:
       - "2022"
     volumes:
-      - ./xray:/etc/xray
+      - ./xray/config.json:/etc/xray/config.json
       - ./caddy/data:/caddy/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  warp:
+    container_name: warp-server
+    image: teddysun/xray
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./xray/warp.json:/etc/xray/config.json
     logging:
       driver: "json-file"
       options:

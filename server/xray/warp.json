@@ -1,0 +1,18 @@
+{
+  "log": {
+    "loglevel": "debug",
+    "dnsLog": true
+  },
+  "inbounds": [
+    {
+      "port": 40001,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 40000,
+        "network": "tcp,udp"
+      },
+      "tag": "warp"
+    }
+  ]
+}
