@@ -6,13 +6,23 @@
   "inbounds": [
     {
       "port": 40001,
-      "protocol": "dokodemo-door",
+      "protocol": "socks",
       "settings": {
-        "address": "127.0.0.1",
-        "port": 40000,
-        "network": "tcp,udp"
-      },
-      "tag": "warp"
+        "udp": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 40000
+          }
+        ]
+      }
     }
   ]
 }
