@@ -41,6 +41,11 @@
       },
       {
         "type": "field",
+        "balancerTag": "Proxy",
+        "domain": ["geosite:atlassian"]
+      },
+      {
+        "type": "field",
         "outboundTag": "Direct",
         "domain": [
           "geosite:cn",
@@ -70,6 +75,12 @@
         "type": "field",
         "outboundTag": "Direct",
         "ip": ["geoip:cn", "geoip:private"]
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "Proxy",
+        "selector": ["Proxy-grpc", "Proxy-http"]
       }
     ]
   },
