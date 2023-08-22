@@ -36,13 +36,8 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-grpc",
-        "domain": ["geosite:bing"]
-      },
-      {
-        "type": "field",
         "balancerTag": "Proxy",
-        "domain": ["geosite:atlassian"]
+        "domain": ["geosite:atlassian", "geosite:microsoft"]
       },
       {
         "type": "field",
@@ -80,7 +75,7 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-grpc", "Proxy-http"]
+        "selector": ["Proxy-http", "Proxy-grpc"]
       }
     ]
   },
