@@ -36,7 +36,7 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy-grpc",
+        "outboundTag": "Proxy",
         "domain": ["geosite:geolocation-!cn"]
       },
       {
@@ -48,7 +48,7 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-http", "Proxy-grpc"]
+        "selector": ["Proxy-grpc", "Proxy-reality"]
       }
     ]
   }
