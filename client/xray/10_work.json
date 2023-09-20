@@ -1,0 +1,24 @@
+{
+  "routing": {
+    "balancers": [
+      {
+        "tag": "Proxy",
+        "selector": ["Proxy-http", "Proxy-grpc"]
+      }
+    ]
+  },
+  "outbounds": [
+    {
+      "protocol": "http",
+      "tag": "Proxy-http",
+      "settings": {
+        "servers": [
+          {
+            "address": "10.29.248.90",
+            "port": 80
+          }
+        ]
+      }
+    }
+  ]
+}

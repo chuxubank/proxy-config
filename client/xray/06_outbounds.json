@@ -114,18 +114,6 @@
       }
     },
     {
-      "protocol": "http",
-      "tag": "Proxy-http",
-      "settings": {
-        "servers": [
-          {
-            "address": "10.29.248.90",
-            "port": 80
-          }
-        ]
-      }
-    },
-    {
       "protocol": "freedom",
       "tag": "Direct"
     },
