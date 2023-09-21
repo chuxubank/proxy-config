@@ -1,0 +1,55 @@
+{
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "domain": ["geosite:umeng"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Block",
+        "domain": ["geosite:category-ads", "domain:zscloud.net"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "domain": [
+          "geosite:cn",
+          "geosite:google@cn",
+          "geosite:apple",
+          "geosite:jetbrains",
+          "geosite:microsoft@cn",
+          "geosite:notion",
+          "geosite:logitech",
+          "domain:teams.microsoft.com",
+          "domain:documentfoundation.org",
+          "domain:cn.msi.com",
+          "domain:ping.pe",
+          "domain:bwh88.net",
+          "domain:64clouds.com",
+          "domain:justmysocks5.net",
+          "domain:imwork.net",
+          "full:direct.chuxubank.top"
+        ]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Proxy",
+        "domain": ["geosite:geolocation-!cn"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "ip": ["geoip:cn", "geoip:private"]
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "Proxy",
+        "selector": ["Proxy-http", "Proxy-grpc"]
+      }
+    ]
+  }
+}

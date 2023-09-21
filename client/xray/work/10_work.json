@@ -1,12 +1,4 @@
 {
-  "routing": {
-    "balancers": [
-      {
-        "tag": "Proxy",
-        "selector": ["Proxy-http", "Proxy-grpc"]
-      }
-    ]
-  },
   "outbounds": [
     {
       "protocol": "http",
