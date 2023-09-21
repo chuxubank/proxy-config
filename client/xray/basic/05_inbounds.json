@@ -9,7 +9,8 @@
       },
       "sniffing": {
         "enabled": true,
-        "destOverride": ["http", "tls"]
+        "destOverride": ["http", "tls"],
+        "domainsExcluded": ["courier.push.apple.com"]
       }
     }
   ]
