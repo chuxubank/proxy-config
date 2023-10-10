@@ -36,7 +36,7 @@
       },
       {
         "type": "field",
-        "outboundTag": "Proxy",
+        "balancerTag": "Proxy",
         "domain": ["geosite:geolocation-!cn"]
       },
       {
