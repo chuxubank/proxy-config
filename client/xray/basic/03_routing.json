@@ -43,7 +43,7 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-grpc", "Proxy-reality"]
+        "selector": ["Proxy-grpc"]
       }
     ]
   }
