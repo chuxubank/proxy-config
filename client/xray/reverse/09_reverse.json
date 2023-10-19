@@ -1,0 +1,10 @@
+{
+  "reverse": {
+    "bridges": [
+      {
+        "tag": "bridge",
+        "domain": "test.xray.com"
+      }
+    ]
+  }
+}
