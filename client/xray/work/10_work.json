@@ -2,6 +2,18 @@
   "outbounds": [
     {
       "protocol": "http",
+      "tag": "Proxy-zs",
+      "settings": {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 9000
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "http",
       "tag": "Proxy-http",
       "settings": {
         "servers": [
