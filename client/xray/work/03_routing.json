@@ -10,7 +10,7 @@
       {
         "type": "field",
         "outboundTag": "Block",
-        "domain": ["geosite:category-ads", "domain:zscloud.net"]
+        "domain": ["geosite:category-ads"]
       },
       {
         "type": "field",
