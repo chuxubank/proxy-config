@@ -9,11 +9,6 @@
       },
       {
         "type": "field",
-        "outboundTag": "Block",
-        "domain": ["geosite:category-ads"]
-      },
-      {
-        "type": "field",
         "outboundTag": "Direct",
         "domain": [
           "geosite:cn",
