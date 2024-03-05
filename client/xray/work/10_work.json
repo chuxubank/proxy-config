@@ -14,7 +14,7 @@
     },
     {
       "protocol": "http",
-      "tag": "Proxy-http",
+      "tag": "Proxy-zssg",
       "settings": {
         "servers": [
           {

@@ -44,7 +44,7 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-zs", "Proxy-http", "Proxy-grpc"]
+        "selector": ["Proxy-zs", "Proxy-zssg", "Proxy-grpc"]
       }
     ]
   }
