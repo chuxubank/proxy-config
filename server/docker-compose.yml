@@ -50,33 +50,35 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  warp:
-    container_name: warp-server
-    image: teddysun/xray
-    restart: unless-stopped
-    network_mode: host
-    volumes:
-      - ./xray/warp.json:/etc/xray/config.json
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
   # warp:
-  #   container_name: warp
-  #   image: monius/docker-warp-socks
-  #   privileged: true
-  #   sysctls:
-  #     - net.ipv6.conf.all.disable_ipv6=0
-  #     - net.ipv4.conf.all.src_valid_mark=1
-  #   cap_add:
-  #     - NET_ADMIN
-  #     - SYS_ADMIN
-  #   ports:
-  #     - "9091:9091"
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "https://www.cloudflare.com/cdn-cgi/trace"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
+  #   container_name: warp-server
+  #   image: teddysun/xray
+  #   restart: unless-stopped
+  #   network_mode: host
+  #   volumes:
+  #     - ./xray/warp.json:/etc/xray/config.json
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "200k"
+  #       max-file: "10"
+
+  warp:
+    container_name: warp
+    image: monius/docker-warp-socks
+    privileged: true
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv4.conf.all.src_valid_mark=1
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    ports:
+      - "9091:9091"
+    volumes:
+      - /lib/modules:/lib/modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://www.cloudflare.com/cdn-cgi/trace"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
