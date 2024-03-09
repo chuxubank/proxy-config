@@ -9,7 +9,12 @@
       {
         "type": "field",
         "outboundTag": "warp",
-        "domain": ["geosite:netflix", "geosite:openai", "geosite:bing"]
+        "domain": [
+          "geosite:netflix",
+          "geosite:openai",
+          "geosite:bing",
+          "geosite:anthropic"
+        ]
       },
       {
         "type": "field",
