@@ -31,7 +31,7 @@ services:
 
   xray:
     container_name: xray
-    image: teddysun/xray
+    image: ghcr.io/xtls/xray-core
     restart: always
     ports:
       - "8443:8443/udp"
@@ -52,7 +52,7 @@ services:
 
   # warp:
   #   container_name: warp-server
-  #   image: teddysun/xray
+  #   image: ghcr.io/xtls/xray-core
   #   restart: unless-stopped
   #   network_mode: host
   #   volumes:
