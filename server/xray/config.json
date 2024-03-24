@@ -13,7 +13,8 @@
           "geosite:netflix",
           "geosite:openai",
           "geosite:bing",
-          "geosite:anthropic"
+          "geosite:anthropic",
+          "geosite:cloudflare"
         ]
       },
       {
