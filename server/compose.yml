@@ -80,3 +80,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  freshrss:
+    image: freshrss/freshrss
+    profiles:
+      - rss
+    container_name: freshrss
+    hostname: freshrss
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - freshrss_data:/var/www/FreshRSS/data
+      - ./rss/extensions:/var/www/FreshRSS/extensions
+    environment:
+      TZ: Asia/Shanghai
+      CRON_MIN: "3,33"
+
+volumes:
+  freshrss_data:
