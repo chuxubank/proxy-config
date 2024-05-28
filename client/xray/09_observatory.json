@@ -1,0 +1,18 @@
+{
+  "observatory": {
+    "subjectSelector": ["Proxy-grpc", "Proxy-xtls", "Proxy-zssg"],
+    "probeUrl": "https://www.google.com/generate_204",
+    "probeInterval": "10s",
+    "enableConcurrency": false
+  },
+  "burstObservatory": {
+    "subjectSelector": ["Proxy-grpc", "Proxy-xtls", "Proxy-zssg"],
+    "pingConfig": {
+      "destination": "https://connectivitycheck.gstatic.com/generate_204",
+      "connectivity": "",
+      "interval": "1h",
+      "sampling": 3,
+      "timeout": "30s"
+    }
+  }
+}

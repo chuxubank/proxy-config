@@ -9,6 +9,11 @@
       },
       {
         "type": "field",
+        "outboundTag": "Block",
+        "domain": ["geosite:category-ads"]
+      },
+      {
+        "type": "field",
         "outboundTag": "Direct",
         "domain": [
           "geosite:cn",
@@ -16,17 +21,18 @@
           "geosite:apple",
           "geosite:jetbrains",
           "geosite:microsoft@cn",
+          "geosite:steam@cn",
           "geosite:notion",
           "geosite:logitech",
           "domain:teams.microsoft.com",
           "domain:documentfoundation.org",
-          "domain:aaecosystem.com",
           "domain:cn.msi.com",
           "domain:ping.pe",
           "domain:bwh88.net",
           "domain:64clouds.com",
           "domain:justmysocks5.net",
           "domain:imwork.net",
+          "domain:xiumi.us",
           "full:direct.chuxubank.top"
         ]
       },
@@ -44,8 +50,11 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-grpc", "Proxy-zssg"],
-        "type": "roundRobin"
+        "selector": ["Proxy-grpc", "Proxy-xtls", "Proxy-zssg"],
+        "strategy": {
+          "type": "leastPing",
+          "settings": {}
+        }
       }
     ]
   }
