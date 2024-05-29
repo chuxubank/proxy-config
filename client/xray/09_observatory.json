@@ -3,7 +3,7 @@
     "subjectSelector": ["Proxy-grpc", "Proxy-xtls", "Proxy-zssg"],
     "probeUrl": "https://www.google.com/generate_204",
     "probeInterval": "10s",
-    "enableConcurrency": false
+    "enableConcurrency": true
   },
   "burstObservatory": {
     "subjectSelector": ["Proxy-grpc", "Proxy-xtls", "Proxy-zssg"],
