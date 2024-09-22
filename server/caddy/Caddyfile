@@ -1,16 +1,18 @@
 {
 	email {env.EMAIL}
 	servers {
-		protocol {
-			experimental_http3
-		}
+		protocols h1 h2 h3
 	}
 }
-chuxubank.top {
-	log
+
+*.chuxubank.top {
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}
+}
+
+chuxubank.top {
+	log
 	file_server
 	@grpc {
 		protocol grpc
@@ -18,9 +20,7 @@ chuxubank.top {
 	}
 	reverse_proxy @grpc h2c://xray:2022
 }
+
 rss.chuxubank.top {
-	tls {
-		dns cloudflare {env.CF_API_TOKEN}
-	}
 	reverse_proxy http://freshrss
 }

@@ -1,11 +1,14 @@
 services:
   caddy:
     container_name: caddy
-    image: chuxubank/caddy-cloudflare
+    image: iarekylew00t/caddy-cloudflare
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/site:/srv
