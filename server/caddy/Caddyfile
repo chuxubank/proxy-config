@@ -5,13 +5,13 @@
 	}
 }
 
-*.chuxubank.top {
+*.{$DOMAIN:localhost} {
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}
 }
 
-chuxubank.top {
+{$DOMAIN:localhost} {
 	log
 	file_server
 	@grpc {
@@ -21,6 +21,6 @@ chuxubank.top {
 	reverse_proxy @grpc h2c://xray:2022
 }
 
-rss.chuxubank.top {
+rss.{$DOMAIN:localhost} {
 	reverse_proxy http://freshrss
 }

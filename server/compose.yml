@@ -18,9 +18,6 @@ services:
       - ./caddy/site:/srv
       - ./caddy/data:/data
       - ./caddy/config:/config
-    environment:
-      EMAIL: chuxubank@qq.com
-      CF_API_TOKEN: Ce5IBLFCroR8ca2cXa3v1iFncYeydxe4LyK_MNvu
     logging:
       driver: "json-file"
       options:
