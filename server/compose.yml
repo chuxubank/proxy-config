@@ -1,6 +1,5 @@
 include:
   - path: ./rss/compose.yml
-    project_directory: ./rss/
 
 services:
   caddy:

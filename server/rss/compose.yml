@@ -1,5 +1,8 @@
 services:
   freshrss:
+    env_file:
+      - path: "freshrss.env"
+        required: false
     image: freshrss/freshrss
     profiles:
       - rss
@@ -15,6 +18,22 @@ services:
     environment:
       TZ: Asia/Shanghai
       CRON_MIN: "3,33"
+      FRESHRSS_INSTALL: |-
+        --api-enabled
+        --base-url ${BASE_URL}
+        --db-base ${DB_BASE}
+        --db-host ${DB_HOST}
+        --db-password ${DB_PASSWORD}
+        --db-type ${DB_TYPE}
+        --db-user ${DB_USER}
+        --default_user admin
+        --language en
+      FRESHRSS_USER: |-
+        --api-password ${ADMIN_API_PASSWORD}
+        --email ${ADMIN_EMAIL}
+        --language en
+        --password ${ADMIN_PASSWORD}
+        --user admin
 
 volumes:
   freshrss_data:
