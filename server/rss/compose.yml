@@ -1,8 +1,5 @@
 services:
   freshrss:
-    env_file:
-      - path: "freshrss.env"
-        required: false
     image: freshrss/freshrss
     profiles:
       - rss
