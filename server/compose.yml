@@ -47,7 +47,7 @@ services:
     expose:
       - "2022"
     volumes:
-      - ./xray/config.json:/etc/xray/config.json
+      - ./xray:/etc/xray
       - ./caddy/data:/caddy/data
     logging:
       driver: "json-file"
