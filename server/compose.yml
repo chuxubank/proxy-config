@@ -13,9 +13,11 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
+      - caddy_data:/data
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/certificates/crt:/data/caddy/certificates/${ACME_CA}-directory/wildcard_${DOMAIN}/wildcard_${DOMAIN}.crt"
+      - ./caddy/certificates/key:/data/caddy/certificates/${ACME_CA}-directory/wildcard_${DOMAIN}/wildcard_${DOMAIN}.key"
       - ./caddy/site:/srv
-      - ./caddy/data:/data
       - ./caddy/config:/config
     environment:
       DOMAIN: ${DOMAIN}
@@ -48,7 +50,7 @@ services:
       - "2022"
     volumes:
       - ./xray:/etc/xray
-      - ./caddy/data:/caddy/data
+      - ./caddy/certificates:/caddy/certificates
     logging:
       driver: "json-file"
       options:
@@ -87,3 +89,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+volumes:
+  caddy_data:
