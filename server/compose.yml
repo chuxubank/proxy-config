@@ -13,12 +13,11 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - caddy_data:/data
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy/certificates/crt:/data/caddy/certificates/${ACME_CA}-directory/wildcard_${DOMAIN}/wildcard_${DOMAIN}.crt"
-      - ./caddy/certificates/key:/data/caddy/certificates/${ACME_CA}-directory/wildcard_${DOMAIN}/wildcard_${DOMAIN}.key"
+      - ./caddy/certificates:/data/caddy/certificates/${ACME_CA}-directory
       - ./caddy/site:/srv
-      - ./caddy/config:/config
+      - caddy_data:/data
+      - caddy_config:/config
     environment:
       DOMAIN: ${DOMAIN}
       EMAIL: ${EMAIL}
@@ -39,6 +38,8 @@ services:
   xray:
     container_name: xray
     image: ghcr.io/xtls/xray-core
+    depends_on:
+      - caddy
     restart: always
     ports:
       - "8443:8443/udp"
@@ -50,7 +51,8 @@ services:
       - "2022"
     volumes:
       - ./xray:/etc/xray
-      - ./caddy/certificates:/caddy/certificates
+      - ./caddy/certificates/wildcard_.${DOMAIN}/wildcard_.${DOMAIN}.crt:/caddy/certificates/domain.crt
+      - ./caddy/certificates/wildcard_.${DOMAIN}/wildcard_.${DOMAIN}.key:/caddy/certificates/domain.key
     logging:
       driver: "json-file"
       options:
@@ -92,3 +94,4 @@ services:
 
 volumes:
   caddy_data:
+  caddy_config:
