@@ -31,38 +31,6 @@
         "vnext": [
           {
             "address": "direct.chuxubank.top",
-            "port": 8443,
-            "users": [
-              {
-                "id": "3a4ffeea-c276-4d30-b3b4-fb152e22d4be",
-                "encryption": "none"
-              }
-            ]
-          }
-        ]
-      },
-      "tag": "Proxy-quic",
-      "streamSettings": {
-        "network": "quic",
-        "quicSettings": {
-          "security": "none",
-          "key": "",
-          "header": {
-            "type": "srtp"
-          }
-        },
-        "security": "tls",
-        "tlsSettings": {
-          "servername": "chuxubank.top"
-        }
-      }
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "direct.chuxubank.top",
             "port": 8445,
             "users": [
               {
