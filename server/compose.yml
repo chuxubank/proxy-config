@@ -14,7 +14,6 @@ services:
       - "443:443/udp"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy/certificates:/data/caddy/certificates/${ACME_CA}-directory
       - ./caddy/site:/srv
       - caddy_data:/data
       - caddy_config:/config
@@ -44,8 +43,7 @@ services:
       - "2022"
     volumes:
       - ./xray:/etc/xray
-      - ./caddy/certificates/${DOMAIN}/${DOMAIN}.crt:/caddy/certificates/domain.crt
-      - ./caddy/certificates/${DOMAIN}/${DOMAIN}.key:/caddy/certificates/domain.key
+      - caddy_data:/data
     logging:
       driver: "json-file"
       options:

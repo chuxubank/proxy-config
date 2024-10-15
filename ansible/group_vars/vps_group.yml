@@ -1,0 +1,8 @@
+ansible_host: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='url') }}"
+ansible_port: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='port') }}"
+ansible_password: "{{ lookup('community.general.passwordstore', pass_base_path) }}"
+proxy_env:
+  DOMAIN: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='domain') }}"
+  EMAIL: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='email') }}"
+  ACME_CA: "acme-v02.api.letsencrypt.org"
+  CF_API_TOKEN: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='cf_api_token') }}"

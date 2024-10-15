@@ -1,0 +1,54 @@
+- name: Setup Proxy
+  hosts: vps_group
+
+  vars:
+    proxy_config_dir: "proxy-config"
+
+  tasks:
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_installed
+      ignore_errors: true
+
+    - name: Install Docker (only if not installed)
+      include_role:
+        name: geerlingguy.docker
+      when: docker_installed.rc != 0
+
+    - name: Ensure rsync is installed (Ubuntu/Debian)
+      apt:
+        name: rsync
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Ensure proxy-config directory exists
+      file:
+        path: "{{ proxy_config_dir }}"
+        state: directory
+
+    - name: Sync Docker Compose directory to remote server
+      ansible.posix.synchronize:
+        src: ../server/
+        dest: "{{ proxy_config_dir }}"
+        dest_port: "{{ ansible_port | int }}"
+
+    - name: Setup env
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: "{{ proxy_config_dir }}/.env"
+
+    - name: Setup xray config
+      ansible.builtin.template:
+        src: templates/config.j2
+        dest: "{{ proxy_config_dir }}/xray/config.json"
+
+    - name: Stop Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ proxy_config_dir }}"
+        state: stopped
+      ignore_errors: true
+
+    - name: Run Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ proxy_config_dir }}"
+        remove_orphans: true

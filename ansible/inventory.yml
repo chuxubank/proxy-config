@@ -1,0 +1,20 @@
+all:
+  hosts:
+    bwg:
+      pass_base_path: "Network/Host/BandwagonHost/ssh"
+
+    nerd:
+      pass_base_path: "Network/Host/Racknerd/ssh"
+
+    rpi:
+      ansible_host: raspberrypi.local
+
+  children:
+    vps_group:
+      hosts:
+        bwg:
+        nerd:
+
+    local_group:
+      hosts:
+        rpi:
