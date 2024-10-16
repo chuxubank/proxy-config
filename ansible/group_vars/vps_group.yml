@@ -1,8 +1,20 @@
-ansible_host: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='url') }}"
-ansible_port: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='port') }}"
-ansible_password: "{{ lookup('community.general.passwordstore', pass_base_path) }}"
+ansible_host: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='url') }}"
+ansible_port: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='port') }}"
+ansible_password: "{{ lookup('community.general.passwordstore', proxy_pass_path) }}"
+
 proxy_env:
-  DOMAIN: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='domain') }}"
-  EMAIL: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='email') }}"
+  DOMAIN: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='domain') }}"
+  EMAIL: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='email') }}"
   ACME_CA: "acme-v02.api.letsencrypt.org"
-  CF_API_TOKEN: "{{ lookup('community.general.passwordstore', pass_base_path, subkey='cf_api_token') }}"
+  CF_API_TOKEN: "{{ lookup('community.general.passwordstore', cf_pass_path, subkey='api_token') }}"
+
+rss_env:
+  RSS_SUB_DOMAIN: rss
+  DEFAULT_USER: "{{ lookup('community.general.passwordstore', rss_pass_path, subkey='username') }}"
+  ADMIN_EMAIL: "{{ lookup('community.general.passwordstore', rss_pass_path, subkey='email') }}"
+  ADMIN_PASSWORD: "{{ lookup('community.general.passwordstore', rss_pass_path) }}"
+  ADMIN_API_PASSWORD: "{{ lookup('community.general.passwordstore', rss_api_pass_path) }}"
+  DB_TYPE: sqlite
+  RSSHUB_SUB_DOMAIN: rsshub
+
+proxy_profile:

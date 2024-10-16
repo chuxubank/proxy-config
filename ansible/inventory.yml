@@ -1,10 +1,14 @@
 all:
   hosts:
     bwg:
-      pass_base_path: "Network/Host/BandwagonHost/ssh"
+      proxy_pass_path: "Network/Host/BandwagonHost/ssh"
+      cf_pass_path: "Network/Host/Cloudflare"
+      rss_pass_path: "Network/Host/FreshRSS/web"
+      rss_api_pass_path: "Network/Host/FreshRSS/api"
 
     nerd:
-      pass_base_path: "Network/Host/Racknerd/ssh"
+      proxy_pass_path: "Network/Host/Racknerd/ssh"
+      cf_pass_path: "Network/Host/Cloudflare"
 
     rpi:
       ansible_host: raspberrypi.local

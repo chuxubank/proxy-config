@@ -21,6 +21,10 @@
 	reverse_proxy @grpc h2c://xray:2022
 }
 
-rss.{$DOMAIN:localhost} {
+{$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
 	reverse_proxy http://freshrss
+}
+
+{$RSSHUB_SUB_DOMAIN:rsshub}.{$DOMAIN:localhost} {
+	reverse_proxy http://rsshub:1200
 }

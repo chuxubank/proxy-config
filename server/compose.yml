@@ -1,5 +1,6 @@
 include:
   - path: ./rss/compose.yml
+  - path: ./rsshub/compose.yml
 
 services:
   caddy:
@@ -17,10 +18,12 @@ services:
       - ./caddy/site:/srv
       - caddy_data:/data
       - caddy_config:/config
-    environment:
-      DOMAIN: ${DOMAIN}
-      EMAIL: ${EMAIL}
-      CF_API_TOKEN: ${CF_API_TOKEN}
+    env_file:
+      - path: .env
+      - path: ./rss/.env
+        required: false
+      - path: ./rsshub/.env
+        required: false
     logging:
       driver: "json-file"
       options:

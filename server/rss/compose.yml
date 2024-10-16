@@ -23,14 +23,14 @@ services:
         --db-password ${DB_PASSWORD}
         --db-type ${DB_TYPE}
         --db-user ${DB_USER}
-        --default_user admin
+        --default_user ${DEFAULT_USER}
         --language en
       FRESHRSS_USER: |-
         --api-password ${ADMIN_API_PASSWORD}
         --email ${ADMIN_EMAIL}
         --language en
         --password ${ADMIN_PASSWORD}
-        --user admin
+        --user ${DEFAULT_USER}
 
 volumes:
   freshrss_data:
