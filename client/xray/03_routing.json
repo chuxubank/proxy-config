@@ -38,6 +38,11 @@
       },
       {
         "type": "field",
+        "outboundTag": "Proxy-grpc",
+        "domain": ["geosite:anthropic"]
+      },
+      {
+        "type": "field",
         "balancerTag": "Proxy",
         "domain": ["geosite:geolocation-!cn"]
       },
