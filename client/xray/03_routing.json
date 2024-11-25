@@ -55,9 +55,9 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-grpc", "Proxy-reality", "Proxy-xtls", "Proxy-zssg"],
+        "selector": ["Proxy"],
         "strategy": {
-          "type": "leastPing",
+          "type": "leastLoad",
           "settings": {}
         }
       }

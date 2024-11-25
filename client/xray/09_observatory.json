@@ -20,7 +20,7 @@
     "pingConfig": {
       "destination": "https://connectivitycheck.gstatic.com/generate_204",
       "connectivity": "",
-      "interval": "1h",
+      "interval": "1m",
       "sampling": 3,
       "timeout": "30s"
     }
