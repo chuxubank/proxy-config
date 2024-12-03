@@ -57,7 +57,7 @@
         "tag": "Proxy",
         "selector": ["Proxy"],
         "strategy": {
-          "type": "leastLoad",
+          "type": "leastPing",
           "settings": {}
         }
       }
