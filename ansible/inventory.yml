@@ -13,6 +13,9 @@ all:
     rpi:
       ansible_host: raspberrypi.local
 
+    localhost:
+      ansible_connection: local
+
   children:
     vps_group:
       hosts:
@@ -22,3 +25,4 @@ all:
     local_group:
       hosts:
         rpi:
+        localhost:
