@@ -1,2 +1,9 @@
 ---
-brew_path: "/opt/homebrew"
+brew_path: >-
+  {%- if ansible_facts['os_family'] == 'Darwin' and ansible_facts['architecture'] == 'arm64' -%}
+  /opt/homebrew
+  {%- elif ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'Debian' -%}
+  /home/linuxbrew/.linuxbrew
+  {%- else -%}
+  /usr/local
+  {%- endif -%}
