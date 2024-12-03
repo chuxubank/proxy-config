@@ -75,6 +75,7 @@
   vars:
     xray_config_dir: "{{ playbook_dir | dirname }}/client/xray"
     xray_log_dir: "{{ ansible_env.HOME }}/Library/Logs/Xray"
+    xray_logrotate_config: "{{ ansible_env.HOME }}/.config/logrotate.d/xray"
 
   tasks:
     - name: Install Xray via Homebrew (macOS)
@@ -98,8 +99,13 @@
       when: ansible_facts['os_family'] == "Darwin"
       tags: service
 
+    - name: Setup logrotate
+      ansible.builtin.template:
+        src: templates/xray.logrotate.j2
+        dest: "{{ xray_logrotate_config }}"
+
     - name: Force log file rotation (macOS)
-      command: logrotate -f ~/.config/logrotate.d/xray -s ~/.config/logrotate.status
+      command: logrotate -f {{ xray_logrotate_config }} -s ~/.config/logrotate.status
       when: ansible_facts['os_family'] == "Darwin"
       tags: service
 

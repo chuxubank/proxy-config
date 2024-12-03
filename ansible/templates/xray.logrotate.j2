@@ -1,0 +1,17 @@
+{{ xray_log_dir }}/xray-stdout.log {
+  rotate 7
+  daily
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ xray_log_dir }}/xray-stderr.log {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
