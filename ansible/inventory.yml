@@ -5,6 +5,10 @@ all:
       cf_pass_path: "Network/Host/Cloudflare"
       rss_pass_path: "Network/Host/FreshRSS/web"
       rss_api_pass_path: "Network/Host/FreshRSS/api"
+    bwg-cn2-gia:
+      proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
+      rss_pass_path: "Network/Host/FreshRSS/web"
+      rss_api_pass_path: "Network/Host/FreshRSS/api"
 
     nerd:
       proxy_pass_path: "Network/Host/Racknerd/ssh"

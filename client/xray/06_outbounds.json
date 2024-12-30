@@ -47,10 +47,10 @@
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "publicKey": "YC2qo1k_HL8KuE7RN758n4uSDEXjWyUirovdXcnCwgs",
-          "shortId": "3f4d573ec4ce481c",
-          "serverName": "www.microsoft.com",
-          "fingerprint": "randomized"
+          "fingerprint": "chrome",
+          "serverName": "",
+          "publicKey": "bd7npsorc-dF2FkQJ9l2rmBYT4CiBpTTOjMdqyvGCFA",
+          "shortId": "87a736ba1efadbc7"
         }
       }
     },

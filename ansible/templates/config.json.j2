@@ -64,11 +64,20 @@
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "privateKey": "-AshIsF7qB6RIc9ChSUisY-m1XNO6R32Kz1TOC1TKHk",
-          "shortIds": ["3f4d573ec4ce481c"],
-          "dest": "23.35.196.245:443",
-          "serverNames": ["www.microsoft.com"]
+          "dest": "1.1.1.1:443",
+          "serverNames": [""],
+          "privateKey": "wCCNYx5LfMUEO6RswXhamE-JtsQzKoljmEJcIl6R9Do",
+          "shortIds": ["87a736ba1efadbc7"]
         }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "routeOnly": true
       }
     },
     {
