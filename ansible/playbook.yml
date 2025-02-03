@@ -61,12 +61,19 @@
         profiles: "{{ proxy_profile }}"
         state: stopped
       ignore_errors: true
+      tags: always
+
+    - name: Pull Docker Compose
+      community.docker.docker_compose_v2_pull:
+        project_src: "{{ proxy_config_dir }}"
+      tags: pull
 
     - name: Run Docker Compose
       community.docker.docker_compose_v2:
         project_src: "{{ proxy_config_dir }}"
         profiles: "{{ proxy_profile }}"
         remove_orphans: true
+      tags: always
 
 - name: Setup Local Proxy
   hosts: local_group
