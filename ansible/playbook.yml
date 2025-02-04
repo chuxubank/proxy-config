@@ -35,7 +35,7 @@
 
     - name: Setup env
       ansible.builtin.template:
-        src: templates/proxy_env.j2
+        src: templates/env.j2
         dest: "{{ proxy_config_dir }}/.env"
 
     - name: Setup xray config
