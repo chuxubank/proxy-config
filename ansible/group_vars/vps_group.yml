@@ -8,6 +8,12 @@ proxy_env:
   ACME_CA: "acme-v02.api.letsencrypt.org"
   CF_API_TOKEN: "{{ lookup('community.general.passwordstore', cf_pass_path, subkey='api_token') }}"
 
+xray_env:
+  REALITY_ID: "{{ lookup('community.general.passwordstore', xray_reality_pass_path) }}"
+  REALITY_PORT: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='port') }}"
+  REALITY_PRIVATE_KEY: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='privateKey') }}"
+  REALITY_SHORT_ID: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='shortId') }}"
+
 rss_env:
   RSS_SUB_DOMAIN: rss
   DEFAULT_USER: "{{ lookup('community.general.passwordstore', rss_pass_path, subkey='username') }}"

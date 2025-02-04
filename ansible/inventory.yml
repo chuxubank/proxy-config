@@ -5,6 +5,7 @@ all:
       cf_pass_path: "Network/Host/Cloudflare"
       rss_pass_path: "Network/Host/FreshRSS/web"
       rss_api_pass_path: "Network/Host/FreshRSS/api"
+      xray_reality_pass_path: "Network/Xray/Reality"
     bwg-cn2-gia:
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
       rss_pass_path: "Network/Host/FreshRSS/web"
@@ -13,9 +14,12 @@ all:
     nerd:
       proxy_pass_path: "Network/Host/Racknerd/ssh"
       cf_pass_path: "Network/Host/Cloudflare"
+      xray_reality_pass_path: "Network/Xray/Reality"
 
     localhost:
       ansible_connection: local
+      proxy_pass_path: "Network/Host/BandwagonHost/ssh"
+      xray_reality_pass_path: "Network/Xray/Reality"
 
   children:
     vps_group:

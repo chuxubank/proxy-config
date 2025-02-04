@@ -1,0 +1,135 @@
+{
+  "log": {
+    "loglevel": "debug",
+    "dnsLog": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "223.5.5.5",
+        "port": 53,
+        "domains": ["geosite:cn"],
+        "expectIPs": ["geoip:cn"]
+      },
+      {
+        "address": "8.8.8.8",
+        "port": 53,
+        "domains": ["geosite:geolocation-!cn"]
+      },
+      "1.1.1.1",
+      "localhost"
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "domain": ["geosite:umeng"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Block",
+        "domain": ["geosite:category-ads"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "domain": [
+          "geosite:cn",
+          "geosite:google@cn",
+          "geosite:apple",
+          "geosite:jetbrains",
+          "geosite:microsoft@cn",
+          "geosite:steam@cn",
+          "geosite:notion",
+          "geosite:logitech",
+          "domain:teams.microsoft.com",
+          "domain:documentfoundation.org",
+          "domain:cn.msi.com",
+          "domain:ping.pe",
+          "domain:bwh88.net",
+          "domain:64clouds.com",
+          "domain:justmysocks5.net",
+          "domain:imwork.net",
+          "domain:xiumi.us",
+          "full:direct.chuxubank.top"
+        ]
+      },
+      {
+        "type": "field",
+        "balancerTag": "Proxy",
+        "domain": ["geosite:geolocation-!cn"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "Direct",
+        "ip": ["geoip:cn", "geoip:private"]
+      }
+    ],
+    "balancers": [
+      {
+        "tag": "Proxy",
+        "selector": ["Proxy"]
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "port": 10800,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+        "udp": true
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"],
+        "domainsExcluded": ["courier.push.apple.com"],
+        "routeOnly": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "{{ xray_env.ADDRESS }}",
+            "port": {{ xray_env.REALITY_PORT | int }},
+            "users": [
+              {
+                "id": "{{ xray_env.REALITY_ID }}",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "fingerprint": "chrome",
+          "serverName": "",
+          "publicKey": "{{ xray_env.REALITY_PUBLIC_KEY }}",
+          "spiderX": "",
+          "shortId": "{{ xray_env.REALITY_SHORT_ID }}"
+        }
+      },
+      "tag": "Proxy-reality"
+    },
+    {
+      "protocol": "freedom",
+      "tag": "Direct"
+    },
+    {
+      "tag": "Block",
+      "protocol": "blackhole"
+    }
+  ]
+}
