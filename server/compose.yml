@@ -37,34 +37,17 @@ services:
       - caddy
     restart: always
     ports:
-      - "8443:8443/udp"
       - "8445:8445"
-      - "8446:8446"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    expose:
-      - "2022"
     volumes:
-      - ./xray:/etc/xray
+      - ./xray/config.json:/etc/xray/config.json
       - caddy_data:/data
     logging:
       driver: "json-file"
       options:
         max-size: "200k"
         max-file: "10"
-
-  # warp:
-  #   container_name: warp-server
-  #   image: ghcr.io/xtls/xray-core
-  #   restart: unless-stopped
-  #   network_mode: host
-  #   volumes:
-  #     - ./xray/warp.json:/etc/xray/config.json
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "200k"
-  #       max-file: "10"
 
   warp:
     container_name: warp

@@ -11,16 +11,6 @@
 	}
 }
 
-{$DOMAIN:localhost} {
-	log
-	file_server
-	@grpc {
-		protocol grpc
-		path /listen-to-both-sides/*
-	}
-	reverse_proxy @grpc h2c://xray:2022
-}
-
 {$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
 	reverse_proxy http://freshrss
 }
