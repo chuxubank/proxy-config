@@ -1,0 +1,86 @@
+{
+  "log": {
+    "loglevel": "debug",
+    "dnsLog": true
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "outboundTag": "warp",
+        "domain": [
+          "geosite:netflix",
+          "geosite:openai",
+          "geosite:bing",
+          "geosite:anthropic",
+          "geosite:cloudflare"
+        ]
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": ["geosite:geolocation-!cn"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "ip": ["geoip:cn", "geoip:private"]
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "port": {{ xray_env.REALITY_PORT | int }},
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "{{ xray_env.REALITY_ID }}",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "dest": "1.1.1.1:443",
+          "serverNames": [""],
+          "privateKey": "{{ xray_env.REALITY_PRIVATE_KEY }}",
+          "shortIds": ["{{ xray_env.REALITY_SHORT_ID }}"]
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"],
+        "routeOnly": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "tag": "warp",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "warp",
+            "port": 9091
+          }
+        ]
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ]
+}

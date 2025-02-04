@@ -40,7 +40,7 @@
 
     - name: Setup xray config
       ansible.builtin.template:
-        src: templates/config.json.j2
+        src: templates/config_server.json.j2
         dest: "{{ proxy_config_dir }}/xray/config.json"
 
     - name: Setup rss env
