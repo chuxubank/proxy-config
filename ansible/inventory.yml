@@ -14,9 +14,6 @@ all:
       proxy_pass_path: "Network/Host/Racknerd/ssh"
       cf_pass_path: "Network/Host/Cloudflare"
 
-    rpi:
-      ansible_host: raspberrypi.local
-
     localhost:
       ansible_connection: local
 
@@ -28,5 +25,4 @@ all:
 
     local_group:
       hosts:
-        rpi:
         localhost:
