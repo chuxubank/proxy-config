@@ -16,9 +16,9 @@
 	file_server
 	@grpc {
 		protocol grpc
-		path {env.XHTTP_PATH}/
+		path {$XHTTP_PATH}/
 	}
-	reverse_proxy @grpc h2c://xray:{env.XHTTP_PORT}
+	reverse_proxy @grpc h2c://xray:{$XHTTP_PORT}
 }
 
 {$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
