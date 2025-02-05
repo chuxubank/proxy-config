@@ -102,7 +102,7 @@
             "port": {{ xray_env.REALITY_PORT | int }},
             "users": [
               {
-                "id": "{{ xray_env.REALITY_ID }}",
+                "id": "{{ xray_env.CLIENT_ID }}",
                 "encryption": "none",
                 "flow": "xtls-rprx-vision"
               }
@@ -122,6 +122,30 @@
         }
       },
       "tag": "Proxy-reality"
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "{{ xray_env.DOMAIN }}",
+            "port": 443,
+            "users": [
+              {
+                "id": "{{ xray_env.CLIENT_ID }}"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "tls",
+        "xhttpSettings": {
+          "path": "{{ xray_env.XHTTP_PATH }}"
+        }
+      },
+      "tag": "Proxy-xhttp"
     },
     {
       "protocol": "freedom",

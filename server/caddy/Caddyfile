@@ -11,6 +11,16 @@
 	}
 }
 
+{$DOMAIN:localhost} {
+	log
+	file_server
+	@grpc {
+		protocol grpc
+		path {env.XHTTP_PATH}/
+	}
+	reverse_proxy @grpc h2c://xray:{env.XHTTP_PORT}
+}
+
 {$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
 	reverse_proxy http://freshrss
 }

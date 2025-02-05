@@ -1,0 +1,6 @@
+xray_env:
+  CLIENT_ID: "{{ lookup('community.general.passwordstore', xray_client_pass_path) }}"
+  REALITY_PORT: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='port') }}"
+  REALITY_SHORT_ID: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='shortId') }}"
+  XHTTP_PORT: "{{ lookup('community.general.passwordstore', xray_xhttp_pass_path, subkey='port') }}"
+  XHTTP_PATH: "{{ lookup('community.general.passwordstore', xray_xhttp_pass_path, subkey='path') }}"

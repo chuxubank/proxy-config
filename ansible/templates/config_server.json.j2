@@ -36,7 +36,7 @@
       "settings": {
         "clients": [
           {
-            "id": "{{ xray_env.REALITY_ID }}",
+            "id": "{{ xray_env.CLIENT_ID }}",
             "flow": "xtls-rprx-vision"
           }
         ],
@@ -56,6 +56,24 @@
         "enabled": true,
         "destOverride": ["http", "tls", "quic"],
         "routeOnly": true
+      }
+    },
+    {
+      "port": {{ xray_env.XHTTP_PORT | int }},
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "{{ xray_env.CLIENT_ID }}"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "{{ xray_env.XHTTP_PATH }}"
+        }
       }
     }
   ],

@@ -38,6 +38,8 @@ services:
     restart: always
     ports:
       - "${REALITY_PORT}:${REALITY_PORT}"
+    expose:
+      - "${XHTTP_PORT}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
