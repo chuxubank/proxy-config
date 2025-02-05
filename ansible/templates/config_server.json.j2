@@ -7,6 +7,12 @@
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
+        "inboundTag": ["dokodemo-in"],
+        "domain": ["{{ xray_env.REALITY_TARGET }}"],
+        "outboundTag": "direct",
+        "ruleTag": "Xray Reality Client"
+      },
+      {
         "domain": [
           "geosite:netflix",
           "geosite:openai",
@@ -21,12 +27,6 @@
         "domain": ["geosite:geolocation-!cn"],
         "outboundTag": "direct",
         "ruleTag": "Known Site"
-      },
-      {
-        "inboundTag": ["dokodemo-in"],
-        "domain": ["{{ xray_env.REALITY_TARGET }}"],
-        "outboundTag": "direct",
-        "ruleTag": "Xray Reality Client"
       },
       {
         "inboundTag": ["dokodemo-in"],
