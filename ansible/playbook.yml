@@ -58,6 +58,7 @@
     - name: Stop Docker Compose
       community.docker.docker_compose_v2:
         project_src: "{{ proxy_config_dir }}"
+        profiles: "{{ proxy_profile }}"
         state: stopped
       ignore_errors: true
 
