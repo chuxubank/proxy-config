@@ -7,5 +7,5 @@ xray_env:
   REALITY_PRIVATE_KEY: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='privateKey') }}"
   REALITY_PUBLIC_KEY: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='publicKey') }}"
   REALITY_SHORT_ID: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='shortId') }}"
-  XHTTP_PORT: "{{ lookup('community.general.passwordstore', xray_xhttp_pass_path, subkey='port') }}"
-  XHTTP_PATH: "{{ lookup('community.general.passwordstore', xray_xhttp_pass_path, subkey='path') }}"
+  XHTTP_PORT: 2022
+  XHTTP_PATH: "{{ lookup('community.general.passwordstore', xray_xhttp_pass_path) }}"
