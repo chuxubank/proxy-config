@@ -16,7 +16,7 @@
 	file_server
 	@grpc {
 		protocol grpc
-		path {$XHTTP_PATH}/
+		path {$XHTTP_PATH}/*
 	}
 	reverse_proxy @grpc h2c://xray:{$XHTTP_PORT}
 }
