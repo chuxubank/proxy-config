@@ -7,8 +7,3 @@ brew_path: >-
   {%- else -%}
   /usr/local
   {%- endif -%}
-
-xray_env:
-  ADDRESS: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='url') }}"
-  DOMAIN: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='domain') }}"
-  REALITY_PUBLIC_KEY: "{{ lookup('community.general.passwordstore', xray_reality_pass_path, subkey='publicKey') }}"
