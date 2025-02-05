@@ -72,7 +72,7 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy"]
+        "selector": ["Proxy-reality"]
       }
     ]
   },
@@ -115,7 +115,7 @@
         "security": "reality",
         "realitySettings": {
           "fingerprint": "chrome",
-          "serverName": "",
+          "serverName": "{{ xray_env.REALITY_TARGET }}",
           "publicKey": "{{ xray_env.REALITY_PUBLIC_KEY }}",
           "spiderX": "",
           "shortId": "{{ xray_env.REALITY_SHORT_ID }}"
