@@ -7,31 +7,58 @@
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
-        "type": "field",
-        "outboundTag": "warp",
         "domain": [
           "geosite:netflix",
           "geosite:openai",
           "geosite:bing",
           "geosite:anthropic",
           "geosite:cloudflare"
-        ]
+        ],
+        "outboundTag": "warp",
+        "ruleTag": "Clean IP"
       },
       {
-        "type": "field",
+        "domain": ["geosite:geolocation-!cn"],
         "outboundTag": "direct",
-        "domain": ["geosite:geolocation-!cn"]
+        "ruleTag": "Known Site"
       },
       {
-        "type": "field",
+        "inboundTag": ["dokodemo-in"],
+        "domain": ["{{ xray_env.REALITY_TARGET }}"],
+        "outboundTag": "direct",
+        "ruleTag": "Xray Reality Client"
+      },
+      {
+        "inboundTag": ["dokodemo-in"],
         "outboundTag": "blocked",
-        "ip": ["geoip:cn", "geoip:private"]
+        "ruleTag": "Unknown Client"
+      },
+      {
+        "ip": ["geoip:cn", "geoip:private"],
+        "outboundTag": "blocked",
+        "ruleTag": "Private/CN IP"
       }
     ]
   },
   "inbounds": [
     {
+      "tag": "dokodemo-in",
       "port": {{ xray_env.REALITY_PORT | int }},
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 4432,
+        "network": "tcp"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["tls"],
+        "routeOnly": true
+      }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 4432,
       "protocol": "vless",
       "settings": {
         "clients": [
@@ -46,8 +73,9 @@
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "dest": "1.1.1.1:443",
-          "serverNames": [""],
+          "show": true,
+          "target": "{{ xray_env.REALITY_TARGET }}:443",
+          "serverNames": ["{{ xray_env.REALITY_TARGET }}"],
           "privateKey": "{{ xray_env.REALITY_PRIVATE_KEY }}",
           "shortIds": ["{{ xray_env.REALITY_SHORT_ID }}"]
         }
