@@ -25,15 +25,16 @@
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
+        "domain": ["geosite:umeng"],
         "outboundTag": "Direct",
-        "domain": ["geosite:umeng"]
+        "ruleTag": "Allowed Ads"
       },
       {
+        "domain": ["geosite:category-ads"],
         "outboundTag": "Block",
-        "domain": ["geosite:category-ads"]
+        "ruleTag": "Blocked Ads"
       },
       {
-        "outboundTag": "Direct",
         "domain": [
           "geosite:cn",
           "geosite:google@cn",
@@ -53,15 +54,19 @@
           "domain:imwork.net",
           "domain:xiumi.us",
           "full:{{ xray_env.ADDRESS }}"
-        ]
-      },
-      {
-        "balancerTag": "Proxy",
-        "domain": ["geosite:geolocation-!cn"]
-      },
-      {
+        ],
         "outboundTag": "Direct",
-        "ip": ["geoip:cn", "geoip:private"]
+        "ruleTag": "China Domains"
+      },
+      {
+        "domain": ["geosite:geolocation-!cn"],
+        "balancerTag": "Proxy",
+        "ruleTag": "Known Foreign Site"
+      },
+      {
+        "ip": ["geoip:cn", "geoip:private"],
+        "outboundTag": "Direct",
+        "ruleTag": "Private/CN IP"
       }
     ],
     "balancers": [
