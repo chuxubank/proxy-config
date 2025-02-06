@@ -13,12 +13,12 @@
 
 {$DOMAIN:localhost} {
 	log
-	file_server
-	@grpc {
-		protocol grpc
-		path {$XHTTP_PATH}/*
+	handle {$XHTTP_PATH}/* {
+		reverse_proxy h2c://xray:{$XHTTP_PORT}
 	}
-	reverse_proxy @grpc h2c://xray:{$XHTTP_PORT}
+	handle {
+		file_server
+	}
 }
 
 {$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
