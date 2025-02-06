@@ -72,7 +72,11 @@
     "balancers": [
       {
         "tag": "Proxy",
-        "selector": ["Proxy-reality"]
+        "selector": ["Proxy"],
+        "strategy": {
+          "type": "leastPing",
+          "settings": {}
+        }
       }
     ]
   },
@@ -156,5 +160,21 @@
       "tag": "Block",
       "protocol": "blackhole"
     }
-  ]
+  ],
+  "observatory": {
+    "subjectSelector": ["Proxy"],
+    "probeUrl": "https://www.google.com/generate_204",
+    "probeInterval": "30s",
+    "enableConcurrency": true
+  },
+  "burstObservatory": {
+    "subjectSelector": ["Proxy"],
+    "pingConfig": {
+      "destination": "https://connectivitycheck.gstatic.com/generate_204",
+      "connectivity": "",
+      "interval": "1m",
+      "sampling": 3,
+      "timeout": "30s"
+    }
+  }
 }
