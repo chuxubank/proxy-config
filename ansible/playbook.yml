@@ -122,3 +122,8 @@
         EOF
       when: ansible_facts['os_family'] == "Darwin"
       tags: service
+
+    - name: Generate share text
+      ansible.builtin.template:
+        src: templates/share.txt.j2
+        dest: "{{ xray_config_dir }}/share.txt"

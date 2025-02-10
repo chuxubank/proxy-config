@@ -1,0 +1,2 @@
+vless://{{ xray_env.CLIENT_ID }}@{{ xray_env.ADDRESS }}:{{ xray_env.REALITY_PORT }}?type=tcp&security=reality&flow=xtls-rprx-vision&pbk={{ xray_env.REALITY_PUBLIC_KEY }}&sni={{ xray_env.REALITY_TARGET }}&sid={{ xray_env.REALITY_SHORT_ID }}#{{ "{}-{}-{}".format(xray_env.ALIAS, "tcp", "reality") | title | urlencode}}
+vless://{{ xray_env.CLIENT_ID }}@{{ xray_env.DOMAIN }}:443?type=xhttp&security=tls&path={{ xray_env.XHTTP_PATH | urlencode }}#{{ "{}-{}-{}".format(xray_env.ALIAS, "xhttp", "tls") | title | urlencode }}
