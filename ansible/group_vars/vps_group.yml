@@ -1,4 +1,4 @@
-ansible_host: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='url') }}"
+ansible_host: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='ip') }}"
 ansible_port: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='port') }}"
 ansible_password: "{{ lookup('community.general.passwordstore', proxy_pass_path) }}"
 

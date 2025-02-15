@@ -1,5 +1,5 @@
 xray_env:
-  ADDRESS: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='url') }}"
+  ADDRESS: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='ip') }}"
   DOMAIN: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='domain') }}"
   ALIAS: "{{ lookup('community.general.passwordstore', proxy_pass_path, subkey='alias') }}"
   CLIENT_ID: "{{ lookup('community.general.passwordstore', xray_client_pass_path) }}"
