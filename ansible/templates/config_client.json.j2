@@ -52,8 +52,7 @@
           "domain:64clouds.com",
           "domain:justmysocks5.net",
           "domain:imwork.net",
-          "domain:xiumi.us",
-          "full:{{ xray_env.ADDRESS }}"
+          "domain:xiumi.us"
         ],
         "outboundTag": "Direct",
         "ruleTag": "China Domains"
@@ -64,7 +63,7 @@
         "ruleTag": "Known Foreign Site"
       },
       {
-        "ip": ["geoip:cn", "geoip:private"],
+        "ip": ["geoip:cn", "geoip:private", "{{ xray_env.ADDRESS }}"],
         "outboundTag": "Direct",
         "ruleTag": "Private/CN IP"
       }
