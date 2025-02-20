@@ -2,7 +2,6 @@ all:
   hosts:
     bwg:
       proxy_pass_path: "Network/Host/BandwagonHost/ssh"
-      cf_pass_path: "Network/Host/Cloudflare"
 
     bwg-cn2-gia:
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
@@ -12,12 +11,13 @@ all:
 
     localhost:
       ansible_connection: local
-      proxy_pass_path: "Network/Host/BandwagonHost/ssh"
+      proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
   children:
     vps_group:
       hosts:
         bwg:
+        bwg-cn2-gia:
         nerd:
       vars:
         cf_pass_path: "Network/Host/Cloudflare"
@@ -27,6 +27,7 @@ all:
     xray_group:
       hosts:
         bwg:
+        bwg-cn2-gia:
         nerd:
         localhost:
       vars:
