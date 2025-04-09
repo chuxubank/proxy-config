@@ -59,6 +59,13 @@
         "ruleTag": "China Domains"
       },
       {
+        "domain": [
+           "geosite:category-ai-!cn"
+        ],
+        "balancerTag": "Proxy-self",
+        "ruleTag": "IP Restriction"
+      },
+      {
         "domain": ["geosite:geolocation-!cn"],
         "balancerTag": "Proxy",
         "ruleTag": "Known Foreign Site"
@@ -73,6 +80,14 @@
       {
         "tag": "Proxy",
         "selector": ["Proxy"],
+        "strategy": {
+          "type": "leastPing",
+          "settings": {}
+        }
+      },
+      {
+        "tag": "Proxy-self",
+        "selector": ["Proxy-self"],
         "strategy": {
           "type": "leastPing",
           "settings": {}
@@ -125,7 +140,7 @@
           "shortId": "{{ xray_env.REALITY_SHORT_ID }}"
         }
       },
-      "tag": "Proxy-reality"
+      "tag": "Proxy-self-reality"
     },
     {
       "protocol": "vless",
@@ -150,7 +165,7 @@
           "path": "{{ xray_env.XHTTP_PATH }}"
         }
       },
-      "tag": "Proxy-xhttp"
+      "tag": "Proxy-self-xhttp"
     },
     {
       "protocol": "freedom",
