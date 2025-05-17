@@ -6,3 +6,7 @@
 #+end_src
 *** Log
 [[file:~/Library/Logs/Xray/xray-stdout.log]]
+** Ansible
+#+begin_src sh :results silent
+  ansible-playbook playbook.yml --limit localhost
+#+end_src

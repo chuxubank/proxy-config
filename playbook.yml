@@ -29,7 +29,7 @@
 
     - name: Sync Docker Compose directory to remote server
       ansible.posix.synchronize:
-        src: ../server/
+        src: server/
         dest: "{{ proxy_config_dir }}"
         dest_port: "{{ ansible_port | int }}"
 
@@ -81,7 +81,7 @@
   become: false
 
   vars:
-    xray_config_dir: "{{ playbook_dir | dirname }}/client/xray"
+    xray_config_dir: "{{ playbook_dir }}/client/xray"
     xray_log_dir: "{{ ansible_env.HOME }}/Library/Logs/Xray"
     xray_logrotate_config: "{{ ansible_env.HOME }}/.config/logrotate.d/xray"
 
