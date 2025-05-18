@@ -123,6 +123,31 @@
       "settings": {
         "vnext": [
           {
+            "address": "{{ xray_env.DOMAIN }}",
+            "port": 443,
+            "users": [
+              {
+                "id": "{{ xray_env.CLIENT_ID }}",
+                "encryption": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "tls",
+        "xhttpSettings": {
+          "path": "{{ xray_env.XHTTP_PATH }}"
+        }
+      },
+      "tag": "Proxy-self-xhttp"
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
             "address": "{{ xray_env.ADDRESS }}",
             "port": {{ xray_env.REALITY_PORT | int }},
             "users": [
@@ -147,31 +172,6 @@
         }
       },
       "tag": "Proxy-self-reality"
-    },
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "{{ xray_env.DOMAIN }}",
-            "port": 443,
-            "users": [
-              {
-                "id": "{{ xray_env.CLIENT_ID }}",
-                "encryption": "none"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "xhttp",
-        "security": "tls",
-        "xhttpSettings": {
-          "path": "{{ xray_env.XHTTP_PATH }}"
-        }
-      },
-      "tag": "Proxy-self-xhttp"
     },
     {
       "protocol": "freedom",
