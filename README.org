@@ -1,20 +1,20 @@
 * Proxy
 ** Xray
 *** Config
-#+begin_src sh :results silent
+#+begin_src sh :results output silent
   xray run -confdir=./client/xray/ -dump
 #+end_src
 *** Log
 [[file:~/Library/Logs/Xray/xray-stdout.log]]
 ** Ansible
-#+begin_src sh :results silent
+#+begin_src sh :results output silent
   ansible-playbook playbook.yml --limit localhost
 #+end_src
 
 ** Flash DNS
 
 *** macOS
-#+begin_src sh
+#+begin_src sh :dir /sudo:root@localhost: :results silent
   sudo dscacheutil -flushcache
   sudo killall -HUP mDNSResponder
 #+end_src
