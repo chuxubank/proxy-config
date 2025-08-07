@@ -6,20 +6,30 @@
   "dns": {
     "servers": [
       {
+        "address": "https://cloudflare-dns.com/dns-query",
+        "tag": "cloudflare"
+      },
+      {
+        "address": "https://dns.google/dns-query",
+        "tag": "google"
+      },
+      {
         "address": "223.5.5.5",
         "port": 53,
         "domains": ["geosite:cn"],
-        "expectIPs": ["geoip:cn"]
+        "expectIPs": ["geoip:cn"],
+        "tag": "alidns"
       },
       {
         "address": "8.8.8.8",
         "port": 53,
-        "domains": ["geosite:geolocation-!cn"]
+        "domains": ["geosite:geolocation-!cn"],
+        "tag": "googledns"
       },
       "1.1.1.1",
       "localhost"
     ],
-    "queryStrategy": "UseIPv4"
+    "queryStrategy": "UseSystem"
   },
   "routing": {
     "domainStrategy": "IPIfNonMatch",
