@@ -10,3 +10,11 @@
 #+begin_src sh :results silent
   ansible-playbook playbook.yml --limit localhost
 #+end_src
+
+** Flash DNS
+
+*** macOS
+#+begin_src sh
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder
+#+end_src
