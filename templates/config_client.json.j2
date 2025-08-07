@@ -151,6 +151,9 @@
         "security": "tls",
         "xhttpSettings": {
           "path": "{{ xray_env.XHTTP_PATH }}"
+        },
+        "sockopt": {
+          "domainStrategy": "UseIP"
         }
       },
       "tag": "Proxy-self-xhttp"
@@ -181,6 +184,9 @@
           "publicKey": "{{ xray_env.REALITY_PUBLIC_KEY }}",
           "spiderX": "",
           "shortId": "{{ xray_env.REALITY_SHORT_ID }}"
+        },
+        "sockopt": {
+          "domainStrategy": "UseIP"
         }
       },
       "tag": "Proxy-self-reality"
