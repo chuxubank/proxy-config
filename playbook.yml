@@ -115,7 +115,7 @@
     - name: Setup xray config
       ansible.builtin.template:
         src: templates/config_client.json.j2
-        dest: "{{ xray_config_dir }}/config.json"
+        dest: "{{ xray_config_dir }}/99-config.json"
 
     - name: Force log file rotation (macOS)
       command: logrotate -f {{ xray_logrotate_config }} -s ~/.config/logrotate.status
