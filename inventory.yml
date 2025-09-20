@@ -1,8 +1,5 @@
 all:
   hosts:
-    bwg:
-      proxy_pass_path: "Network/Host/BandwagonHost/ssh"
-
     bwg-cn2-gia:
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
@@ -16,7 +13,6 @@ all:
   children:
     vps_group:
       hosts:
-        bwg:
         bwg-cn2-gia:
         nerd:
       vars:
@@ -26,7 +22,6 @@ all:
 
     xray_group:
       hosts:
-        bwg:
         bwg-cn2-gia:
         nerd:
         localhost:
