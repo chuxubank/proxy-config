@@ -9,12 +9,12 @@
 ** Ansible
 
 *** Local
-#+begin_src sh :results output silent
+#+begin_src sh :results output silent :async
   ansible-playbook playbook.yml --limit localhost
 #+end_src
 
 *** Remote
-#+begin_src sh :results output silent
+#+begin_src sh :results output silent :async
   ansible-playbook playbook.yml
 #+end_src
 
