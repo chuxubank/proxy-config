@@ -1,11 +1,13 @@
 * Proxy
 ** Xray
+
 *** Config
 #+begin_src sh :results output silent
   xray run -confdir=./client/xray/ -dump
 #+end_src
 *** Log
 [[file:~/Library/Logs/Xray/xray-stdout.log]]
+
 ** Ansible
 
 *** Local
