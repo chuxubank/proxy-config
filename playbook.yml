@@ -40,7 +40,7 @@
 
     - name: Setup xray config
       ansible.builtin.template:
-        src: templates/config_server.json.j2
+        src: templates/xray/config_server.json.j2
         dest: "{{ proxy_config_dir }}/xray/config.json"
 
     - name: Setup rss env
@@ -109,12 +109,12 @@
 
     - name: Setup logrotate
       ansible.builtin.template:
-        src: templates/xray.logrotate.j2
+        src: templates/xray/logrotate.j2
         dest: "{{ xray_logrotate_config }}"
 
     - name: Setup xray config
       ansible.builtin.template:
-        src: templates/config_client.json.j2
+        src: templates/xray/config_client.json.j2
         dest: "{{ xray_config_dir }}/99-config.json"
 
     - name: Force log file rotation (macOS)
@@ -125,12 +125,12 @@
     - name: Start Xray service with custom config (macOS)
       shell: |
         brew services start xray --file=/dev/stdin <<EOF
-        {{ lookup('template', 'templates/xray.plist.j2') }}
+        {{ lookup('template', 'templates/xray/service.plist.j2') }}
         EOF
       when: ansible_facts['os_family'] == "Darwin"
       tags: service
 
     - name: Generate share text
       ansible.builtin.template:
-        src: templates/share.txt.j2
+        src: templates/xray/share.txt.j2
         dest: "{{ xray_config_dir }}/share.txt"
