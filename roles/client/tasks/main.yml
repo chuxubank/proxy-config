@@ -1,49 +1,44 @@
 ---
-- name: Install Xray via Homebrew (macOS)
-  community.general.homebrew:
-    name: xray
-    state: present
-  when: ansible_facts['os_family'] == "Darwin"
-  tags: install
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: Ensure Xray log directory exists (macOS)
-  file:
-    path: "{{ xray_log_dir }}"
-    state: directory
-    mode: "0755"
-  when: ansible_facts['os_family'] == "Darwin"
-  tags: service
-
-- name: Stop Xray service (macOS)
-  command: brew services stop xray
-  ignore_errors: true
-  when: ansible_facts['os_family'] == "Darwin"
-  tags: service
-
+# ------------------------------------------------------------------------------
+# Reusable Tasks (using variables)
+# ------------------------------------------------------------------------------
 - name: Setup logrotate
+  become: "{{ use_become }}"
   ansible.builtin.template:
     src: templates/xray/logrotate.j2
     dest: "{{ xray_logrotate_config }}"
 
 - name: Setup xray config
+  become: "{{ use_become }}"
   ansible.builtin.template:
     src: templates/xray/config_client.json.j2
-    dest: "{{ xray_config_dir }}/99-config.json"
+    dest: "{{ xray_config_file }}"
 
-- name: Force log file rotation (macOS)
-  command: logrotate -f {{ xray_logrotate_config }} -s ~/.config/logrotate.status
-  when: ansible_facts['os_family'] == "Darwin"
+- name: Ensure Xray log directory exists
+  become: "{{ use_become }}"
+  ansible.builtin.file:
+    path: "{{ xray_log_dir }}"
+    state: directory
+    owner: "{{ xray_log_owner | default(omit) }}"
+    group: "{{ xray_log_group | default(omit) }}"
+    mode: "0755"
   tags: service
 
-- name: Start Xray service with custom config (macOS)
-  shell: |
-    brew services start xray --file=/dev/stdin <<EOF
-    {{ lookup('template', 'templates/xray/service.plist.j2') }}
-    EOF
-  when: ansible_facts['os_family'] == "Darwin"
+- name: Force log file rotation
+  become: "{{ use_become }}"
+  command: "{{ xray_logrotate_command }}"
   tags: service
 
-- name: Generate share text
-  ansible.builtin.template:
-    src: templates/xray/share.txt.j2
-    dest: "{{ xray_config_dir }}/share.txt"
+# ------------------------------------------------------------------------------
+# Include OS-specific tasks
+# ------------------------------------------------------------------------------
+- name: Include macOS tasks
+  ansible.builtin.include_tasks: macos.yml
+  when: ansible_facts['os_family'] == "Darwin"
+
+- name: Include Arch Linux tasks
+  ansible.builtin.include_tasks: archlinux.yml
+  when: ansible_facts['os_family'] == "Archlinux"

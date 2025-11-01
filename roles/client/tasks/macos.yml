@@ -1,0 +1,25 @@
+---
+# OS-specific tasks for macOS
+
+- name: Install Xray via Homebrew (macOS)
+  community.general.homebrew:
+    name: xray
+    state: present
+  tags: install
+
+- name: Stop Xray service (macOS)
+  command: brew services stop xray
+  ignore_errors: true
+  tags: service
+
+- name: Start Xray service with custom config (macOS)
+  shell: |
+    brew services start xray --file=/dev/stdin <<EOF
+    {{ lookup('template', 'templates/xray/service.plist.j2') }}
+    EOF
+  tags: service
+
+- name: Generate share text
+  ansible.builtin.template:
+    src: templates/xray/share.txt.j2
+    dest: "{{ xray_config_dir }}/share.txt"

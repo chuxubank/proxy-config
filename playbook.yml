@@ -11,11 +11,5 @@
   hosts: local_group
   connection: local
   become: false
-
-  vars:
-    xray_config_dir: "{{ playbook_dir }}/client/xray"
-    xray_log_dir: "{{ ansible_env.HOME }}/Library/Logs/Xray"
-    xray_logrotate_config: "{{ ansible_env.HOME }}/.config/logrotate.d/xray"
-
   roles:
     - client
