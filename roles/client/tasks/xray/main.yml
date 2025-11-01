@@ -1,55 +1,37 @@
 ---
-# ------------------------------------------------------------------------------
-# Reusable Tasks (using variables)
-# ------------------------------------------------------------------------------
-
 - name: Generate share text
   ansible.builtin.template:
     src: templates/xray/share.txt.j2
     dest: "{{ xray_config_dir }}/share.txt"
+
+- name: Ensure xray log directory exists
+  become: "{{ use_become }}"
+  ansible.builtin.file:
+    path: "{{ xray_log_dir }}"
+    state: directory
+    mode: "0755"
+  tags: service
 
 - name: Setup logrotate
   become: "{{ use_become }}"
   ansible.builtin.template:
     src: xray/logrotate.j2
     dest: "{{ xray_logrotate_config }}"
+  notify:
+    - Force xray log rotation
 
 - name: Setup xray config
   become: "{{ use_become }}"
   ansible.builtin.template:
     src: xray/config_client.json.j2
     dest: "{{ xray_config_file }}"
+  notify:
+    - Force xray log rotation
+    - Stop xray service
+    - Start xray service
 
-- name: Ensure Xray log directory exists
-  become: "{{ use_become }}"
-  ansible.builtin.file:
-    path: "{{ xray_log_dir }}"
-    state: directory
-    owner: "{{ xray_log_owner | default(omit) }}"
-    group: "{{ xray_log_group | default(omit) }}"
-    mode: "0755"
-  tags: service
-
-- name: Force log file rotation
-  become: "{{ use_become }}"
-  command: "logrotate -f {{ xray_logrotate_config }}"
-  tags: service
-
-- name: Install Xray via Homebrew
+- name: Install xray via Homebrew
   community.general.homebrew:
     name: xray
     state: present
   tags: install
-
-- name: Stop Xray service
-  community.general.homebrew_services:
-    name: xray
-    state: absent
-  tags: service
-
-- name: Start Xray service with custom config (macOS)
-  shell: |
-    brew services start xray --file=/dev/stdin <<EOF
-    {{ lookup('template', 'templates/xray/service.plist.j2') }}
-    EOF
-  tags: service

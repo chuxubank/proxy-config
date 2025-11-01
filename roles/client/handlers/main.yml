@@ -1,0 +1,15 @@
+- name: Stop xray service
+  community.general.homebrew_services:
+    name: xray
+    state: absent
+
+- name: Start xray service
+  shell: |
+    brew services start xray --file=/dev/stdin <<EOF
+    {{ lookup('template', 'templates/xray/service.plist.j2') }}
+    EOF
+
+- name: Force xray log rotation
+  ansible.builtin.command:
+    cmd: "logrotate -f {{ xray_logrotate_config }}"
+  become: "{{ use_become }}"
