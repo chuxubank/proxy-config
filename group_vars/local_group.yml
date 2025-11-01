@@ -7,3 +7,6 @@ brew_path: >-
   {%- else -%}
   /usr/local
   {%- endif -%}
+
+client_apps:
+  - xray

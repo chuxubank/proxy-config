@@ -1,24 +1,7 @@
 ---
-# OS-specific tasks for Arch Linux
-
-- name: Install Xray via Pacman (Arch Linux)
-  become: true
-  community.general.pacman:
-    name: xray
-    state: present
-  tags: install
-
-- name: Stop Xray service (Arch Linux)
-  become: true
-  ansible.builtin.systemd:
-    name: xray
-    state: stopped
-  tags: service
-
-- name: Start Xray service (Arch Linux)
-  become: true
-  ansible.builtin.systemd:
-    name: xray
-    state: started
-    enabled: true
-  tags: service
+- name: "Execute tasks for configured client apps on Archlinux"
+  include_tasks: "{{ app }}/main.yml"
+  loop: "{{ client_apps }}"
+  loop_control:
+    loop_var: app
+  when: client_apps is defined and client_apps | length > 0
