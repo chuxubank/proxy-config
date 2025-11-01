@@ -8,5 +8,14 @@ brew_path: >-
   /usr/local
   {%- endif -%}
 
+logrotate_config_dir: >-
+  {%- if ansible_facts['os_family'] == 'Darwin' -%}
+  {{ ansible_env.HOME }}/.config/logrotate.d
+  {%- else -%}
+  /etc/logrotate.d
+  {%- endif -%}
+
+xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
+
 client_apps:
   - xray

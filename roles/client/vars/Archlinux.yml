@@ -1,12 +1,9 @@
 ---
 use_become: true
 
-logrotate_dir: "/etc/logrotate.d"
-
 xray_config_dir: "etc/xray"
 xray_config_file: "{{ xray_config_dir }}/config.json"
 xray_log_dir: "/var/log/xray"
-xray_logrotate_config: "{{ logrotate_dir }}/xray"
 xray_logrotate_command: "logrotate -f {{ xray_logrotate_config }}"
 xray_log_owner: "nobody"
 xray_log_group: "nobody"

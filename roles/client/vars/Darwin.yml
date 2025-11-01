@@ -1,9 +1,6 @@
 use_become: false
 
-logrotate_dir: "{{ ansible_env.HOME }}/.config/logrotate.d"
-
 xray_config_dir: "{{ playbook_dir }}/client/xray"
 xray_config_file: "{{ xray_config_dir }}/99-config.json"
 xray_log_dir: "{{ ansible_env.HOME }}/Library/Logs/Xray"
-xray_logrotate_config: "{{ logrotate_dir }}/xray"
 xray_logrotate_command: "logrotate -f {{ xray_logrotate_config }} -s ~/.config/logrotate.status"
