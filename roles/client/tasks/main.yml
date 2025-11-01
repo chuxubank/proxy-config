@@ -1,11 +1,10 @@
 ---
-# ------------------------------------------------------------------------------
-# Include OS-specific tasks
-# ------------------------------------------------------------------------------
-- name: Include macOS tasks
-  ansible.builtin.include_tasks: macos.yml
-  when: ansible_facts['os_family'] == "Darwin"
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: Include Arch Linux tasks
-  ansible.builtin.include_tasks: archlinux.yml
-  when: ansible_facts['os_family'] == "Archlinux"
+- name: "Execute tasks for configured client apps"
+  include_tasks: "{{ app }}/main.yml"
+  loop: "{{ client_apps }}"
+  loop_control:
+    loop_var: app
+  when: client_apps is defined and client_apps | length > 0
