@@ -1,0 +1,10 @@
+[Unit]
+Description=Homebrew generated unit for xray
+
+[Install]
+WantedBy=default.target
+
+[Service]
+Type=simple
+ExecStart="{{ brew_path }}/opt/xray/bin/xray" "run" "-confdir" "{{ xray_config_dir }}"
+Restart=on-failure

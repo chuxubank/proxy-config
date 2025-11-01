@@ -2,6 +2,12 @@
 # ------------------------------------------------------------------------------
 # Reusable Tasks (using variables)
 # ------------------------------------------------------------------------------
+
+- name: Generate share text
+  ansible.builtin.template:
+    src: templates/xray/share.txt.j2
+    dest: "{{ xray_config_dir }}/share.txt"
+
 - name: Setup logrotate
   become: "{{ use_become }}"
   ansible.builtin.template:
@@ -26,16 +32,24 @@
 
 - name: Force log file rotation
   become: "{{ use_become }}"
-  command: "{{ xray_logrotate_command }}"
+  command: "logrotate -f {{ xray_logrotate_config }}"
   tags: service
 
-# ------------------------------------------------------------------------------
-# Include OS-specific tasks
-# ------------------------------------------------------------------------------
-- name: Include macOS tasks
-  ansible.builtin.include_tasks: macos.yml
-  when: ansible_facts['os_family'] == "Darwin"
+- name: Install Xray via Homebrew
+  community.general.homebrew:
+    name: xray
+    state: present
+  tags: install
 
-- name: Include Arch Linux tasks
-  ansible.builtin.include_tasks: archlinux.yml
-  when: ansible_facts['os_family'] == "Archlinux"
+- name: Stop Xray service
+  community.general.homebrew_services:
+    name: xray
+    state: absent
+  tags: service
+
+- name: Start Xray service with custom config (macOS)
+  shell: |
+    brew services start xray --file=/dev/stdin <<EOF
+    {{ lookup('template', 'templates/xray/service.plist.j2') }}
+    EOF
+  tags: service

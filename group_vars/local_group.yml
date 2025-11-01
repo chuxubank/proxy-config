@@ -1,21 +1,32 @@
 ---
 brew_path: >-
-  {%- if ansible_facts['os_family'] == 'Darwin' and ansible_facts['architecture'] == 'arm64' -%}
+  {%- if ansible_system == 'Darwin' and ansible_architecture == 'arm64' -%}
   /opt/homebrew
-  {%- elif ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'Debian' -%}
+  {%- elif ansible_system == 'Linux' -%}
   /home/linuxbrew/.linuxbrew
   {%- else -%}
   /usr/local
   {%- endif -%}
 
-logrotate_config_dir: >-
-  {%- if ansible_facts['os_family'] == 'Darwin' -%}
-  {{ ansible_env.HOME }}/.config/logrotate.d
+etc_path: >-
+  {%- if ansible_system == 'Linux' -%}
+  /etc
   {%- else -%}
-  /etc/logrotate.d
+  {{ brew_path }}/etc
   {%- endif -%}
 
-xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
+var_path: >-
+  {%- if ansible_system == 'Linux' -%}
+  /var
+  {%- else -%}
+  {{ brew_path }}/var
+  {%- endif -%}
 
-client_apps:
-  - xray
+log_dir: >-
+  {%- if ansible_system == 'Darwin' -%}
+  {{ ansible_env.HOME }}/Library/Logs
+  {%- else -%}
+  /var/log
+  {%- endif -%}
+
+logrotate_config_dir: "{{ etc_path }}/logrotate.d"

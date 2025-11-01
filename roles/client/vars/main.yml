@@ -1,0 +1,6 @@
+use_become: false
+
+xray_config_dir: "{{ ansible_env.HOME }}/.config/xray"
+xray_config_file: "{{ xray_config_dir }}/99-config.json"
+xray_log_dir: "{{ log_dir }}/xray"
+xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
