@@ -1,0 +1,53 @@
+---
+- name: Ensure proxy-config directory exists
+  file:
+    path: "{{ proxy_config_dir }}"
+    state: directory
+
+- name: Sync Docker Compose directory to remote server
+  ansible.posix.synchronize:
+    src: files/
+    dest: "{{ proxy_config_dir }}"
+    dest_port: "{{ ansible_port | int }}"
+
+- name: Setup env
+  ansible.builtin.template:
+    src: templates/env.j2
+    dest: "{{ proxy_config_dir }}/.env"
+
+- name: Setup xray config
+  ansible.builtin.template:
+    src: templates/xray/config_server.json.j2
+    dest: "{{ proxy_config_dir }}/xray/config.json"
+
+- name: Setup rss env
+  ansible.builtin.template:
+    src: templates/rss_env.j2
+    dest: "{{ proxy_config_dir }}/rss/.env"
+  when: rss_pass_path is defined
+
+- name: Setup rsshub env
+  ansible.builtin.template:
+    src: templates/rsshub_env.j2
+    dest: "{{ proxy_config_dir }}/rsshub/.env"
+  when: rss_pass_path is defined
+
+- name: Stop Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ proxy_config_dir }}"
+    profiles: "{{ proxy_profile }}"
+    state: stopped
+  ignore_errors: true
+  tags: always
+
+- name: Pull Docker Compose
+  community.docker.docker_compose_v2_pull:
+    project_src: "{{ proxy_config_dir }}"
+  tags: pull
+
+- name: Run Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ proxy_config_dir }}"
+    profiles: "{{ proxy_profile }}"
+    remove_orphans: true
+  tags: always

@@ -1,0 +1,17 @@
+---
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Install Docker (only if not installed)
+  include_role:
+    name: geerlingguy.docker
+  when: docker_installed.rc != 0
+
+- name: Ensure rsync is installed (Ubuntu/Debian)
+  apt:
+    name: rsync
+    state: present
+  when: ansible_facts['os_family'] == "Debian"

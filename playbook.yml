@@ -1,79 +1,11 @@
 ---
 - name: Setup VPS Proxy
   hosts: vps_group
-
   vars:
     proxy_config_dir: "proxy-config"
-
-  tasks:
-    - name: Check if Docker is installed
-      command: docker --version
-      register: docker_installed
-      ignore_errors: true
-
-    - name: Install Docker (only if not installed)
-      include_role:
-        name: geerlingguy.docker
-      when: docker_installed.rc != 0
-
-    - name: Ensure rsync is installed (Ubuntu/Debian)
-      apt:
-        name: rsync
-        state: present
-      when: ansible_facts['os_family'] == "Debian"
-
-    - name: Ensure proxy-config directory exists
-      file:
-        path: "{{ proxy_config_dir }}"
-        state: directory
-
-    - name: Sync Docker Compose directory to remote server
-      ansible.posix.synchronize:
-        src: server/
-        dest: "{{ proxy_config_dir }}"
-        dest_port: "{{ ansible_port | int }}"
-
-    - name: Setup env
-      ansible.builtin.template:
-        src: templates/env.j2
-        dest: "{{ proxy_config_dir }}/.env"
-
-    - name: Setup xray config
-      ansible.builtin.template:
-        src: templates/xray/config_server.json.j2
-        dest: "{{ proxy_config_dir }}/xray/config.json"
-
-    - name: Setup rss env
-      ansible.builtin.template:
-        src: templates/rss_env.j2
-        dest: "{{ proxy_config_dir }}/rss/.env"
-      when: rss_pass_path is defined
-
-    - name: Setup rsshub env
-      ansible.builtin.template:
-        src: templates/rsshub_env.j2
-        dest: "{{ proxy_config_dir }}/rsshub/.env"
-      when: rss_pass_path is defined
-
-    - name: Stop Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: "{{ proxy_config_dir }}"
-        profiles: "{{ proxy_profile }}"
-        state: stopped
-      ignore_errors: true
-      tags: always
-
-    - name: Pull Docker Compose
-      community.docker.docker_compose_v2_pull:
-        project_src: "{{ proxy_config_dir }}"
-      tags: pull
-
-    - name: Run Docker Compose
-      community.docker.docker_compose_v2:
-        project_src: "{{ proxy_config_dir }}"
-        profiles: "{{ proxy_profile }}"
-        remove_orphans: true
-      tags: always
+  roles:
+    - common
+    - server
 
 - name: Setup Local Proxy
   hosts: local_group
@@ -85,52 +17,5 @@
     xray_log_dir: "{{ ansible_env.HOME }}/Library/Logs/Xray"
     xray_logrotate_config: "{{ ansible_env.HOME }}/.config/logrotate.d/xray"
 
-  tasks:
-    - name: Install Xray via Homebrew (macOS)
-      community.general.homebrew:
-        name: xray
-        state: present
-      when: ansible_facts['os_family'] == "Darwin"
-      tags: install
-
-    - name: Ensure Xray log directory exists (macOS)
-      file:
-        path: "{{ xray_log_dir }}"
-        state: directory
-        mode: "0755"
-      when: ansible_facts['os_family'] == "Darwin"
-      tags: service
-
-    - name: Stop Xray service (macOS)
-      command: brew services stop xray
-      ignore_errors: true
-      when: ansible_facts['os_family'] == "Darwin"
-      tags: service
-
-    - name: Setup logrotate
-      ansible.builtin.template:
-        src: templates/xray/logrotate.j2
-        dest: "{{ xray_logrotate_config }}"
-
-    - name: Setup xray config
-      ansible.builtin.template:
-        src: templates/xray/config_client.json.j2
-        dest: "{{ xray_config_dir }}/99-config.json"
-
-    - name: Force log file rotation (macOS)
-      command: logrotate -f {{ xray_logrotate_config }} -s ~/.config/logrotate.status
-      when: ansible_facts['os_family'] == "Darwin"
-      tags: service
-
-    - name: Start Xray service with custom config (macOS)
-      shell: |
-        brew services start xray --file=/dev/stdin <<EOF
-        {{ lookup('template', 'templates/xray/service.plist.j2') }}
-        EOF
-      when: ansible_facts['os_family'] == "Darwin"
-      tags: service
-
-    - name: Generate share text
-      ansible.builtin.template:
-        src: templates/xray/share.txt.j2
-        dest: "{{ xray_config_dir }}/share.txt"
+  roles:
+    - client
