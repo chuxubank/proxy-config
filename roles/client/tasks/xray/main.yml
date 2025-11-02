@@ -10,6 +10,8 @@
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
+  notify:
+    - Force xray log rotation
   tags: service
 
 - name: Setup logrotate
@@ -21,10 +23,9 @@
     - Force xray log rotation
 
 - name: Setup xray config
-  become: "{{ use_become }}"
   ansible.builtin.template:
     src: xray/config_client.json.j2
-    dest: "{{ xray_config_file }}"
+    dest: "{{ xray_config_dir }}/99-config.json"
   notify:
     - Force xray log rotation
     - Stop xray service
