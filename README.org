@@ -3,8 +3,9 @@
 
 *** Config
 #+begin_src sh :results output silent
-  xray run -confdir=./client/xray/ -dump
+  xray run -confdir=$HOME/.config/xray/ -dump
 #+end_src
+
 *** Log
 [[file:~/Library/Logs/Xray/xray-stdout.log]]
 
