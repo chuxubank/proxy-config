@@ -3,3 +3,9 @@ use_become: false
 xray_config_dir: "{{ ansible_env.HOME }}/.config/xray"
 xray_log_dir: "{{ log_dir }}/xray"
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
+xray_service_template: >-
+  {%- if ansible_system == 'Darwin' -%}
+  service.plist.j2
+  {%- else -%}
+  service.conf.j2
+  {%- endif -%}

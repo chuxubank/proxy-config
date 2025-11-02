@@ -6,7 +6,7 @@
 - name: Start xray service
   shell: |
     brew services start xray --file=/dev/stdin <<EOF
-    {{ lookup('template', 'templates/service.plist.j2') }}
+    {{ lookup('template', xray_service_template) }}
     EOF
 
 - name: Force xray log rotation
