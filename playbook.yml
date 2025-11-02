@@ -12,4 +12,4 @@
   connection: local
   become: false
   roles:
-    - client
+    - xray_client

@@ -1,6 +1,0 @@
-- name: "Execute tasks for configured client apps"
-  include_tasks: "{{ app }}/main.yml"
-  loop: "{{ client_apps }}"
-  loop_control:
-    loop_var: app
-  when: client_apps is defined and client_apps | length > 0

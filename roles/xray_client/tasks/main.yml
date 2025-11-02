@@ -1,7 +1,7 @@
 ---
 - name: Generate share text
   ansible.builtin.template:
-    src: templates/xray/share.txt.j2
+    src: share.txt.j2
     dest: "{{ xray_config_dir }}/share.txt"
 
 - name: Ensure xray log directory exists
@@ -17,14 +17,14 @@
 - name: Setup logrotate
   become: "{{ use_become }}"
   ansible.builtin.template:
-    src: xray/logrotate.j2
+    src: logrotate.j2
     dest: "{{ xray_logrotate_config }}"
   notify:
     - Force xray log rotation
 
 - name: Setup xray config
   ansible.builtin.template:
-    src: xray/config_client.json.j2
+    src: config.json.j2
     dest: "{{ xray_config_dir }}/99-config.json"
   notify:
     - Force xray log rotation
