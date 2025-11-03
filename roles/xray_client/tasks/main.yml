@@ -1,4 +1,10 @@
 ---
+- name: Ensure xray config directory exists
+  ansible.builtin.file:
+    path: "{{ xray_config_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: Generate share text
   ansible.builtin.template:
     src: share.txt.j2
