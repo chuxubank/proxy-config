@@ -1,9 +1,9 @@
+- name: Force xray log rotation
+  ansible.builtin.command:
+    cmd: "logrotate -f {{ xray_logrotate_config }}"
+
 - name: Restart xray service
   shell: |
     brew services restart xray --file=/dev/stdin <<EOF
     {{ lookup('template', xray_service_template) }}
     EOF
-
-- name: Force xray log rotation
-  ansible.builtin.command:
-    cmd: "logrotate -f {{ xray_logrotate_config }}"
