@@ -7,7 +7,7 @@
 #+end_src
 
 *** Log
-[[file:~/Library/Logs/Xray/xray-stdout.log]]
+[[file:~/Library/Logs/Xray/access.log]]
 
 ** sing-box
 
@@ -17,7 +17,7 @@
 #+end_src
 
 *** Log
-[[file:~/Library/Logs/sing-box/sing-box-stdout.log]]
+[[file:~/Library/Logs/sing-box/box.log]]
 
 ** Ansible
 
