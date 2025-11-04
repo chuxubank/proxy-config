@@ -1,11 +1,6 @@
-- name: Stop xray service
-  community.general.homebrew_services:
-    name: xray
-    state: absent
-
-- name: Start xray service
+- name: Restart xray service
   shell: |
-    brew services start xray --file=/dev/stdin <<EOF
+    brew services restart xray --file=/dev/stdin <<EOF
     {{ lookup('template', xray_service_template) }}
     EOF
 

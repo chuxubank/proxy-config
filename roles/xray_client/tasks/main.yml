@@ -38,8 +38,7 @@
     dest: "{{ xray_config_dir }}/99-config.json"
   notify:
     - Force xray log rotation
-    - Stop xray service
-    - Start xray service
+    - Restart xray service
 
 - name: Install xray via Homebrew
   community.general.homebrew:
