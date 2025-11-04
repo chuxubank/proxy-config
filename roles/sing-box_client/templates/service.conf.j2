@@ -1,0 +1,10 @@
+[Unit]
+Description=Homebrew generated unit for sing-box
+
+[Install]
+WantedBy=default.target
+
+[Service]
+Type=simple
+ExecStart="{{ brew_path }}/opt/sing-box/bin/sing-box" "run" "--config-directory" "{{ sing_box_config_dir }}" "--directory" "{{ brew_path }}/var/lib/sing-box"
+Restart=on-failure

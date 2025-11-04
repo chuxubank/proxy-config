@@ -1,0 +1,17 @@
+{{ sing_box_log_dir }}/sing-box-stdout.log {
+  rotate 7
+  daily
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ sing_box_log_dir }}/sing-box-stderr.log {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}

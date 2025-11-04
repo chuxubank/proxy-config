@@ -9,6 +9,16 @@
 *** Log
 [[file:~/Library/Logs/Xray/xray-stdout.log]]
 
+** sing-box
+
+*** Config
+#+begin_src sh :results output silent
+  sing-box check -C $HOME/.config/sing-box
+#+end_src
+
+*** Log
+[[file:~/Library/Logs/sing-box/sing-box-stdout.log]]
+
 ** Ansible
 
 *** Local

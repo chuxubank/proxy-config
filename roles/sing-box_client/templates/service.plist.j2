@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>KeepAlive</key>
+    <true/>
+    <key>Label</key>
+    <string>homebrew.mxcl.sing-box</string>
+    <key>StandardOutPath</key>
+    <string>{{ sing_box_log_dir }}/sing-box-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>{{ sing_box_log_dir }}/sing-box-stderr.log</string>
+    <key>LimitLoadToSessionType</key>
+    <array>
+      <string>Aqua</string>
+      <string>Background</string>
+      <string>LoginWindow</string>
+      <string>StandardIO</string>
+      <string>System</string>
+    </array>
+    <key>ProgramArguments</key>
+    <array>
+      <string>{{ brew_path }}/bin/sing-box</string>
+      <string>run</string>
+      <string>--config-directory</string>
+      <string>{{ sing_box_config_dir }}</string>
+      <string>--directory</string>
+      <string>{{ brew_path }}/var/lib/sing-box</string>
+      <string>--disable-color</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+  </dict>
+</plist>
