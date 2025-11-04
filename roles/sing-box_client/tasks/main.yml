@@ -6,7 +6,6 @@
     mode: "0755"
 
 - name: Ensure sing-box log directory exists
-  become: true
   ansible.builtin.file:
     path: "{{ sing_box_log_dir }}"
     state: directory

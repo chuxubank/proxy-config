@@ -10,7 +10,6 @@
 - name: Setup Local Proxy
   hosts: local_group
   connection: local
-  become: false
   roles:
     - xray_client
     - sing-box_client
