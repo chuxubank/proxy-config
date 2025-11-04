@@ -7,4 +7,4 @@
 - name: Force sing-box log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ sing_box_logrotate_config }}"
-  become: "{{ use_become }}"
+  become: true

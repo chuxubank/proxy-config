@@ -7,4 +7,3 @@
 - name: Force xray log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ xray_logrotate_config }}"
-  become: "{{ use_become }}"

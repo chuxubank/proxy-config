@@ -6,21 +6,19 @@
     mode: "0755"
 
 - name: Ensure sing-box log directory exists
-  become: "{{ use_become }}"
+  become: true
   ansible.builtin.file:
     path: "{{ sing_box_log_dir }}"
     state: directory
     mode: "0755"
 
 - name: Ensure logrotate config directory exists
-  become: "{{ use_become }}"
   ansible.builtin.file:
     path: "{{ logrotate_config_dir }}"
     state: directory
     mode: "0755"
 
 - name: Setup logrotate
-  become: "{{ use_become }}"
   ansible.builtin.template:
     src: logrotate.j2
     dest: "{{ sing_box_logrotate_config }}"

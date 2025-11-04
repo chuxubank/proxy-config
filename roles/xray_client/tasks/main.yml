@@ -11,21 +11,18 @@
     dest: "{{ xray_config_dir }}/share.txt"
 
 - name: Ensure xray log directory exists
-  become: "{{ use_become }}"
   ansible.builtin.file:
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
 
 - name: Ensure logrotate config directory exists
-  become: "{{ use_become }}"
   ansible.builtin.file:
     path: "{{ logrotate_config_dir }}"
     state: directory
     mode: "0755"
 
 - name: Setup logrotate
-  become: "{{ use_become }}"
   ansible.builtin.template:
     src: logrotate.j2
     dest: "{{ xray_logrotate_config }}"
