@@ -1,4 +1,22 @@
-{{ xray_log_dir }}/xray-stdout.log {
+{{ xray_log_dir }}/stdout.log {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ xray_log_dir }}/stderr.log {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ xray_log_dir }}/access.log {
   rotate 7
   daily
   missingok
@@ -7,7 +25,7 @@
   copytruncate
 }
 
-{{ xray_log_dir }}/xray-stderr.log {
+{{ xray_log_dir }}/error.log {
   rotate 3
   yearly
   missingok

@@ -1,4 +1,4 @@
-{{ sing_box_log_dir }}/sing-box-stdout.log {
+{{ sing_box_log_dir }}/box.log {
   rotate 7
   daily
   missingok
@@ -7,7 +7,16 @@
   copytruncate
 }
 
-{{ sing_box_log_dir }}/sing-box-stderr.log {
+{{ sing_box_log_dir }}/stdout.log {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ sing_box_log_dir }}/stderr.log {
   rotate 3
   yearly
   missingok
