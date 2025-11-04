@@ -1,3 +1,0 @@
-[submodule "server/rss/extensions"]
-	path = server/rss/extensions
-	url = https://github.com/FreshRSS/Extensions.git
