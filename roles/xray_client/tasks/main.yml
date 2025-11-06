@@ -32,7 +32,7 @@
 - name: Setup xray config
   ansible.builtin.template:
     src: config.json.j2
-    dest: "{{ xray_config_dir }}/99-config.json"
+    dest: "{{ xray_config_dir }}/50-config.json"
   notify:
     - Force xray log rotation
     - Restart xray service
