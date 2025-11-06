@@ -4,6 +4,6 @@
 
 - name: Restart sing-box service
   shell: |
-    sudo brew services restart sing-box --file=/dev/stdin <<EOF
+    brew services restart sing-box --file=/dev/stdin <<EOF
     {{ lookup('template', sing_box_service_template) }}
     EOF

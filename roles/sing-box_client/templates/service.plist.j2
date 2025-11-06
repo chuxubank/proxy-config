@@ -10,16 +10,20 @@
     <string>{{ sing_box_log_dir }}/sing-box-stdout.log</string>
     <key>StandardErrorPath</key>
     <string>{{ sing_box_log_dir }}/sing-box-stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>{{ brew_path }}/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+      <key>SUDO_ASKPASS</key>
+      <string>{{ brew_path }}/bin/ssh-askpass</string>
+    </dict>
     <key>LimitLoadToSessionType</key>
     <array>
       <string>Aqua</string>
-      <string>Background</string>
-      <string>LoginWindow</string>
-      <string>StandardIO</string>
-      <string>System</string>
     </array>
     <key>ProgramArguments</key>
     <array>
+      <string>sudo</string>
       <string>{{ brew_path }}/bin/sing-box</string>
       <string>run</string>
       <string>--config-directory</string>
