@@ -8,6 +8,7 @@
 
 *** Log
 [[file:~/Library/Logs/xray/xray-access.log]]
+[[file:~/Library/Logs/xray/xray-error.log]]
 
 ** sing-box
 
