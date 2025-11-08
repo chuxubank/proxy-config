@@ -7,3 +7,7 @@ arch_bootstrap_packages:
   - openssh
   - rsync
   - wget
+mirror_countries:
+  - China
+enable_yay: true
+update_system: true

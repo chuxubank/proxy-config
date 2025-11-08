@@ -34,7 +34,7 @@
         - name: Optimize mirrors using cachyos-rate-mirrors
           become: true
           ansible.builtin.shell: |
-            cachyos-rate-mirrors --country China --save /etc/pacman.d/mirrorlist
+            cachyos-rate-mirrors --country {{ mirror_countries | join(',') }} --save /etc/pacman.d/mirrorlist
           register: cachyos_mirror_update
           changed_when: cachyos_mirror_update.rc == 0
 
@@ -50,7 +50,7 @@
         - name: Optimize mirrors using reflector
           become: true
           ansible.builtin.shell: |
-            reflector --country China --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+            reflector {% for country in mirror_countries %}--country {{ country }} {% endfor %}--age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
           register: reflector_mirror_update
           changed_when: reflector_mirror_update.rc == 0
 
@@ -79,6 +79,7 @@
       ansible.builtin.pacman:
         name: yay
         state: present
+      when: enable_yay
 
     - name: Upgrade all packages using yay
       become: true
@@ -86,3 +87,6 @@
       ansible.builtin.shell: yay -Syu --noconfirm
       register: yay_upgrade
       changed_when: "'there is nothing to do' not in yay_upgrade.stdout"
+      when:
+        - enable_yay
+        - update_system
