@@ -1,0 +1,88 @@
+---
+- name: Ensure target is Arch Linux
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "Archlinux"
+    fail_msg: "The arch_bootstrap role only supports Arch Linux targets."
+    success_msg: "Arch Linux detected; proceeding with bootstrap packages."
+
+- name: Bootstrap Arch Linux hosts
+  when: ansible_os_family == "Archlinux"
+  tags:
+    - arch_bootstrap
+  block:
+    - name: Ensure base packages are installed
+      become: true
+      ansible.builtin.pacman:
+        name: "{{ arch_bootstrap_packages }}"
+        state: present
+        update_cache: true
+
+    - name: Debug system info
+      ansible.builtin.debug:
+        msg: "Detected OS: {{ ansible_distribution }} (family: {{ ansible_os_family }})"
+
+    - name: Optimize mirrors for CachyOS
+      when: ansible_distribution == "CachyOS"
+      block:
+        - name: Install cachyos-rate-mirrors on CachyOS
+          become: true
+          ansible.builtin.pacman:
+            name: cachyos-rate-mirrors
+            state: present
+
+        - name: Optimize mirrors using cachyos-rate-mirrors
+          become: true
+          ansible.builtin.shell: |
+            cachyos-rate-mirrors --country China --save /etc/pacman.d/mirrorlist
+          register: cachyos_mirror_update
+          changed_when: cachyos_mirror_update.rc == 0
+
+    - name: Optimize mirrors for non-CachyOS hosts
+      when: ansible_distribution != "CachyOS"
+      block:
+        - name: Ensure reflector is installed
+          become: true
+          ansible.builtin.pacman:
+            name: reflector
+            state: present
+
+        - name: Optimize mirrors using reflector
+          become: true
+          ansible.builtin.shell: |
+            reflector --country China --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+          register: reflector_mirror_update
+          changed_when: reflector_mirror_update.rc == 0
+
+    - name: Add archlinuxcn repository to pacman.conf
+      become: true
+      ansible.builtin.blockinfile:
+        path: /etc/pacman.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK archlinuxcn"
+        block: |
+          [archlinuxcn]
+          Server = https://repo.archlinuxcn.org/$arch
+
+    - name: Update package database
+      become: true
+      ansible.builtin.pacman:
+        update_cache: true
+
+    - name: Install archlinuxcn keyring
+      become: true
+      ansible.builtin.pacman:
+        name: archlinuxcn-keyring
+        state: present
+
+    - name: Install yay
+      become: true
+      ansible.builtin.pacman:
+        name: yay
+        state: present
+
+    - name: Upgrade all packages using yay
+      become: true
+      become_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
+      ansible.builtin.shell: yay -Syu --noconfirm
+      register: yay_upgrade
+      changed_when: "'there is nothing to do' not in yay_upgrade.stdout"

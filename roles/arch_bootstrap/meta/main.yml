@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: chuxu
+  description: Bootstrap base packages and pacman cache for Arch Linux hosts.
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: ArchLinux
+      versions:
+        - any
+dependencies: []

@@ -1,0 +1,9 @@
+---
+arch_bootstrap_packages:
+  - base-devel
+  - git
+  - curl
+  - jq
+  - openssh
+  - rsync
+  - wget
