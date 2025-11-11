@@ -37,7 +37,7 @@
       },
       {
         "rule_set": "geosite-geolocation-!cn",
-        "query_type": ["A", "AAAA"],
+        "query_type": ["A"],
         "server": "doh-cf"
       },
       {
@@ -47,7 +47,7 @@
       }
     ],
     "final": "local",
-    "strategy": "prefer_ipv4",
+    "strategy": "ipv4_only",
     "independent_cache": true
   },
   "route": {
@@ -141,7 +141,7 @@
     {
       "type": "tun",
       "tag": "tun-in",
-      "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"],
+      "address": ["172.18.0.1/30"],
       "auto_route": true,
       "strict_route": true
     }
