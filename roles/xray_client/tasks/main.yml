@@ -5,11 +5,6 @@
     state: directory
     mode: "0755"
 
-- name: Generate share text
-  ansible.builtin.template:
-    src: share.txt.j2
-    dest: "{{ xray_config_dir }}/share.txt"
-
 - name: Ensure xray log directory exists
   ansible.builtin.file:
     path: "{{ xray_log_dir }}"
@@ -42,3 +37,30 @@
     name: xray
     state: present
   tags: install
+
+- name: Ensure qrencode is installed
+  community.general.homebrew:
+    name: qrencode
+    state: present
+  tags: install
+
+- name: Render share text
+  ansible.builtin.set_fact:
+    xray_share_text: "{{ lookup('template', 'share.txt.j2') | trim }}"
+
+- name: Display share links
+  ansible.builtin.debug:
+    msg: "{{ xray_share_text }}"
+  when: xray_share_text != ""
+
+- name: Print share QR code
+  ansible.builtin.command:
+    cmd: qrencode -t UTF8 "{{ xray_share_text }}"
+  register: qrencode_output
+  changed_when: false
+  when: xray_share_text != ""
+
+- name: Show QR code
+  ansible.builtin.debug:
+    msg: "{{ qrencode_output.stdout }}"
+  when: qrencode_output is defined
