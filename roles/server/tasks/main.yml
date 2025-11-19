@@ -7,6 +7,7 @@
 - name: Sync Docker Compose directory to remote server
   ansible.posix.synchronize:
     src: files/
+    delete: true
     dest: "{{ proxy_config_dir }}"
     dest_port: "{{ ansible_port | int }}"
 
