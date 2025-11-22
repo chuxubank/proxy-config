@@ -1,0 +1,8 @@
+---
+- name: Include OS-specific install tasks for sing-box
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - "install_{{ ansible_facts.distribution | lower | replace(' ', '_') }}.yml"
+    - "install_{{ ansible_facts.system | lower }}.yml"
+    - install_default.yml
+  tags: install

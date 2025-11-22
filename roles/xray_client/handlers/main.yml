@@ -2,8 +2,19 @@
   ansible.builtin.command:
     cmd: "logrotate -f {{ xray_logrotate_config }}"
 
-- name: Restart xray service
-  shell: |
+- name: Restart xray service (Homebrew)
+  ansible.builtin.shell: |
     brew services restart xray --file=/dev/stdin <<EOF
     {{ lookup('template', xray_service_template) }}
     EOF
+  when: ansible_system == 'Darwin'
+  listen: Restart xray service
+
+- name: Restart xray service (systemd)
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.systemd:
+    name: xray.service
+    state: restarted
+    daemon_reload: true
+  when: ansible_system == 'Linux'
+  listen: Restart xray service

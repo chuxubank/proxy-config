@@ -1,0 +1,6 @@
+---
+- name: Fail when sing-box install method is undefined for this platform
+  ansible.builtin.fail:
+    msg: >-
+      sing-box installation is not implemented for {{ ansible_facts.system }};
+      add roles/sing-box_client/tasks/install_{{ ansible_facts.system | lower }}.yml.

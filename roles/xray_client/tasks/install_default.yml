@@ -1,0 +1,6 @@
+---
+- name: Fail when xray install method is undefined for this platform
+  ansible.builtin.fail:
+    msg: >-
+      xray installation is not implemented for {{ ansible_facts.system }};
+      add roles/xray_client/tasks/install_{{ ansible_facts.system | lower }}.yml.

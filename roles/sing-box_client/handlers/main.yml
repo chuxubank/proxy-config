@@ -2,8 +2,19 @@
   ansible.builtin.command:
     cmd: "logrotate -f {{ sing_box_logrotate_config }}"
 
-- name: Restart sing-box service
-  shell: |
+- name: Restart sing-box service (Homebrew)
+  ansible.builtin.shell: |
     brew services restart sing-box --file=/dev/stdin <<EOF
     {{ lookup('template', sing_box_service_template) }}
     EOF
+  when: ansible_system == 'Darwin'
+  listen: Restart sing-box service
+
+- name: Restart sing-box service (systemd)
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.systemd:
+    name: sing-box.service
+    state: restarted
+    daemon_reload: true
+  when: ansible_system == 'Linux'
+  listen: Restart sing-box service

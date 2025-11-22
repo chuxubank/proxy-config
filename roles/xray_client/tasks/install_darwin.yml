@@ -1,0 +1,12 @@
+---
+- name: Install xray via Homebrew
+  community.general.homebrew:
+    name: xray
+    state: present
+  tags: install
+
+- name: Ensure qrencode is installed
+  community.general.homebrew:
+    name: qrencode
+    state: present
+  tags: install

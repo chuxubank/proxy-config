@@ -1,0 +1,30 @@
+- name: Abort when package manager is not pacman
+  ansible.builtin.fail:
+    msg: "Linux install supports pacman-based systems (e.g., CachyOS/Arch) only."
+  when: ansible_facts.pkg_mgr != 'pacman'
+
+- name: Install xray and tools via pacman
+  become: "{{ use_become | default(true) }}"
+  community.general.pacman:
+    name:
+      - xray
+      - qrencode
+    state: present
+    update_cache: true
+
+- name: Deploy xray systemd unit
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.template:
+    src: "{{ xray_service_template }}"
+    dest: /etc/systemd/system/xray.service
+    mode: "0644"
+  notify:
+    - Restart xray service
+
+- name: Ensure xray service is enabled and started
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.systemd:
+    name: xray.service
+    enabled: true
+    state: started
+    daemon_reload: true

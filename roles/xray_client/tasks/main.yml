@@ -4,12 +4,14 @@
     path: "{{ xray_config_dir }}"
     state: directory
     mode: "0755"
+    owner: "{{ ansible_user_id }}"
 
 - name: Ensure xray log directory exists
   ansible.builtin.file:
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
+    owner: "{{ ansible_user_id }}"
 
 - name: Ensure logrotate config directory exists
   ansible.builtin.file:
@@ -32,16 +34,8 @@
     - Force xray log rotation
     - Restart xray service
 
-- name: Install xray via Homebrew
-  community.general.homebrew:
-    name: xray
-    state: present
-  tags: install
-
-- name: Ensure qrencode is installed
-  community.general.homebrew:
-    name: qrencode
-    state: present
+- name: Include xray install tasks
+  ansible.builtin.include_tasks: install.yml
   tags: install
 
 - name: Render share text

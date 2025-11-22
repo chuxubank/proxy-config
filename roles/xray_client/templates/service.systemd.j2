@@ -1,0 +1,14 @@
+[Unit]
+Description=Xray Client
+After=network.target
+
+[Service]
+User={{ ansible_user_id }}
+ExecStart=/usr/bin/xray run -confdir {{ xray_config_dir }}
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:{{ xray_log_dir }}/xray-stdout.log
+StandardError=append:{{ xray_log_dir }}/xray-stderr.log
+
+[Install]
+WantedBy=multi-user.target

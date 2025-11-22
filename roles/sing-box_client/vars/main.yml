@@ -4,6 +4,8 @@ sing_box_logrotate_config: "{{ logrotate_config_dir }}/sing-box"
 sing_box_service_template: >-
   {%- if ansible_system == 'Darwin' -%}
   service.plist.j2
+  {%- elif ansible_system == 'Linux' -%}
+  service.systemd.j2
   {%- else -%}
   service.conf.j2
   {%- endif -%}
