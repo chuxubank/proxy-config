@@ -1,6 +1,7 @@
----
 - name: Install sing-box via Homebrew
-  community.general.homebrew:
-    name: sing-box
-    state: present
-  tags: install
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: install_homebrew_packages
+  vars:
+    homebrew_packages:
+      - sing-box

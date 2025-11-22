@@ -1,28 +1,15 @@
-- name: Abort when package manager is not pacman
-  ansible.builtin.fail:
-    msg: "Linux install supports pacman-based systems (e.g., CachyOS/Arch) only."
-  when: ansible_facts.pkg_mgr != 'pacman'
+- name: Render sing-box systemd unit content
+  ansible.builtin.set_fact:
+    sing_box_service_content: "{{ lookup('template', sing_box_service_template) }}"
 
-- name: Install sing-box via pacman
-  become: "{{ use_become | default(true) }}"
-  community.general.pacman:
-    name: sing-box
-    state: present
-    update_cache: true
-
-- name: Deploy sing-box systemd unit
-  become: "{{ use_become | default(true) }}"
-  ansible.builtin.template:
-    src: "{{ sing_box_service_template }}"
-    dest: /etc/systemd/system/sing-box.service
-    mode: "0644"
-  notify:
-    - Restart sing-box service
-
-- name: Ensure sing-box service is enabled and started
-  become: "{{ use_become | default(true) }}"
-  ansible.builtin.systemd:
-    name: sing-box.service
-    enabled: true
-    state: started
-    daemon_reload: true
+- name: Install sing-box and service via pacman helper
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: install_pacman_service
+  vars:
+    package_list:
+      - sing-box
+    service_name: sing-box
+    service_content: "{{ sing_box_service_content }}"
+    service_notify:
+      - Restart sing-box service
