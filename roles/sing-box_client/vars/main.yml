@@ -1,10 +1,10 @@
-sing_box_config_dir: "{{ ansible_env.HOME }}/.config/sing-box"
+sing_box_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/sing-box"
 sing_box_log_dir: "{{ log_dir }}/sing-box"
 sing_box_logrotate_config: "{{ logrotate_config_dir }}/sing-box"
 sing_box_service_template: >-
-  {%- if ansible_system == 'Darwin' -%}
+  {%- if ansible_facts['system'] == 'Darwin' -%}
   service.plist.j2
-  {%- elif ansible_system == 'Linux' -%}
+  {%- elif ansible_facts['system'] == 'Linux' -%}
   service.systemd.j2
   {%- else -%}
   service.conf.j2

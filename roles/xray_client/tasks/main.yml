@@ -4,7 +4,7 @@
     path: "{{ xray_config_dir }}"
     state: directory
     mode: "0755"
-    owner: "{{ ansible_user_id }}"
+    owner: "{{ ansible_facts['user_id'] }}"
 
 - name: Ensure xray log directory exists
   become: "{{ use_become | default(false) }}"
@@ -12,7 +12,7 @@
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
-    owner: "{{ ansible_user_id }}"
+    owner: "{{ ansible_facts['user_id'] }}"
 
 - name: Ensure logrotate config directory exists
   become: "{{ use_become | default(false) }}"
