@@ -3,7 +3,7 @@ Description=Xray Client
 After=network.target
 
 [Service]
-User={{ ansible_user_id }}
+User={{ ansible_facts['user_id'] }}
 ExecStart=/usr/bin/xray run -confdir {{ xray_config_dir }}
 Restart=on-failure
 RestartSec=5s

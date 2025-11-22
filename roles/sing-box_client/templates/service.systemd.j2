@@ -3,7 +3,7 @@ Description=Sing-box Client
 After=network.target
 
 [Service]
-User={{ ansible_user_id }}
+User={{ ansible_facts['user_id'] }}
 ExecStart=/usr/bin/sing-box run --config-directory {{ sing_box_config_dir }}
 Restart=on-failure
 RestartSec=5s
