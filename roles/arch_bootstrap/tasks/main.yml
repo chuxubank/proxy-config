@@ -2,12 +2,51 @@
 - name: Ensure target is Arch Linux
   ansible.builtin.assert:
     that:
-      - ansible_os_family == "Archlinux"
+      - ansible_facts['os_family'] == "Archlinux"
     fail_msg: "The arch_bootstrap role only supports Arch Linux targets."
     success_msg: "Arch Linux detected; proceeding with bootstrap packages."
 
+- name: Check for /etc/os-release
+  ansible.builtin.stat:
+    path: /etc/os-release
+  register: arch_os_release_stat
+
+- name: Read /etc/os-release
+  ansible.builtin.slurp:
+    path: /etc/os-release
+  register: arch_os_release_raw
+  when: arch_os_release_stat.stat.exists
+
+- name: Derive os-release id
+  ansible.builtin.set_fact:
+    arch_os_release_id: >-
+      {{
+        (
+          arch_os_release_raw.content
+          | default('')
+          | b64decode
+          | regex_search('(?mi)^ID=(.+)$')
+          | regex_replace('^\"|\"$', '')
+          | lower
+        ) | default('')
+      }}
+  when: arch_os_release_stat.stat.exists
+
+- name: Detect CachyOS derivative
+  ansible.builtin.set_fact:
+    is_cachyos: >-
+      {{
+        'cachyos' in (ansible_facts.get('distribution', '') | lower)
+        or 'cachyos' in (
+          arch_os_release_raw.content
+          | default('')
+          | b64decode
+          | lower
+        )
+      }}
+
 - name: Bootstrap Arch Linux hosts
-  when: ansible_os_family == "Archlinux"
+  when: ansible_facts['os_family'] == "Archlinux"
   tags:
     - arch_bootstrap
   block:
@@ -20,7 +59,9 @@
 
     - name: Debug system info
       ansible.builtin.debug:
-        msg: "Detected OS: {{ ansible_distribution }} (family: {{ ansible_os_family }})"
+        msg: >-
+          Detected OS: {{ ansible_facts['distribution'] }}
+          (family: {{ ansible_facts['os_family'] }}; os-release id: {{ arch_os_release_id | default('n/a') }})
 
     - name: Add archlinuxcn repository to pacman.conf
       become: true
@@ -32,7 +73,7 @@
           Server = https://repo.archlinuxcn.org/$arch
 
     - name: Optimize mirrors for CachyOS
-      when: ansible_distribution == "CachyOS"
+      when: is_cachyos | bool
       block:
         - name: Install cachyos-rate-mirrors on CachyOS
           become: true
@@ -48,7 +89,7 @@
           changed_when: cachyos_mirror_update.rc == 0
 
     - name: Optimize mirrors for non-CachyOS hosts
-      when: ansible_distribution != "CachyOS"
+      when: not is_cachyos | bool
       block:
         - name: Ensure reflector is installed
           become: true
@@ -83,7 +124,6 @@
 
     - name: Upgrade all packages using yay
       become: true
-      become_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
       ansible.builtin.shell: yay -Syu --noconfirm
       register: yay_upgrade
       changed_when: "'there is nothing to do' not in yay_upgrade.stdout"
