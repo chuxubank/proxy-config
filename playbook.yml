@@ -11,6 +11,5 @@
   hosts: local_group
   connection: local
   roles:
-    - arch_bootstrap
     - xray_client
     - sing-box_client
