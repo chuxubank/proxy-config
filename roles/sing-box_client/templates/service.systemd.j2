@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User={{ ansible_facts['user_id'] }}
-ExecStart=/usr/bin/sing-box run --config-directory {{ sing_box_config_dir }}
+ExecStart=sudo /usr/bin/sing-box run --config-directory {{ sing_box_config_dir }}
 Restart=on-failure
 RestartSec=5s
 StandardOutput=append:{{ sing_box_log_dir }}/sing-box-stdout.log
