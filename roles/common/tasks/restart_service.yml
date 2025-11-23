@@ -4,7 +4,7 @@
     brew services restart {{ service_name }} --file=/dev/stdin <<EOF
     {{ service_template_content }}
     EOF
-  when: ansible_system == 'Darwin'
+  when: ansible_facts['system'] == 'Darwin'
 
 - name: Restart service via systemd
   become: "{{ use_become | default(true) }}"
@@ -12,4 +12,4 @@
     name: "{{ service_name }}.service"
     state: restarted
     daemon_reload: true
-  when: ansible_system == 'Linux'
+  when: ansible_facts['system'] == 'Linux'

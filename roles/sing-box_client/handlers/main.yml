@@ -1,6 +1,7 @@
 - name: Force sing-box log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ sing_box_logrotate_config }}"
+  become: "{{ use_become }}"
 
 - name: Restart sing-box service
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/restart_service.yml"

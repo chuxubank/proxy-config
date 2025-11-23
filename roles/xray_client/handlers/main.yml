@@ -1,6 +1,7 @@
 - name: Force xray log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ xray_logrotate_config }}"
+  become: "{{ use_become }}"
 
 - name: Restart xray service
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/restart_service.yml"
