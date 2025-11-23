@@ -22,6 +22,15 @@
       ansible.builtin.debug:
         msg: "Detected OS: {{ ansible_distribution }} (family: {{ ansible_os_family }})"
 
+    - name: Add archlinuxcn repository to pacman.conf
+      become: true
+      ansible.builtin.blockinfile:
+        path: /etc/pacman.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK archlinuxcn"
+        block: |
+          [archlinuxcn]
+          Server = https://repo.archlinuxcn.org/$arch
+
     - name: Optimize mirrors for CachyOS
       when: ansible_distribution == "CachyOS"
       block:
@@ -53,15 +62,6 @@
             reflector {% for country in mirror_countries %}--country {{ country }} {% endfor %}--age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
           register: reflector_mirror_update
           changed_when: reflector_mirror_update.rc == 0
-
-    - name: Add archlinuxcn repository to pacman.conf
-      become: true
-      ansible.builtin.blockinfile:
-        path: /etc/pacman.conf
-        marker: "# {mark} ANSIBLE MANAGED BLOCK archlinuxcn"
-        block: |
-          [archlinuxcn]
-          Server = https://repo.archlinuxcn.org/$arch
 
     - name: Update package database
       become: true
