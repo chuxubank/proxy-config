@@ -17,4 +17,4 @@ rss_env:
   DB_TYPE: sqlite
   RSSHUB_SUB_DOMAIN: rsshub
 
-proxy_profile:
+proxy_profile: []

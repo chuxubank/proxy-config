@@ -1,0 +1,5 @@
+---
+# Base directory for generated Compose files and templates.
+proxy_config_dir: proxy-config
+# Docker Compose profiles to enable; empty list runs only unprofiled services.
+proxy_profile: []

@@ -10,6 +10,7 @@
     delete: true
     dest: "{{ proxy_config_dir }}"
     dest_port: "{{ ansible_port | int }}"
+  when: not ansible_check_mode
 
 - name: Setup env
   ansible.builtin.template:
@@ -40,11 +41,13 @@
     state: stopped
   ignore_errors: true
   tags: always
+  when: not ansible_check_mode
 
 - name: Pull Docker Compose
   community.docker.docker_compose_v2_pull:
     project_src: "{{ proxy_config_dir }}"
   tags: pull
+  when: not ansible_check_mode
 
 - name: Run Docker Compose
   community.docker.docker_compose_v2:
@@ -52,3 +55,4 @@
     profiles: "{{ proxy_profile }}"
     remove_orphans: true
   tags: always
+  when: not ansible_check_mode
