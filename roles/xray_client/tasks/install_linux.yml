@@ -1,16 +1,24 @@
-- name: Render xray systemd unit content
-  ansible.builtin.set_fact:
-    xray_service_content: "{{ lookup('template', xray_service_template) }}"
-
-- name: Install xray and service via pacman helper
-  ansible.builtin.include_role:
-    name: common
-    tasks_from: install_pacman_service
-  vars:
-    package_list:
+- name: Install xray dependencies
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.package:
+    name:
       - xray
       - qrencode
-    service_name: xray
-    service_content: "{{ xray_service_content }}"
-    service_notify:
-      - Restart xray service
+    state: present
+
+- name: Deploy xray systemd unit
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.template:
+    src: "{{ xray_service_template }}"
+    dest: "/etc/systemd/system/xray.service"
+    mode: "0644"
+  notify:
+    - Restart xray service
+
+- name: Ensure xray service is enabled and started
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.systemd:
+    name: xray.service
+    enabled: true
+    state: started
+    daemon_reload: true
