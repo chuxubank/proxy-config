@@ -10,8 +10,8 @@
     name: geerlingguy.docker
   when: docker_installed.rc != 0
 
-- name: Ensure rsync is installed (Ubuntu/Debian)
-  apt:
+- name: Ensure rsync is installed
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.package:
     name: rsync
     state: present
-  when: ansible_os_family == "Debian"
