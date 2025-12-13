@@ -7,8 +7,10 @@
   "dns": {
     "servers": [
       {
-        "type": "local",
-        "tag": "local"
+        "tag": "dot-google",
+        "type": "tls",
+        "server": "8.8.8.8",
+        "detour": "proxy"
       },
       {
         "tag": "doh-cf",
@@ -20,6 +22,10 @@
         "tag": "doh-ali",
         "type": "https",
         "server": "223.5.5.5"
+      },
+      {
+        "type": "local",
+        "tag": "local"
       }
     ],
     "rules": [
@@ -28,17 +34,21 @@
         "server": "doh-ali"
       },
       {
-        "rule_set": "geosite-geolocation-!cn",
-        "query_type": ["A"],
-        "server": "doh-cf"
-      },
-      {
-        "rule_set": "geosite-geolocation-!cn",
-        "query_type": ["CNAME"],
-        "server": "doh-ali"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-!cn",
+            "invert": true
+          },
+          {
+            "rule_set": "geoip-cn"
+          }
+        ],
+        "server": "doh-cf",
+        "client_subnet": "114.114.114.114/24"
       }
     ],
-    "final": "local",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
