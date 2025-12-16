@@ -6,12 +6,7 @@
   },
   "dns": {
     "servers": [
-      {
-        "tag": "dot-google",
-        "type": "tls",
-        "server": "8.8.8.8",
-        "detour": "proxy"
-      },
+      { "tag": "doh-ali", "type": "https", "server": "223.5.5.5" },
       {
         "tag": "doh-cf",
         "type": "https",
@@ -19,18 +14,20 @@
         "detour": "proxy"
       },
       {
-        "tag": "doh-ali",
+        "tag": "doh-google",
         "type": "https",
-        "server": "223.5.5.5"
+        "server": "8.8.8.8",
+        "detour": "proxy"
       },
-      {
-        "type": "local",
-        "tag": "local"
-      }
+      { "type": "local", "tag": "local" }
     ],
     "rules": [
+      { "rule_set": "geosite-google", "server": "doh-cf" },
+      { "rule_set": "geosite-google-cn", "server": "doh-cf" },
       {
-        "rule_set": "geosite-geolocation-cn",
+        "type": "logical",
+        "mode": "and",
+        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
         "server": "doh-ali"
       },
       {
@@ -45,16 +42,34 @@
             "rule_set": "geoip-cn"
           }
         ],
-        "server": "doh-cf",
-        "client_subnet": "114.114.114.114/24"
+        "server": "doh-google",
+        "client_subnet": "202.96.209.5/32"
       }
     ],
     "strategy": "ipv4_only",
     "independent_cache": true
   },
   "route": {
-    "default_domain_resolver": "local",
+    "default_domain_resolver": "doh-ali",
     "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-google",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-google-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google@cn.srs"
+      },
       {
         "type": "remote",
         "tag": "geosite-geolocation-cn",
