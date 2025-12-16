@@ -8,44 +8,105 @@
   "dns": {
     "servers": [
       {
-        "address": "https://cloudflare-dns.com/dns-query",
-        "domains": ["geosite:matrix"],
-        "tag": "cloudflare"
-      },
-      {
-        "address": "https://dns.google/dns-query",
-        "tag": "google"
-      },
-      {
-        "address": "223.5.5.5",
-        "port": 53,
-        "domains": ["geosite:cn"],
-        "expectIPs": ["geoip:cn"],
-        "tag": "alidns"
+        "address": "1.1.1.1",
+        "skipFallback": true,
+        "domains": ["geosite:google", "geosite:google@cn"]
       },
       {
         "address": "8.8.8.8",
-        "port": 53,
+        "skipFallback": true,
+        "domains": ["geosite:google", "geosite:google@cn"],
+        "finalQuery": true
+      },
+      {
+        "tag": "dns-direct",
+        "address": "114.114.114.114",
+        "skipFallback": true,
+        "domains": ["geosite:cn"],
+        "expectIPs": ["geoip:cn"]
+      },
+      {
+        "tag": "dns-direct",
+        "address": "223.5.5.5",
+        "skipFallback": true,
+        "domains": ["geosite:cn"],
+        "expectIPs": ["geoip:cn"]
+      },
+      {
+        "address": "1.1.1.1",
+        "skipFallback": true,
+        "domains": ["geosite:cn"]
+      },
+      {
+        "address": "8.8.8.8",
+        "skipFallback": true,
+        "domains": ["geosite:cn"],
+        "finalQuery": true
+      },
+      {
+        "address": "1.1.1.1",
+        "skipFallback": true,
         "domains": ["geosite:geolocation-!cn"],
-        "tag": "googledns"
+        "expectIPs": ["geoip:!cn"]
+      },
+      {
+        "address": "8.8.8.8",
+        "skipFallback": true,
+        "domains": ["geosite:geolocation-!cn"],
+        "expectIPs": ["geoip:!cn"]
+      },
+      {
+        "address": "8.8.8.8",
+        "clientIp": "202.96.209.5",
+        "skipFallback": true,
+        "domains": ["geosite:geolocation-!cn"]
+      },
+      {
+        "address": "8.8.4.4",
+        "clientIp": "202.96.209.5",
+        "skipFallback": true,
+        "domains": ["geosite:geolocation-!cn"],
+        "finalQuery": true
+      },
+      {
+        "address": "8.8.8.8",
+        "clientIp": "202.96.209.5",
+        "expectIPs": ["geoip:cn"]
+      },
+      {
+        "address": "8.8.4.4",
+        "clientIp": "202.96.209.5",
+        "expectIPs": ["geoip:cn"]
       },
       "1.1.1.1",
+      "8.8.8.8",
       "localhost"
     ],
-    "queryStrategy": "UseIPv4"
+    "enableParallelQuery": true,
+    "queryStrategy": "UseIPv4",
+    "tag": "dns-proxy"
   },
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
-        "domain": ["geosite:umeng"],
-        "outboundTag": "Direct",
-        "ruleTag": "Allowed Ads"
+        "inboundTag": ["dns-direct"],
+        "outboundTag": "Direct"
+      },
+      {
+        "inboundTag": ["dns-proxy"],
+        "balancerTag": "Proxy"
       },
       {
         "domain": ["geosite:category-ads"],
         "outboundTag": "Block",
         "ruleTag": "Blocked Ads"
+      },
+      {
+        "type": "field",
+        "protocol": ["bittorrent"],
+        "outboundTag": "Direct",
+        "ruleTag": "Download"
       },
       {
         "domain": [
