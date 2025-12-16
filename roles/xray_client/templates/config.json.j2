@@ -8,12 +8,12 @@
   "dns": {
     "servers": [
       {
-        "address": "1.1.1.1",
+        "address": "https://1.1.1.1/dns-query",
         "skipFallback": true,
         "domains": ["geosite:google", "geosite:google@cn"]
       },
       {
-        "address": "8.8.8.8",
+        "address": "https://8.8.8.8/dns-query",
         "skipFallback": true,
         "domains": ["geosite:google", "geosite:google@cn"],
         "finalQuery": true
@@ -27,36 +27,36 @@
       },
       {
         "tag": "dns-direct",
-        "address": "223.5.5.5",
+        "address": "https://223.5.5.5/dns-query",
         "skipFallback": true,
         "domains": ["geosite:cn"],
         "expectIPs": ["geoip:cn"]
       },
       {
-        "address": "1.1.1.1",
+        "address": "https://1.1.1.1/dns-query",
         "skipFallback": true,
         "domains": ["geosite:cn"]
       },
       {
-        "address": "8.8.8.8",
+        "address": "https://8.8.8.8/dns-query",
         "skipFallback": true,
         "domains": ["geosite:cn"],
         "finalQuery": true
       },
       {
-        "address": "1.1.1.1",
+        "address": "https://1.1.1.1/dns-query",
         "skipFallback": true,
         "domains": ["geosite:geolocation-!cn"],
         "expectIPs": ["geoip:!cn"]
       },
       {
-        "address": "8.8.8.8",
+        "address": "https://8.8.8.8/dns-query",
         "skipFallback": true,
         "domains": ["geosite:geolocation-!cn"],
         "expectIPs": ["geoip:!cn"]
       },
       {
-        "address": "8.8.8.8",
+        "address": "https://8.8.8.8/dns-query",
         "clientIp": "202.96.209.5",
         "skipFallback": true,
         "domains": ["geosite:geolocation-!cn"]
@@ -69,7 +69,7 @@
         "finalQuery": true
       },
       {
-        "address": "8.8.8.8",
+        "address": "https://8.8.8.8/dns-query",
         "clientIp": "202.96.209.5",
         "expectIPs": ["geoip:cn"]
       },
@@ -78,9 +78,8 @@
         "clientIp": "202.96.209.5",
         "expectIPs": ["geoip:cn"]
       },
-      "1.1.1.1",
-      "8.8.8.8",
-      "localhost"
+      "https://1.1.1.1/dns-query",
+      "https://8.8.8.8/dns-query"
     ],
     "enableParallelQuery": true,
     "queryStrategy": "UseIPv4",
