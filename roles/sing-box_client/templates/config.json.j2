@@ -32,7 +32,18 @@
         "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
         "server": "doh-ali"
       },
+      { "rule_set": "geosite-cn", "server": "doh-cf" },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          { "rule_set": "geosite-geolocation-!cn" },
+          { "rule_set": "geoip-cn", "invert": true }
+        ],
+        "server": "doh-cf"
+      },
+      {
+        "rule_set": "geoip-cn",
         "server": "doh-google",
         "client_subnet": "114.114.114.114/24"
       }
