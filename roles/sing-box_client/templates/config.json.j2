@@ -6,6 +6,7 @@
   },
   "dns": {
     "servers": [
+      { "type": "local", "tag": "local" },
       { "tag": "doh-ali", "type": "https", "server": "223.5.5.5" },
       {
         "tag": "doh-cf",
@@ -18,8 +19,7 @@
         "type": "https",
         "server": "8.8.8.8",
         "detour": "proxy"
-      },
-      { "type": "local", "tag": "local" }
+      }
     ],
     "rules": [
       { "domain": "{{ xray_env.DOMAIN }}", "server": "doh-ali" },
