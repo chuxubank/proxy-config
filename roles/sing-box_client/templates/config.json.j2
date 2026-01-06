@@ -38,7 +38,10 @@
       {
         "type": "logical",
         "mode": "and",
-        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
+        "rules": [
+          { "rule_set": "geosite-geolocation-cn" },
+          { "rule_set": "geoip-cn" }
+        ],
         "server": "local"
       },
       {
@@ -133,9 +136,9 @@
       },
       {
         "type": "remote",
-        "tag": "geosite-cn",
+        "tag": "geosite-geolocation-cn",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
       },
       {
         "type": "remote",
