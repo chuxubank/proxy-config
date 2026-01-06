@@ -42,11 +42,21 @@
         "server": "local"
       },
       {
-        "rule_set": "geosite-cn",
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-!cn",
+            "invert": true
+          },
+          {
+            "rule_set": "geoip-cn"
+          }
+        ],
         "server": "local"
       }
     ],
-    "final": "doh-ali",
+    "final": "doh-google",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
