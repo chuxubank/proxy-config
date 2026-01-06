@@ -22,31 +22,27 @@
       }
     ],
     "rules": [
-      { "domain": "{{ xray_env.DOMAIN }}", "server": "doh-ali" },
-      { "rule_set": "geosite-google", "server": "doh-cf" },
-      { "rule_set": "geosite-geolocation-cn", "server": "doh-ali" },
       {
         "type": "logical",
-        "mode": "and",
-        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
-        "server": "doh-ali"
-      },
-      { "rule_set": "geosite-cn", "server": "doh-cf" },
-      {
-        "type": "logical",
-        "mode": "and",
+        "mode": "or",
         "rules": [
-          { "rule_set": "geosite-geolocation-!cn" },
-          { "rule_set": "geoip-cn", "invert": true }
+          { "rule_set": "geosite-google" },
+          { "rule_set": "geosite-google-cn" }
         ],
         "server": "doh-cf"
       },
       {
-        "rule_set": "geoip-cn",
+        "type": "logical",
+        "mode": "and",
+        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
+        "server": "local"
+      },
+      {
         "server": "doh-google",
-        "client_subnet": "114.114.114.114/24"
+        "client_subnet": "183.192.0.0/10"
       }
     ],
+    "final": "doh-google",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
@@ -70,12 +66,6 @@
         "tag": "geosite-google-cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google@cn.srs"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-geolocation-cn",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
       },
       {
         "type": "remote",
@@ -179,9 +169,10 @@
   "experimental": {
     "cache_file": {
       "enabled": true,
-      "path": "cache.db",
-      "store_fakeip": true,
       "store_rdrc": true
+    },
+    "clash_api": {
+      "default_mode": "Enhanced"
     }
   }
 }
