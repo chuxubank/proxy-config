@@ -37,12 +37,9 @@
         "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
         "server": "local"
       },
-      {
-        "server": "doh-google",
-        "client_subnet": "183.192.0.0/10"
-      }
+      { "rule_set": "geosite-cn", "server": "doh-ali" }
     ],
-    "final": "doh-ali",
+    "final": "local",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
