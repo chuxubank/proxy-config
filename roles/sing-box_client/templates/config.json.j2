@@ -36,12 +36,7 @@
         "server": "doh-cf"
       },
       {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          { "rule_set": "geosite-geolocation-cn" },
-          { "rule_set": "geoip-cn" }
-        ],
+        "rule_set": "geosite-geolocation-cn",
         "server": "local"
       },
       {
