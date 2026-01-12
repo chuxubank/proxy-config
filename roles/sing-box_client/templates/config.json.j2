@@ -36,7 +36,12 @@
         "server": "doh-cf"
       },
       {
-        "rule_set": "geosite-geolocation-cn",
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          { "rule_set": "geosite-geolocation-cn" },
+          { "domain": "{{ xray_env.DOMAIN }}" }
+        ],
         "server": "local"
       },
       {
