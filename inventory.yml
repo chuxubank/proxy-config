@@ -3,9 +3,6 @@ all:
     bwg-cn2-gia:
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
-    nerd:
-      proxy_pass_path: "Network/Host/Racknerd/ssh"
-
     localhost:
       ansible_connection: local
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
@@ -14,7 +11,6 @@ all:
     vps_group:
       hosts:
         bwg-cn2-gia:
-        nerd:
       vars:
         cf_pass_path: "Network/Host/Cloudflare"
         rss_pass_path: "Network/Host/FreshRSS/web"
@@ -23,7 +19,6 @@ all:
     xray_group:
       hosts:
         bwg-cn2-gia:
-        nerd:
         localhost:
       vars:
         xray_client_pass_path: "Network/Xray/Client/Misaka"
