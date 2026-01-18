@@ -6,8 +6,9 @@ openwrt_vm_name: OpenWrt
 openwrt_vm_memory: 256
 openwrt_vm_cores: 1
 openwrt_vm_net0: "virtio,bridge=vmbr0"
-openwrt_vm_ipconfig0: "ip=192.168.50.200/24"
+openwrt_vm_ipconfig0: "ip={{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='ip') }}/24"
 openwrt_vm_scsihw: virtio-scsi-pci
+openwrt_vm_machine: q35
 openwrt_vm_hostpci:
   hostpci0: "host=02:00.0,pcie=1"
   hostpci1: "host=03:00.0,pcie=1"

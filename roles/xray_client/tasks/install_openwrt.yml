@@ -1,0 +1,12 @@
+---
+- name: Install xray packages on OpenWrt
+  community.general.opkg:
+    name: "{{ xray_openwrt_packages }}"
+    state: present
+    update_cache: true
+
+- name: Ensure xray service enabled and started on OpenWrt
+  community.general.openwrt_init:
+    name: "{{ xray_openwrt_service_name }}"
+    enabled: true
+    state: started

@@ -35,3 +35,7 @@ all:
     pve_group:
       hosts:
         pve:
+
+    openwrt_group:
+      hosts:
+        pve:

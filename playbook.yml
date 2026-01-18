@@ -17,3 +17,10 @@
   environment: "{{ proxmox_api_env | default({}) }}"
   roles:
     - pve_openwrt
+
+- name: Setup OpenWrt Xray Client
+  hosts: openwrt_group
+  vars_files:
+    - roles/pve_openwrt/vars/openwrt_mirror.yml
+  roles:
+    - xray_client

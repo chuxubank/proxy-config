@@ -1,4 +1,6 @@
 ---
-ansible_host: 192.168.50.200
-ansible_user: root
-ansible_port: 22
+openwrt_pass_path: "Network/Home/OpenWrt/ssh"
+
+ansible_host: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='ip') }}"
+ansible_user: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='user') | default('root', true) }}"
+ansible_port: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='port') | default(22, true) }}"

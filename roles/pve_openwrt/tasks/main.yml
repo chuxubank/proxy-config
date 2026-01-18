@@ -33,9 +33,11 @@
     cores: "{{ openwrt_vm_cores }}"
     net:
       net0: "{{ openwrt_vm_net0 }}"
-    ipconfig: "{{ openwrt_vm_ipconfig0 | length > 0 | ternary({'ipconfig0': openwrt_vm_ipconfig0}, omit) }}"
+    ipconfig:
+      ipconfig0: "{{ openwrt_vm_ipconfig0 }}"
     hostpci: "{{ openwrt_vm_hostpci | default(omit) }}"
     scsihw: "{{ openwrt_vm_scsihw }}"
+    machine: "{{ openwrt_vm_machine }}"
     ostype: l26
     onboot: "{{ openwrt_vm_onboot }}"
     state: present

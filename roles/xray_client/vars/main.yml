@@ -1,6 +1,23 @@
-xray_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/xray"
-xray_log_dir: "{{ log_dir }}/xray"
+xray_is_openwrt: "{{ ansible_facts['distribution'] | lower == 'openwrt' }}"
+xray_config_dir: >-
+  {{
+    xray_is_openwrt
+    | ternary('/etc/xray', ansible_facts['env']['HOME'] ~ '/.config/xray')
+  }}
+xray_config_file: >-
+  {{
+    xray_is_openwrt
+    | ternary(xray_config_dir ~ '/config.json', xray_config_dir ~ '/50-config.json')
+  }}
+xray_log_dir: >-
+  {{
+    xray_is_openwrt
+    | ternary('/var/log/xray', (log_dir | default('/var/log')) ~ '/xray')
+  }}
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
+xray_openwrt_packages:
+  - xray-core
+xray_openwrt_service_name: xray
 xray_service_template: >-
   {%- if ansible_facts['system'] == 'Darwin' -%}
   service.plist.j2

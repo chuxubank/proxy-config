@@ -1,0 +1,17 @@
+---
+plugin: community.proxmox.proxmox
+url: "{{ lookup('community.general.passwordstore', 'Network/Home/PVE/ssh', subkey='url') }}"
+user: "{{ lookup('community.general.passwordstore', 'Network/Home/PVE/ssh', subkey='user') }}"
+password: "{{ lookup('community.general.passwordstore', 'Network/Home/PVE/ssh') }}"
+validate_certs: "{{ lookup('ansible.builtin.env', 'PROXMOX_VALIDATE_CERTS') | default('0', true) | int == 1 }}"
+exclude_nodes: true
+want_facts: true
+want_proxmox_nodes_ansible_host: false
+filters:
+  - (proxmox_vmtype) == 'qemu'
+  - (proxmox_name | lower) == 'openwrt'
+groups:
+  openwrt_group: "(proxmox_name | lower) == 'openwrt'"
+  xray_group: "(proxmox_name | lower) == 'openwrt'"
+compose:
+  ansible_host: proxmox_ipconfig0.ip | default(proxmox_net0.ip) | ipaddr('address')
