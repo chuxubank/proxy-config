@@ -1,0 +1,109 @@
+---
+- name: Ensure OpenWrt image directory exists
+  ansible.builtin.file:
+    path: "{{ openwrt_image_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure Proxmox API Python dependencies are installed
+  become: "{{ use_become | default(true) }}"
+  ansible.builtin.package:
+    name: python3-proxmoxer
+    state: present
+
+- name: Download OpenWrt image archive
+  ansible.builtin.get_url:
+    url: "{{ openwrt_image_url }}"
+    dest: "{{ openwrt_image_archive_path }}"
+    mode: "0644"
+    checksum: "{{ openwrt_image_checksum | default(omit) }}"
+
+- name: Decompress OpenWrt image
+  ansible.builtin.command: "gzip -dk {{ openwrt_image_archive_path }}"
+  args:
+    creates: "{{ openwrt_image_path }}"
+  when: openwrt_image_archive_path is search("\\.gz$")
+
+- name: Ensure OpenWrt VM exists
+  community.proxmox.proxmox_kvm:
+    node: "{{ openwrt_proxmox_node }}"
+    vmid: "{{ openwrt_vm_id }}"
+    name: "{{ openwrt_vm_name }}"
+    memory: "{{ openwrt_vm_memory }}"
+    cores: "{{ openwrt_vm_cores }}"
+    net:
+      net0: "{{ openwrt_vm_net0 }}"
+    scsihw: "{{ openwrt_vm_scsihw }}"
+    ostype: l26
+    onboot: "{{ openwrt_vm_onboot }}"
+    state: present
+
+- name: Read OpenWrt VM config
+  ansible.builtin.command: "qm config {{ openwrt_vm_id }}"
+  register: openwrt_vm_config
+  changed_when: false
+
+- name: Detect OpenWrt disk attachment
+  ansible.builtin.set_fact:
+    openwrt_disk_attached: >-
+      {{
+        openwrt_vm_config.stdout
+        | regex_search('^' ~ openwrt_vm_disk_interface ~ ':', multiline=True)
+        is not none
+      }}
+
+- name: Import and attach OpenWrt disk
+  when: not openwrt_disk_attached
+  block:
+    - name: Import OpenWrt disk into Proxmox storage
+      ansible.builtin.command: >-
+        qm importdisk {{ openwrt_vm_id }} {{ openwrt_image_path }} {{ openwrt_vm_storage }}
+      register: openwrt_disk_import
+      changed_when: true
+
+    - name: Attach imported OpenWrt disk
+      community.proxmox.proxmox_kvm:
+        node: "{{ openwrt_proxmox_node }}"
+        vmid: "{{ openwrt_vm_id }}"
+        scsi: "{{ { openwrt_vm_disk_interface: openwrt_disk_volume } }}"
+        update: true
+        update_unsafe: true
+      vars:
+        openwrt_disk_volume: >-
+          {{
+            (
+              (openwrt_disk_import.stdout ~ openwrt_disk_import.stderr)
+              | regex_findall("as '([^']+)'")
+            )
+            | first
+            | default(openwrt_vm_storage ~ ':vm-' ~ openwrt_vm_id ~ '-disk-0', true)
+          }}
+
+- name: Refresh OpenWrt VM config
+  ansible.builtin.command: "qm config {{ openwrt_vm_id }}"
+  register: openwrt_vm_config
+  changed_when: false
+
+- name: Ensure OpenWrt VM settings
+  community.proxmox.proxmox_kvm:
+    node: "{{ openwrt_proxmox_node }}"
+    vmid: "{{ openwrt_vm_id }}"
+    boot: "order={{ openwrt_vm_disk_interface }}"
+    onboot: "{{ openwrt_vm_onboot }}"
+    update: true
+  when: >-
+    openwrt_vm_config.stdout is not search(
+      '^boot: order=' ~ openwrt_vm_disk_interface,
+      multiline=True
+    )
+    or openwrt_vm_config.stdout is not search(
+      '^onboot: ' ~ (openwrt_vm_onboot | ternary('1', '0')),
+      multiline=True
+    )
+
+- name: Start OpenWrt VM
+  community.proxmox.proxmox_kvm:
+    node: "{{ openwrt_proxmox_node }}"
+    vmid: "{{ openwrt_vm_id }}"
+    state: started
+  when: openwrt_vm_start | bool

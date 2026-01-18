@@ -7,6 +7,9 @@ all:
       ansible_connection: local
       proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
+    pve:
+      pve_pass_path: "Network/Home/PVE/ssh"
+
   children:
     vps_group:
       hosts:
@@ -28,3 +31,7 @@ all:
     local_group:
       hosts:
         localhost:
+
+    pve_group:
+      hosts:
+        pve:

@@ -1,0 +1,11 @@
+---
+ansible_host: "{{ lookup('community.general.passwordstore', pve_pass_path, subkey='ip') }}"
+ansible_port: "{{ lookup('community.general.passwordstore', pve_pass_path, subkey='port') }}"
+ansible_password: "{{ lookup('community.general.passwordstore', pve_pass_path) }}"
+
+proxmox_api_env:
+  PROXMOX_HOST: "{{ inventory_hostname }}"
+  PROXMOX_USER: root@pam
+  PROXMOX_PASSWORD: "{{ lookup('community.general.passwordstore', pve_pass_path) }}"
+  PROXMOX_NODE: pve
+  PROXMOX_VALIDATE_CERTS: "0"
