@@ -40,7 +40,7 @@
         "mode": "or",
         "rules": [
           { "rule_set": "geosite-geolocation-cn" },
-          { "domain": "{{ xray_env.DOMAIN }}" }
+          { "domain": ["{{ xray_env.DOMAIN }}"] }
         ],
         "server": "local"
       },

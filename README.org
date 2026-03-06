@@ -38,4 +38,26 @@
 #+begin_src sh :dir /sudo:root@localhost: :results silent
   sudo dscacheutil -flushcache
   sudo killall -HUP mDNSResponder
+  rm /opt/homebrew/var/lib/sing-box/cache.db
+#+end_src
+
+** Debug DNS
+#+begin_src sh :results raw :wrap src json
+  curl ipinfo.io/$(dig +short example.com | head -n1)
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+  "ip": "104.18.27.120",
+  "city": "San Francisco",
+  "region": "California",
+  "country": "US",
+  "loc": "37.7621,-122.3971",
+  "org": "AS13335 Cloudflare, Inc.",
+  "postal": "94107",
+  "timezone": "America/Los_Angeles",
+  "readme": "https://ipinfo.io/missingauth",
+  "anycast": true
+}
 #+end_src
