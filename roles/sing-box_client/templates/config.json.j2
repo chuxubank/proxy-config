@@ -40,6 +40,7 @@
         "mode": "or",
         "rules": [
           { "rule_set": "geosite-geolocation-cn" },
+          { "rule_set": "geosite-feishu" },
           { "domain": ["{{ xray_env.DOMAIN }}"] }
         ],
         "server": "doh-ali"
@@ -164,6 +165,12 @@
         "tag": "geoip-cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-feishu",
+        "format": "binary",
+        "url": "https://github.com/lyc8503/sing-box-rules/raw/rule-set-geosite/geosite-feishu.srs"
       }
     ],
     "final": "proxy",
