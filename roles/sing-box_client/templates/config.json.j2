@@ -8,18 +8,18 @@
     "servers": [
       { "type": "local", "tag": "local" },
       {
-        "tag": "doh-ali",
+        "tag": "ali",
         "type": "https",
         "server": "223.5.5.5"
       },
       {
-        "tag": "doh-cf",
+        "tag": "cf",
         "type": "https",
         "server": "1.1.1.1",
         "detour": "proxy"
       },
       {
-        "tag": "doh-google",
+        "tag": "google",
         "type": "https",
         "server": "8.8.8.8",
         "detour": "proxy"
@@ -33,7 +33,7 @@
           { "rule_set": "geosite-google" },
           { "rule_set": "geosite-google-cn" }
         ],
-        "server": "doh-cf"
+        "server": "cf"
       },
       {
         "type": "logical",
@@ -43,7 +43,7 @@
           { "rule_set": "geosite-feishu" },
           { "domain": ["{{ xray_env.DOMAIN }}"] }
         ],
-        "server": "doh-ali"
+        "server": "ali"
       },
       {
         "type": "logical",
@@ -60,13 +60,13 @@
         "server": "local"
       }
     ],
-    "final": "doh-google",
+    "final": "google",
     "client_subnet": "114.114.114.114/24",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
   "route": {
-    "default_domain_resolver": "doh-ali",
+    "default_domain_resolver": "ali",
     "rules": [
       {
         "inbound": "tun-in",
