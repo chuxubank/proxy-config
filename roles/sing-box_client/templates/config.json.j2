@@ -23,6 +23,12 @@
         "type": "https",
         "server": "8.8.8.8",
         "detour": "proxy"
+      },
+      {
+        "type": "tailscale",
+        "tag": "tailscale-dns",
+        "endpoint": "tailscale-ep",
+        "accept_default_resolvers": true
       }
     ],
     "rules": [
@@ -34,6 +40,11 @@
           { "rule_set": "geosite-google-cn" }
         ],
         "server": "cf"
+      },
+      {
+        "ip_accept_any": true,
+        "domain_suffix": ".ts.net",
+        "server": "tailscale-dns"
       },
       {
         "type": "logical",
@@ -202,6 +213,14 @@
     {
       "type": "direct",
       "tag": "direct"
+    }
+  ],
+  "endpoints": [
+    {
+      "type": "tailscale",
+      "tag": "tailscale-ep",
+      "auth_key": "{{ sing_box_tailscale_auth_token }}",
+      "domain_resolver": "google"
     }
   ],
   "experimental": {
