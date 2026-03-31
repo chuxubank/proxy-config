@@ -25,13 +25,16 @@
         "detour": "proxy"
       },
       {
+        "tag": "ts",
         "type": "tailscale",
-        "tag": "tailscale-dns",
-        "endpoint": "tailscale-ep",
-        "accept_default_resolvers": true
+        "endpoint": "ts-ep"
       }
     ],
     "rules": [
+      {
+        "ip_accept_any": true,
+        "server": "ts"
+      },
       {
         "type": "logical",
         "mode": "or",
@@ -40,11 +43,6 @@
           { "rule_set": "geosite-google-cn" }
         ],
         "server": "cf"
-      },
-      {
-        "ip_accept_any": true,
-        "domain_suffix": ".ts.net",
-        "server": "tailscale-dns"
       },
       {
         "type": "logical",
@@ -82,6 +80,16 @@
       {
         "inbound": "tun-in",
         "action": "sniff"
+      },
+      {
+        "network": "icmp",
+        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
+        "outbound": "ts-ep"
+      },
+      { "network": "icmp", "outbound": "direct" },
+      {
+        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
+        "outbound": "ts-ep"
       },
       {
         "process_name": [
@@ -200,6 +208,7 @@
       "tag": "tun-in",
       "address": ["172.18.0.1/30"],
       "auto_route": true,
+      "stack": "gvisor",
       "strict_route": true
     }
   ],
@@ -218,9 +227,8 @@
   "endpoints": [
     {
       "type": "tailscale",
-      "tag": "tailscale-ep",
-      "auth_key": "{{ sing_box_tailscale_auth_token }}",
-      "domain_resolver": "google"
+      "tag": "ts-ep",
+      "auth_key": "{{ sing_box_tailscale_auth_token }}"
     }
   ],
   "experimental": {
