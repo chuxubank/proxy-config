@@ -10,6 +10,15 @@
     <string>{{ xray_log_dir }}/xray-stdout.log</string>
     <key>StandardErrorPath</key>
     <string>{{ xray_log_dir }}/xray-stderr.log</string>
+{% if xray_is_tun %}
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>{{ brew_path }}/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+      <key>SUDO_ASKPASS</key>
+      <string>{{ brew_path }}/bin/ssh-askpass</string>
+    </dict>
+{% endif %}
     <key>LimitLoadToSessionType</key>
     <array>
       <string>Aqua</string>
