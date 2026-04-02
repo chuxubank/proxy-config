@@ -3,7 +3,16 @@
 
 *** Config
 #+begin_src sh :results output silent
-  xray run -confdir=$HOME/.config/xray/ -dump
+  xray run -confdir=$HOME/.config/xray/ -test
+#+end_src
+
+*** TUN
+#+begin_src sh :results output silent
+  ~/.config/xray/tun-routing.sh up
+#+end_src
+
+#+begin_src sh :results output silent
+  ~/.config/xray/tun-routing.sh down
 #+end_src
 
 *** Log

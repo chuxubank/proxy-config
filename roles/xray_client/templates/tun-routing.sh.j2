@@ -1,0 +1,108 @@
+#!/bin/sh
+
+set -eu
+
+ACTION="${1:-status}"
+TUN_NAME="{{ xray_client_tun_name }}"
+UPSTREAM_IP="{{ xray_env.ADDRESS }}"
+STATE_FILE="{{ xray_tun_routing_state_file }}"
+
+require_root() {
+  if [ "$(id -u)" -ne 0 ]; then
+    exec sudo "$0" "$@"
+  fi
+}
+
+wait_for_tun() {
+  tries=0
+  until ifconfig "$TUN_NAME" >/dev/null 2>&1; do
+    tries=$((tries + 1))
+    if [ "$tries" -ge 20 ]; then
+      echo "timed out waiting for $TUN_NAME" >&2
+      exit 1
+    fi
+    sleep 1
+  done
+}
+
+darwin_default_gateway() {
+  route -n get default | awk '/gateway:/{print $2; exit}'
+}
+
+darwin_default_interface() {
+  route -n get default | awk '/interface:/{print $2; exit}'
+}
+
+darwin_up() {
+  wait_for_tun
+
+  original_gateway="$(darwin_default_gateway)"
+  original_interface="$(darwin_default_interface)"
+
+  cat >"$STATE_FILE" <<EOF
+ORIGINAL_GATEWAY=${original_gateway}
+ORIGINAL_INTERFACE=${original_interface}
+EOF
+
+  route -n add -host "$UPSTREAM_IP" "$original_gateway" 2>/dev/null \
+    || route -n change -host "$UPSTREAM_IP" "$original_gateway"
+  route -n change default -interface "$TUN_NAME" 2>/dev/null || {
+    route -n delete default >/dev/null 2>&1 || true
+    route -n add default -interface "$TUN_NAME"
+  }
+}
+
+darwin_down() {
+  if [ ! -f "$STATE_FILE" ]; then
+    echo "missing state file: $STATE_FILE" >&2
+    exit 1
+  fi
+
+  # shellcheck disable=SC1090
+  . "$STATE_FILE"
+
+  route -n delete default >/dev/null 2>&1 || true
+  route -n add default "$ORIGINAL_GATEWAY" 2>/dev/null \
+    || route -n change default "$ORIGINAL_GATEWAY"
+  route -n delete -host "$UPSTREAM_IP" >/dev/null 2>&1 || true
+  rm -f "$STATE_FILE"
+}
+
+darwin_status() {
+  route -n get default || true
+  route -n get "$UPSTREAM_IP" || true
+}
+
+unsupported() {
+  echo "unsupported system: $(uname -s)" >&2
+  exit 1
+}
+
+main() {
+  case "$(uname -s)" in
+    Darwin)
+      case "$ACTION" in
+        up)
+          require_root "$ACTION"
+          darwin_up
+          ;;
+        down)
+          require_root "$ACTION"
+          darwin_down
+          ;;
+        status)
+          darwin_status
+          ;;
+        *)
+          echo "usage: $0 {up|down|status}" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      unsupported
+      ;;
+  esac
+}
+
+main "$@"

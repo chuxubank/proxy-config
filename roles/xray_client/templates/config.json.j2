@@ -94,6 +94,23 @@
     ]
   },
   "inbounds": [
+{% if xray_is_tun %}
+    {
+      "tag": "tun-in",
+      "port": 0,
+      "protocol": "tun",
+      "settings": {
+        "name": "{{ xray_client_tun_name }}",
+        "MTU": {{ xray_client_tun_mtu | int }}
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"],
+        "domainsExcluded": ["courier.push.apple.com"],
+        "routeOnly": true
+      }
+    }
+{% else %}
     {
       "port": 10800,
       "listen": "127.0.0.1",
@@ -108,6 +125,7 @@
         "routeOnly": true
       }
     }
+{% endif %}
   ],
   "outbounds": [
     {

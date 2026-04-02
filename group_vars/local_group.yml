@@ -37,3 +37,7 @@ log_dir: >-
   {%- endif -%}
 
 logrotate_config_dir: "{{ etc_path }}/logrotate.d"
+
+xray_inbound_mode: tun
+xray_tun_name: utun10
+xray_tun_mtu: 1492

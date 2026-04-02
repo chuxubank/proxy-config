@@ -10,7 +10,8 @@
   connection: local
   roles:
     - xray_client
-    - sing-box_client
+    - role: sing-box_client
+      when: xray_inbound_mode | default('socks') != 'tun'
 
 - name: Setup Proxmox OpenWrt VM
   hosts: pve_group

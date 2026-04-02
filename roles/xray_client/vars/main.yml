@@ -1,4 +1,6 @@
 xray_is_openwrt: "{{ ansible_facts['distribution'] | lower == 'openwrt' }}"
+xray_client_inbound_mode: "{{ xray_inbound_mode | default('socks') }}"
+xray_is_tun: "{{ xray_client_inbound_mode == 'tun' }}"
 xray_config_dir: >-
   {{
     xray_is_openwrt
@@ -15,6 +17,10 @@ xray_log_dir: >-
     | ternary('/var/log/xray', (log_dir | default('/var/log')) ~ '/xray')
   }}
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
+xray_client_tun_name: "{{ xray_tun_name | default('utun10') }}"
+xray_client_tun_mtu: "{{ xray_tun_mtu | default(1492) }}"
+xray_tun_routing_script: "{{ xray_config_dir }}/tun-routing.sh"
+xray_tun_routing_state_file: "{{ xray_config_dir }}/tun-routing.env"
 xray_openwrt_packages:
   - xray-core
 xray_openwrt_service_name: xray

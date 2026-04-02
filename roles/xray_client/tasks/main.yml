@@ -84,6 +84,23 @@
     - Force xray log rotation
     - Restart xray service
 
+- name: Install xray tun routing helper
+  ansible.builtin.template:
+    src: tun-routing.sh.j2
+    dest: "{{ xray_tun_routing_script }}"
+    mode: "0755"
+  when: xray_is_tun
+
+- name: Show xray tun routing helper usage
+  ansible.builtin.debug:
+    msg:
+      - "Xray TUN requires OS routing in addition to the inbound config."
+      - "Run {{ xray_tun_routing_script }} up after xray starts."
+      - "Run {{ xray_tun_routing_script }} down before stopping xray."
+  when:
+    - xray_is_tun
+    - ansible_facts['system'] == 'Darwin'
+
 - name: Include xray install tasks
   ansible.builtin.include_tasks: install.yml
   tags: install
