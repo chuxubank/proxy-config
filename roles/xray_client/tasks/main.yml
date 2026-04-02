@@ -84,6 +84,15 @@
     - Force xray log rotation
     - Restart xray service
 
+- name: Ensure xray tun routing helper directory exists
+  become: "{{ xray_is_openwrt | ternary(true, use_become | default(false)) }}"
+  ansible.builtin.file:
+    path: "{{ xray_tun_routing_script | dirname }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
+  when: xray_is_tun
+
 - name: Install xray tun routing helper
   ansible.builtin.template:
     src: tun-routing.sh.j2

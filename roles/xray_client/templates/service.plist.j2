@@ -20,6 +20,9 @@
     </array>
     <key>ProgramArguments</key>
     <array>
+{% if xray_is_tun %}
+      <string>sudo</string>
+{% endif %}
       <string>{{ brew_path }}/bin/xray</string>
       <string>run</string>
       <string>-confdir</string>

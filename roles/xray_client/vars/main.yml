@@ -19,7 +19,11 @@ xray_log_dir: >-
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
 xray_client_tun_name: "{{ xray_tun_name | default('utun10') }}"
 xray_client_tun_mtu: "{{ xray_tun_mtu | default(1492) }}"
-xray_tun_routing_script: "{{ xray_config_dir }}/tun-routing.sh"
+xray_tun_routing_script: >-
+  {{
+    xray_is_openwrt
+    | ternary('/usr/local/bin/xray-tun-routing', ansible_facts['env']['HOME'] ~ '/.local/bin/xray-tun-routing')
+  }}
 xray_tun_routing_state_file: "{{ xray_config_dir }}/tun-routing.env"
 xray_openwrt_packages:
   - xray-core
