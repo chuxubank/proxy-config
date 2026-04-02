@@ -5,7 +5,6 @@ set -eu
 ACTION="${1:-status}"
 TUN_NAME="{{ xray_client_tun_name }}"
 UPSTREAM_IP="{{ xray_env.ADDRESS }}"
-UPSTREAM_DOMAIN="{{ xray_env.DOMAIN }}"
 STATE_FILE="{{ xray_tun_routing_state_file }}"
 
 require_root() {
@@ -40,21 +39,13 @@ darwin_up() {
   original_gateway="$(darwin_default_gateway)"
   original_interface="$(darwin_default_interface)"
 
-  # Resolve DOMAIN before changing the default route (DNS still goes via original gateway)
-  domain_ip=$(dig +short "$UPSTREAM_DOMAIN" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
-
   cat >"$STATE_FILE" <<EOF
 ORIGINAL_GATEWAY=${original_gateway}
 ORIGINAL_INTERFACE=${original_interface}
-DOMAIN_IP=${domain_ip}
 EOF
 
   route -n add -host "$UPSTREAM_IP" "$original_gateway" 2>/dev/null \
     || route -n change -host "$UPSTREAM_IP" "$original_gateway"
-  if [ -n "$domain_ip" ] && [ "$domain_ip" != "$UPSTREAM_IP" ]; then
-    route -n add -host "$domain_ip" "$original_gateway" 2>/dev/null \
-      || route -n change -host "$domain_ip" "$original_gateway"
-  fi
   route -n change default -interface "$TUN_NAME" 2>/dev/null || {
     route -n delete default >/dev/null 2>&1 || true
     route -n add default -interface "$TUN_NAME"
@@ -74,9 +65,6 @@ darwin_down() {
   route -n add default "$ORIGINAL_GATEWAY" 2>/dev/null \
     || route -n change default "$ORIGINAL_GATEWAY"
   route -n delete -host "$UPSTREAM_IP" >/dev/null 2>&1 || true
-  if [ -n "${DOMAIN_IP:-}" ] && [ "$DOMAIN_IP" != "$UPSTREAM_IP" ]; then
-    route -n delete -host "$DOMAIN_IP" >/dev/null 2>&1 || true
-  fi
   rm -f "$STATE_FILE"
 }
 

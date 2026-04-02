@@ -45,7 +45,7 @@
       },
       {
         "domain": ["domain:gmail.com"],
-        "outboundTag": "xhttp",
+        "outboundTag": "Proxy-self-xhttp",
         "ruleTag": "Via XHTTP"
       },
       {
@@ -151,7 +151,7 @@
           "path": "{{ xray_env.XHTTP_PATH }}"
         }
       },
-      "tag": "xhttp"
+      "tag": "Proxy-self-xhttp"
     },
     {
       "protocol": "vless",
@@ -197,13 +197,13 @@
     }
   ],
   "observatory": {
-    "subjectSelector": ["Proxy-self-reality"],
+    "subjectSelector": ["Proxy"],
     "probeUrl": "https://www.google.com/generate_204",
     "probeInterval": "1m",
     "enableConcurrency": true
   },
   "burstObservatory": {
-    "subjectSelector": ["Proxy-self-reality"],
+    "subjectSelector": ["Proxy"],
     "pingConfig": {
       "destination": "https://connectivitycheck.gstatic.com/generate_204",
       "connectivity": "",
