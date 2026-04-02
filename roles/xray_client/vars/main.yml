@@ -19,11 +19,20 @@ xray_log_dir: >-
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
 xray_client_tun_name: "{{ xray_tun_name | default('utun10') }}"
 xray_client_tun_mtu: "{{ xray_tun_mtu | default(1492) }}"
-# Physical interface to bind outbound sockets to in TUN mode (e.g. en0 for
-# Wi-Fi, en1 for Ethernet).  When set, all outbound sockets are bound to this
-# interface via sockopt.interface so that Xray's own connections cannot loop
-# back through the TUN device.  Leave empty to rely solely on bypass routes.
-xray_client_bind_interface: "{{ xray_tun_bind_interface | default('') }}"
+# Physical interface to bind outbound sockets to in TUN mode.
+# Override per-host with xray_tun_bind_interface (e.g. "en0" or "en1").
+# Falls back to ansible_default_ipv4.interface so it works automatically on
+# most hosts without extra configuration.  Binding is required: without it,
+# Freedom (Direct) outbound sockets follow the default route back into TUN
+# and loop until they time out, causing all direct traffic to stall.
+xray_client_bind_interface: >-
+  {{
+    xray_tun_bind_interface
+    | default(
+        (xray_client_inbound_mode == 'tun')
+        | ternary(ansible_facts['default_ipv4']['interface'] | default(''), '')
+      )
+  }}
 xray_tun_routing_script: >-
   {{
     xray_is_openwrt
