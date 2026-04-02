@@ -5,6 +5,7 @@ set -eu
 ACTION="${1:-status}"
 TUN_NAME="{{ xray_client_tun_name }}"
 UPSTREAM_IP="{{ xray_env.ADDRESS }}"
+UPSTREAM_DOMAIN="{{ xray_env.DOMAIN }}"
 STATE_FILE="{{ xray_tun_routing_state_file }}"
 
 require_root() {
@@ -33,19 +34,54 @@ darwin_default_interface() {
   route -n get default | awk '/interface:/{print $2; exit}'
 }
 
+# Resolve a domain to its A record IPs (space-separated), using the real DNS
+# before the default route is changed.  Returns empty string on failure.
+darwin_resolve_ips() {
+  nslookup "$1" 2>/dev/null \
+    | awk '/^Address:/{print $2}' \
+    | grep -v '#' \
+    | tr '\n' ' ' \
+    | sed 's/ $//'
+}
+
+darwin_add_host_route() {
+  ip="$1"
+  gw="$2"
+  route -n add -host "$ip" "$gw" 2>/dev/null \
+    || route -n change -host "$ip" "$gw" 2>/dev/null \
+    || true
+}
+
 darwin_up() {
   wait_for_tun
 
   original_gateway="$(darwin_default_gateway)"
   original_interface="$(darwin_default_interface)"
 
+  # Resolve the XHTTP domain to IPs BEFORE changing the default route so that
+  # the system DNS (typically the local router) is still reachable directly.
+  # Without this, Xray's XHTTP outbound connection would loop back through TUN.
+  domain_ips="$(darwin_resolve_ips "$UPSTREAM_DOMAIN" 2>/dev/null || echo '')"
+  if [ -z "$domain_ips" ]; then
+    echo "warning: could not resolve $UPSTREAM_DOMAIN; XHTTP bypass route not added" >&2
+  fi
+
   cat >"$STATE_FILE" <<EOF
-ORIGINAL_GATEWAY=${original_gateway}
-ORIGINAL_INTERFACE=${original_interface}
+ORIGINAL_GATEWAY='${original_gateway}'
+ORIGINAL_INTERFACE='${original_interface}'
+DOMAIN_IPS='${domain_ips}'
 EOF
 
-  route -n add -host "$UPSTREAM_IP" "$original_gateway" 2>/dev/null \
-    || route -n change -host "$UPSTREAM_IP" "$original_gateway"
+  # Bypass route for the REALITY server (raw IP).
+  darwin_add_host_route "$UPSTREAM_IP" "$original_gateway"
+
+  # Bypass routes for the XHTTP domain's resolved IPs.
+  for ip in ${domain_ips}; do
+    [ "$ip" = "$UPSTREAM_IP" ] && continue
+    darwin_add_host_route "$ip" "$original_gateway"
+  done
+
+  # Redirect all other traffic through the TUN interface.
   route -n change default -interface "$TUN_NAME" 2>/dev/null || {
     route -n delete default >/dev/null 2>&1 || true
     route -n add default -interface "$TUN_NAME"
@@ -64,13 +100,23 @@ darwin_down() {
   route -n delete default >/dev/null 2>&1 || true
   route -n add default "$ORIGINAL_GATEWAY" 2>/dev/null \
     || route -n change default "$ORIGINAL_GATEWAY"
+
   route -n delete -host "$UPSTREAM_IP" >/dev/null 2>&1 || true
+
+  for ip in ${DOMAIN_IPS:-}; do
+    [ "$ip" = "$UPSTREAM_IP" ] && continue
+    route -n delete -host "$ip" >/dev/null 2>&1 || true
+  done
+
   rm -f "$STATE_FILE"
 }
 
 darwin_status() {
   route -n get default || true
   route -n get "$UPSTREAM_IP" || true
+  for ip in $(nslookup "$UPSTREAM_DOMAIN" 2>/dev/null | awk '/^Address:/{print $2}' | grep -v '#'); do
+    route -n get "$ip" 2>/dev/null || true
+  done
 }
 
 unsupported() {

@@ -63,6 +63,13 @@
         "balancerTag": "Proxy-self",
         "ruleTag": "Work Banned"
       },
+{% if xray_is_tun %}
+      {
+        "domain": ["domain:{{ xray_env.DOMAIN }}"],
+        "outboundTag": "Direct",
+        "ruleTag": "TUN Proxy Server Bypass"
+      },
+{% endif %}
       {
         "domain": ["geosite:geolocation-!cn"],
         "balancerTag": "Proxy",
@@ -149,7 +156,10 @@
         "security": "tls",
         "xhttpSettings": {
           "path": "{{ xray_env.XHTTP_PATH }}"
-        }
+        }{% if xray_is_tun and xray_client_bind_interface != '' %},
+        "sockopt": {
+          "interface": "{{ xray_client_bind_interface }}"
+        }{% endif %}
       },
       "tag": "Proxy-self-xhttp"
     },
@@ -181,7 +191,8 @@
           "shortId": "{{ xray_env.REALITY_SHORT_ID }}"
         },
         "sockopt": {
-          "domainStrategy": "UseIP"
+          "domainStrategy": "UseIP"{% if xray_is_tun and xray_client_bind_interface != '' %},
+          "interface": "{{ xray_client_bind_interface }}"{% endif %}
         }
       },
       "tag": "Proxy-self-reality"
@@ -189,7 +200,12 @@
     {
       "domainStrategy": "UseIP",
       "protocol": "freedom",
-      "tag": "Direct"
+      "tag": "Direct"{% if xray_is_tun and xray_client_bind_interface != '' %},
+      "streamSettings": {
+        "sockopt": {
+          "interface": "{{ xray_client_bind_interface }}"
+        }
+      }{% endif %}
     },
     {
       "tag": "Block",

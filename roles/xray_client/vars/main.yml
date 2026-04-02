@@ -19,6 +19,11 @@ xray_log_dir: >-
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
 xray_client_tun_name: "{{ xray_tun_name | default('utun10') }}"
 xray_client_tun_mtu: "{{ xray_tun_mtu | default(1492) }}"
+# Physical interface to bind outbound sockets to in TUN mode (e.g. en0 for
+# Wi-Fi, en1 for Ethernet).  When set, all outbound sockets are bound to this
+# interface via sockopt.interface so that Xray's own connections cannot loop
+# back through the TUN device.  Leave empty to rely solely on bypass routes.
+xray_client_bind_interface: "{{ xray_tun_bind_interface | default('') }}"
 xray_tun_routing_script: >-
   {{
     xray_is_openwrt
