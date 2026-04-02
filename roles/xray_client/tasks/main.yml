@@ -37,6 +37,7 @@
     src: /etc/openwrt_release
   register: openwrt_release_file
   when: xray_is_openwrt
+  tags: install
 
 - name: Parse OpenWrt release info
   ansible.builtin.set_fact:
@@ -59,6 +60,7 @@
   vars:
     openwrt_release_text: "{{ openwrt_release_file.content | b64decode }}"
   when: xray_is_openwrt
+  tags: install
 
 - name: Build OpenWrt mirror path
   ansible.builtin.set_fact:
@@ -68,6 +70,7 @@
         | ternary('snapshots', 'releases/' ~ openwrt_release)
       }}
   when: xray_is_openwrt
+  tags: install
 
 - name: Configure OpenWrt opkg feeds
   ansible.builtin.template:
@@ -75,6 +78,7 @@
     dest: /etc/opkg/distfeeds.conf
     mode: "0644"
   when: xray_is_openwrt
+  tags: install
 
 - name: Setup xray config
   ansible.builtin.template:
@@ -83,6 +87,7 @@
   notify:
     - Force xray log rotation
     - Restart xray service
+  tags: config
 
 - name: Ensure xray tun routing helper directory exists
   become: "{{ xray_is_openwrt | ternary(true, use_become | default(false)) }}"
@@ -92,6 +97,7 @@
     mode: "0755"
     owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
   when: xray_is_tun
+  tags: install
 
 - name: Install xray tun routing helper
   ansible.builtin.template:
@@ -99,6 +105,7 @@
     dest: "{{ xray_tun_routing_script }}"
     mode: "0755"
   when: xray_is_tun
+  tags: install
 
 - name: Show xray tun routing helper usage
   ansible.builtin.debug:
@@ -109,6 +116,7 @@
   when:
     - xray_is_tun
     - ansible_facts['system'] == 'Darwin'
+  tags: help
 
 - name: Include xray install tasks
   ansible.builtin.include_tasks: install.yml
@@ -118,11 +126,13 @@
   ansible.builtin.set_fact:
     xray_share_text: "{{ lookup('template', 'share.txt.j2') | trim }}"
   when: not xray_is_openwrt
+  tags: share
 
 - name: Display share links
   ansible.builtin.debug:
     msg: "{{ xray_share_text }}"
   when: xray_share_text != ""
+  tags: share
 
 - name: Print share QR code
   ansible.builtin.command:
@@ -132,6 +142,7 @@
   when:
     - xray_share_text != ""
     - not xray_is_openwrt
+  tags: share
 
 - name: Show QR code
   ansible.builtin.debug:
@@ -139,3 +150,4 @@
   when:
     - qrencode_output is defined
     - not xray_is_openwrt
+  tags: share
