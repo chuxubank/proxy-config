@@ -4,6 +4,8 @@
     brew services restart {{ service_name }} --file=/dev/stdin <<EOF
     {{ service_template_content }}
     EOF
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
   when: ansible_facts['system'] == 'Darwin'
 
 - name: Restart service via systemd
