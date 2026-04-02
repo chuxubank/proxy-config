@@ -198,11 +198,15 @@
       "tag": "Proxy-self-reality"
     },
     {
-      "domainStrategy": "UseIP",
       "protocol": "freedom",
-      "tag": "Direct"{% if xray_is_tun and xray_client_bind_interface != '' %},
+      "tag": "Direct",
+      "settings": {
+        "domainStrategy": "AsIs"
+      }{% if xray_is_tun and xray_client_bind_interface != '' %}{% if xray_client_use_send_through and xray_client_send_through != '' %},
+      "sendThrough": "{{ xray_client_send_through }}"{% endif %},
       "streamSettings": {
         "sockopt": {
+          "domainStrategy": "UseIP",
           "interface": "{{ xray_client_bind_interface }}"
         }
       }{% endif %}

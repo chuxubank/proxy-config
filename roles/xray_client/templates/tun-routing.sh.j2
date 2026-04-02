@@ -52,6 +52,15 @@ darwin_add_host_route() {
     || true
 }
 
+darwin_add_scoped_network_route() {
+  destination="$1"
+  gw="$2"
+  ifname="$3"
+  route -n add -ifscope "$ifname" "$destination" "$gw" 2>/dev/null \
+    || route -n change -ifscope "$ifname" "$destination" "$gw" 2>/dev/null \
+    || true
+}
+
 darwin_up() {
   wait_for_tun
 
@@ -84,14 +93,16 @@ EOF
   # Redirect all other traffic through TUN using two /1 routes that are more
   # specific than the original /0 default route.  We deliberately do NOT remove
   # the original default route: sockets bound to the physical interface via
-  # sockopt.interface (Freedom + proxy outbounds) only see routes that use that
-  # interface, so they fall back to the original /0 gateway and can still reach
-  # the internet directly.  Without this, those sockets get ENETUNREACH because
-  # the /1 TUN routes don't match a physical-interface route lookup.
+  # sockopt.interface (Freedom + proxy outbounds) require routes scoped to that
+  # physical interface.  On macOS, the generic default route is not enough once
+  # the split-default /1 routes point at utun, so we install interface-scoped
+  # /1 routes back to the original gateway for sockets bound to the uplink.
   route -n add 0.0.0.0/1 -interface "$TUN_NAME" 2>/dev/null \
     || route -n change 0.0.0.0/1 -interface "$TUN_NAME"
   route -n add 128.0.0.0/1 -interface "$TUN_NAME" 2>/dev/null \
     || route -n change 128.0.0.0/1 -interface "$TUN_NAME"
+  darwin_add_scoped_network_route "0.0.0.0/1" "$original_gateway" "$original_interface"
+  darwin_add_scoped_network_route "128.0.0.0/1" "$original_gateway" "$original_interface"
 }
 
 darwin_down() {
@@ -107,6 +118,8 @@ darwin_down() {
   # route was never changed, so no restoration is needed.
   route -n delete 0.0.0.0/1 >/dev/null 2>&1 || true
   route -n delete 128.0.0.0/1 >/dev/null 2>&1 || true
+  route -n delete -ifscope "${ORIGINAL_INTERFACE}" 0.0.0.0/1 "${ORIGINAL_GATEWAY}" >/dev/null 2>&1 || true
+  route -n delete -ifscope "${ORIGINAL_INTERFACE}" 128.0.0.0/1 "${ORIGINAL_GATEWAY}" >/dev/null 2>&1 || true
 
   route -n delete -host "$UPSTREAM_IP" >/dev/null 2>&1 || true
 
@@ -122,6 +135,7 @@ darwin_status() {
   route -n get default || true
   route -n get 0.0.0.0 || true
   route -n get 128.0.0.0 || true
+  netstat -rn -f inet | awk '/^(0\\/1|128\\.0\\/1|default)/ {print}' || true
   route -n get "$UPSTREAM_IP" || true
   for ip in $(nslookup "$UPSTREAM_DOMAIN" 2>/dev/null | awk '/^Address:/{print $2}' | grep -v '#'); do
     route -n get "$ip" 2>/dev/null || true

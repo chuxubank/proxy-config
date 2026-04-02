@@ -33,6 +33,19 @@ xray_client_bind_interface: >-
         | ternary(ansible_facts['default_ipv4']['interface'] | default(''), '')
       )
   }}
+xray_client_send_through: >-
+  {{
+    xray_tun_send_through
+    | default(
+        (xray_client_inbound_mode == 'tun')
+        | ternary(ansible_facts['default_ipv4']['address'] | default(''), '')
+      )
+  }}
+xray_client_use_send_through: >-
+  {{
+    xray_tun_use_send_through
+    | default(ansible_facts['system'] != 'Darwin')
+  }}
 xray_tun_routing_script: >-
   {{
     xray_is_openwrt

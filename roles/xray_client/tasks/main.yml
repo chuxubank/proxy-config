@@ -80,6 +80,19 @@
   when: xray_is_openwrt
   tags: install
 
+- name: Ensure TUN direct egress is configured
+  ansible.builtin.assert:
+    that:
+      - xray_client_bind_interface != ''
+      - not xray_client_use_send_through or xray_client_send_through != ''
+    fail_msg: >-
+      TUN mode requires a real egress interface for Direct outbound. When
+      sendThrough is enabled it also requires a real IPv4 address. Set
+      xray_tun_bind_interface and optionally xray_tun_send_through explicitly
+      if Ansible facts do not provide them.
+  when: xray_is_tun
+  tags: config
+
 - name: Setup xray config
   ansible.builtin.template:
     src: config.json.j2
