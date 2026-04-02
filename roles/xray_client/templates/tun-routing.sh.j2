@@ -58,7 +58,7 @@ darwin_up() {
   original_gateway="$(darwin_default_gateway)"
   original_interface="$(darwin_default_interface)"
 
-  # Resolve the XHTTP domain to IPs BEFORE changing the default route so that
+  # Resolve the XHTTP domain to IPs BEFORE adding TUN routes so that
   # the system DNS (typically the local router) is still reachable directly.
   # Without this, Xray's XHTTP outbound connection would loop back through TUN.
   domain_ips="$(darwin_resolve_ips "$UPSTREAM_DOMAIN" 2>/dev/null || echo '')"
@@ -81,11 +81,17 @@ EOF
     darwin_add_host_route "$ip" "$original_gateway"
   done
 
-  # Redirect all other traffic through the TUN interface.
-  route -n change default -interface "$TUN_NAME" 2>/dev/null || {
-    route -n delete default >/dev/null 2>&1 || true
-    route -n add default -interface "$TUN_NAME"
-  }
+  # Redirect all other traffic through TUN using two /1 routes that are more
+  # specific than the original /0 default route.  We deliberately do NOT remove
+  # the original default route: sockets bound to the physical interface via
+  # sockopt.interface (Freedom + proxy outbounds) only see routes that use that
+  # interface, so they fall back to the original /0 gateway and can still reach
+  # the internet directly.  Without this, those sockets get ENETUNREACH because
+  # the /1 TUN routes don't match a physical-interface route lookup.
+  route -n add 0.0.0.0/1 -interface "$TUN_NAME" 2>/dev/null \
+    || route -n change 0.0.0.0/1 -interface "$TUN_NAME"
+  route -n add 128.0.0.0/1 -interface "$TUN_NAME" 2>/dev/null \
+    || route -n change 128.0.0.0/1 -interface "$TUN_NAME"
 }
 
 darwin_down() {
@@ -97,9 +103,10 @@ darwin_down() {
   # shellcheck disable=SC1090
   . "$STATE_FILE"
 
-  route -n delete default >/dev/null 2>&1 || true
-  route -n add default "$ORIGINAL_GATEWAY" 2>/dev/null \
-    || route -n change default "$ORIGINAL_GATEWAY"
+  # Remove the two /1 TUN routes added by darwin_up.  The original default
+  # route was never changed, so no restoration is needed.
+  route -n delete 0.0.0.0/1 >/dev/null 2>&1 || true
+  route -n delete 128.0.0.0/1 >/dev/null 2>&1 || true
 
   route -n delete -host "$UPSTREAM_IP" >/dev/null 2>&1 || true
 
@@ -113,6 +120,8 @@ darwin_down() {
 
 darwin_status() {
   route -n get default || true
+  route -n get 0.0.0.0 || true
+  route -n get 128.0.0.0 || true
   route -n get "$UPSTREAM_IP" || true
   for ip in $(nslookup "$UPSTREAM_DOMAIN" 2>/dev/null | awk '/^Address:/{print $2}' | grep -v '#'); do
     route -n get "$ip" 2>/dev/null || true
