@@ -33,10 +33,6 @@
     ],
     "rules": [
       {
-        "ip_accept_any": true,
-        "server": "ts"
-      },
-      {
         "domain_regex": ["dl\\.google\\.*"],
         "server": "local"
       },
@@ -71,6 +67,10 @@
           }
         ],
         "server": "local"
+      },
+      {
+        "ip_accept_any": true,
+        "server": "ts"
       }
     ],
     "final": "google",
