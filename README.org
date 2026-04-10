@@ -23,6 +23,10 @@
 ** Ansible
 
 *** Local
+#+begin_src sh :results silent
+  rm ~/.config/xray/50-config.json && rm ~/.config/sing-box/50-config.json
+#+end_src
+
 #+begin_src sh :results output silent :async
   ansible-playbook playbook.yml --limit localhost
 #+end_src
