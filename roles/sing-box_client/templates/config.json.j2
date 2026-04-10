@@ -7,7 +7,12 @@
   },
   "dns": {
     "servers": [
-      { "type": "local", "tag": "local" },
+      {
+        "tag": "google",
+        "type": "tls",
+        "server": "8.8.8.8",
+        "detour": "proxy"
+      },
       {
         "tag": "ali",
         "type": "https",
@@ -20,16 +25,11 @@
         "detour": "proxy"
       },
       {
-        "tag": "google",
-        "type": "https",
-        "server": "8.8.8.8",
-        "detour": "proxy"
-      },
-      {
         "tag": "ts",
         "type": "tailscale",
         "endpoint": "ts-ep"
-      }
+      },
+      { "type": "local", "tag": "local" }
     ],
     "rules": [
       {
@@ -49,10 +49,47 @@
         "type": "logical",
         "mode": "or",
         "rules": [
+          { "rule_set": "geosite-google" },
+          { "rule_set": "geosite-google-cn" }
+        ],
+        "server": "google"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
           { "rule_set": "geosite-geolocation-cn" },
           { "domain": ["{{ xray_env.DOMAIN }}"] }
         ],
         "server": "ali"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
+        "server": "ali"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "server": "cf"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "server": "google"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-!cn"
+          },
+          {
+            "rule_set": "geoip-cn",
+            "invert": true
+          }
+        ],
+        "server": "cf"
       },
       {
         "type": "logical",
@@ -66,15 +103,13 @@
             "rule_set": "geoip-cn"
           }
         ],
-        "server": "local"
+        "server": "ali"
       },
       {
         "ip_accept_any": true,
         "server": "ts"
       }
     ],
-    "final": "google",
-    "client_subnet": "114.114.114.114/24",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
@@ -145,6 +180,10 @@
         "action": "reject"
       },
       {
+        "rule_set": "geosite-geolocation-cn",
+        "outbound": "direct"
+      },
+      {
         "type": "logical",
         "mode": "and",
         "rules": [
@@ -171,6 +210,12 @@
         "tag": "geosite-geolocation-cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
       },
       {
         "type": "remote",
