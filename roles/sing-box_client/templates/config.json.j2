@@ -52,7 +52,8 @@
           { "rule_set": "geosite-google" },
           { "rule_set": "geosite-google-cn" }
         ],
-        "server": "google"
+        "server": "google",
+        "client_subnet": "114.114.114.114/24"
       },
       {
         "type": "logical",
@@ -75,7 +76,8 @@
       },
       {
         "rule_set": "geosite-cn",
-        "server": "google"
+        "server": "google",
+        "client_subnet": "114.114.114.114/24"
       },
       {
         "type": "logical",
@@ -110,6 +112,8 @@
         "server": "ts"
       }
     ],
+    "final": "google",
+    "client_subnet": "114.114.114.114/24",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
