@@ -261,10 +261,24 @@
   ],
   "outbounds": [
     {
-      "type": "socks",
+      "type": "vless",
       "tag": "proxy",
-      "server": "127.0.0.1",
-      "server_port": 10800
+      "server": "{{ xray_env.ADDRESS }}",
+      "uuid": "{{ xray_env.CLIENT_ID }}",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "{{ xray_env.REALITY_TARGET }}",
+        "utls": {
+          "enabled": true
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "{{ xray_env.REALITY_PUBLIC_KEY }}",
+          "short_id": "{{ xray_env.REALITY_SHORT_ID }}"
+        }
+      },
+      "server_port": {{ xray_env.REALITY_PORT | int }}
     },
     {
       "type": "direct",
