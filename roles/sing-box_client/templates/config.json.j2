@@ -9,7 +9,7 @@
     "servers": [
       {
         "tag": "google",
-        "type": "tls",
+        "type": "https",
         "server": "8.8.8.8",
         "detour": "proxy"
       },
@@ -118,7 +118,6 @@
     "independent_cache": true
   },
   "route": {
-    "default_domain_resolver": "ali",
     "rules": [
       {
         "inbound": "tun-in",
@@ -184,7 +183,16 @@
         "action": "reject"
       },
       {
-        "rule_set": "geosite-geolocation-cn",
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-cn"
+          },
+          {
+            "rule_set": "geoip-cn"
+          }
+        ],
         "outbound": "direct"
       },
       {
@@ -192,11 +200,11 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": "geoip-cn"
-          },
-          {
             "rule_set": "geosite-geolocation-!cn",
             "invert": true
+          },
+          {
+            "rule_set": "geoip-cn"
           }
         ],
         "outbound": "direct"
@@ -247,6 +255,7 @@
       }
     ],
     "final": "proxy",
+    "default_domain_resolver": "ali",
     "auto_detect_interface": true
   },
   "inbounds": [
