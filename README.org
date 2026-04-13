@@ -24,7 +24,8 @@
 
 *** Local
 #+begin_src sh :results silent
-  rm ~/.config/xray/50-config.json && rm ~/.config/sing-box/50-config.json
+  rm ~/.config/xray/50-config.json || true
+  rm ~/.config/sing-box/50-config.json || true
 #+end_src
 
 #+begin_src sh :results output silent :async
