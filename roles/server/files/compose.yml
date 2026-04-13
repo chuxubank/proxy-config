@@ -1,6 +1,7 @@
 include:
   - path: ./rss/compose.yml
   - path: ./rsshub/compose.yml
+  - path: ./asspp/compose.yml
 
 services:
   caddy:
@@ -23,6 +24,8 @@ services:
       - path: ./rss/.env
         required: false
       - path: ./rsshub/.env
+        required: false
+      - path: ./asspp/.env
         required: false
     logging:
       driver: "json-file"

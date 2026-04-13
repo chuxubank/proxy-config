@@ -28,3 +28,7 @@
 {$RSSHUB_SUB_DOMAIN:rsshub}.{$DOMAIN:localhost} {
 	reverse_proxy http://rsshub:1200
 }
+
+{$ASSPP_SUB_DOMAIN:asspp}.{$DOMAIN:localhost} {
+	reverse_proxy asspp:8080
+}
