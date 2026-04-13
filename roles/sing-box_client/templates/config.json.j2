@@ -33,6 +33,10 @@
     ],
     "rules": [
       {
+        "action": "evaluate",
+        "server": "ts"
+      },
+      {
         "domain_regex": ["dl\\.google\\.*"],
         "server": "local"
       },
@@ -103,8 +107,9 @@
         "server": "ali"
       },
       {
+        "match_response": true,
         "ip_accept_any": true,
-        "server": "ts"
+        "action": "respond"
       }
     ],
     "final": "google",
