@@ -47,14 +47,14 @@
 #+end_src
 
 ** Debug DNS
-#+begin_src sh :results raw :wrap src json
+#+begin_src sh :results raw :wrap src js
   curl ipinfo.io/$(dig +short example.com | head -n1)
 #+end_src
 
 #+RESULTS:
-#+begin_src json
+#+begin_src js
 {
-  "ip": "104.18.27.120",
+  "ip": "104.20.23.154",
   "city": "San Francisco",
   "region": "California",
   "country": "US",
