@@ -264,9 +264,17 @@
     }
   ],
   "outbounds": [
+    {% if ansible_env.HOST_ENV == "iv" %}
+    {
+      "type": "http",
+      "tag": "proxy-iv",
+      "server": "proxy.invalley.co",
+      "server_port": 8123
+    },
+    {% endif %}
     {
       "type": "vless",
-      "tag": "proxy",
+      "tag": "proxy-self",
       "server": "{{ xray_env.ADDRESS }}",
       "uuid": "{{ xray_env.CLIENT_ID }}",
       "flow": "xtls-rprx-vision",
@@ -283,6 +291,19 @@
         }
       },
       "server_port": {{ xray_env.REALITY_PORT | int }}
+    },
+    {
+      "type": "urltest",
+      "tag": "proxy",
+      "outbounds": [
+        "proxy-self",
+        "proxy-iv"
+      ],
+      "url": "https://connectivitycheck.gstatic.com/generate_204",
+      "interval": "3m",
+      "tolerance": 50,
+      "idle_timeout": "30m",
+      "interrupt_exist_connections": false
     },
     {
       "type": "direct",
