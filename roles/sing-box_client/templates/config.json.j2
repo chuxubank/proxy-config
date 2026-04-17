@@ -60,6 +60,7 @@
         "mode": "or",
         "rules": [
           { "rule_set": "geosite-geolocation-cn" },
+          { "rule_set": "geosite-apple-cn" },
           { "domain": ["{{ xray_env.DOMAIN }}"] }
         ],
         "server": "ali"
@@ -223,6 +224,12 @@
         "tag": "geosite-cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-apple-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-apple@cn.srs"
       },
       {
         "type": "remote",
