@@ -23,12 +23,10 @@
 ** Ansible
 
 *** Local
-#+begin_src sh :results output silent :session ansible
-  rm ~/.config/xray/50-config.json || true
-  rm ~/.config/sing-box/50-config.json || true
-#+end_src
 
 #+begin_src sh :results output silent :session ansible :async
+  rm ~/.config/xray/50-config.json || true
+  rm ~/.config/sing-box/50-config.json || true
   ansible-playbook playbook.yml --limit localhost
 #+end_src
 
@@ -40,7 +38,7 @@
 ** Flash DNS
 
 *** macOS
-#+begin_src sh :dir /sudo:root@localhost: :results silent
+#+begin_src sh :dir /sudo:root@localhost: :results output silent :session ansible
   sudo dscacheutil -flushcache
   sudo killall -HUP mDNSResponder
   rm /opt/homebrew/var/lib/sing-box/cache.db
