@@ -120,6 +120,19 @@
         "action": "sniff"
       },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "inbound": "ts-ep"
+          },
+          {
+            "ip_is_private": true
+          }
+        ],
+        "outbound": "direct"
+      },
+      {
         "network": "icmp",
         "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
         "outbound": "ts-ep"
