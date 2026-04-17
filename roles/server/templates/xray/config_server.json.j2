@@ -3,6 +3,27 @@
     "loglevel": "debug",
     "dnsLog": true
   },
+  "stats": {},
+  "api": {
+    "tag": "api",
+    "services": [
+      "StatsService"
+    ]
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserUplink": true,
+        "statsUserDownlink": true
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink": true,
+      "statsOutboundDownlink": true
+    }
+  },
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules": [
@@ -32,6 +53,13 @@
         "ruleTag": "Unknown Client"
       },
       {
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api",
+        "ruleTag": "API"
+      },
+      {
         "ip": ["geoip:cn", "geoip:private"],
         "outboundTag": "blocked",
         "ruleTag": "Private/CN IP"
@@ -52,6 +80,14 @@
         "enabled": true,
         "destOverride": ["tls"],
         "routeOnly": true
+      }
+    },
+    {
+      "port": {{ xray_env.API_PORT }},
+      "tag": "api",
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
       }
     },
     {
