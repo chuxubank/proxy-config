@@ -264,7 +264,7 @@
     }
   ],
   "outbounds": [
-    {% if ansible_env.HOST_ENV == "iv" %}
+    {% if host_env == "iv" %}
     {
       "type": "http",
       "tag": "proxy-iv",
@@ -296,7 +296,7 @@
       "type": "urltest",
       "tag": "proxy",
       "outbounds": [
-        {% if ansible_env.HOST_ENV == "iv" %}
+        {% if host_env == "iv" %}
         "proxy-iv",
         {% endif %}
         "proxy-self"

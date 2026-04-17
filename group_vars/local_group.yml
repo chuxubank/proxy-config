@@ -1,4 +1,6 @@
 ---
+host_env: "{{ ansible_facts['env'].HOST_ENV | default('') }}"
+
 use_become: >-
   {%- if ansible_facts['system'] == 'Linux' -%}
   true
