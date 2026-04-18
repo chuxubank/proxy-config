@@ -91,7 +91,16 @@
         "action": "hijack-dns"
       },
       {
-        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"]
+          },
+          {
+            "domain_suffix": "invalley.co"
+          }
+        ],
         "outbound": "ts-ep"
       },
       {
