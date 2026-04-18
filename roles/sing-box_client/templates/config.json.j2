@@ -33,10 +33,6 @@
     ],
     "rules": [
       {
-        "domain_regex": ["dl\\.google\\.*"],
-        "server": "local"
-      },
-      {
         "type": "logical",
         "mode": "or",
         "rules": [
@@ -68,94 +64,30 @@
       {
         "type": "logical",
         "mode": "and",
-        "rules": [{ "rule_set": "geosite-cn" }, { "rule_set": "geoip-cn" }],
-        "server": "ali"
-      },
-      {
-        "rule_set": "geosite-cn",
-        "server": "google",
-        "client_subnet": "114.114.114.114/24"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
         "rules": [
           {
-            "rule_set": "geosite-geolocation-!cn"
-          },
-          {
-            "rule_set": "geoip-cn",
+            "rule_set": "geosite-geolocation-!cn",
             "invert": true
-          }
-        ],
-        "server": "cf"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "rule_set": "geosite-geolocation-cn"
           },
           {
             "rule_set": "geoip-cn"
           }
         ],
-        "server": "ali"
+        "server": "google",
+        "client_subnet": "114.114.114.114/24"
       },
       {
         "ip_accept_any": true,
         "server": "ts"
       }
     ],
-    "final": "google",
-    "client_subnet": "114.114.114.114/24",
     "strategy": "ipv4_only",
     "independent_cache": true
   },
   "route": {
     "rules": [
       {
-        "inbound": "tun-in",
         "action": "sniff"
-      },
-      {
-        "type": "logical",
-        "mode": "and",
-        "rules": [
-          {
-            "inbound": "ts-ep"
-          },
-          {
-            "ip_is_private": true
-          }
-        ],
-        "outbound": "direct"
-      },
-      {
-        "network": "icmp",
-        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
-        "outbound": "ts-ep"
-      },
-      { "network": "icmp", "outbound": "direct" },
-      {
-        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
-        "outbound": "ts-ep"
-      },
-      {
-        "process_name": [
-          "xray",
-          "hysteria",
-          "fly",
-          "Teams",
-          "Motrix",
-          "Feishu"
-        ],
-        "outbound": "direct"
-      },
-      {
-        "process_path_regex": [".*xray"],
-        "outbound": "direct"
       },
       {
         "type": "logical",
@@ -171,7 +103,33 @@
         "action": "hijack-dns"
       },
       {
-        "ip_is_private": true,
+        "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"],
+        "outbound": "ts-ep"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "network": "icmp"
+          },
+          {
+            "ip_is_private": true
+          },
+          {
+            "process_name": [
+              "xray",
+              "hysteria",
+              "fly",
+              "Teams",
+              "Motrix",
+              "Feishu"
+            ]
+          },
+          {
+            "process_path_regex": [".*xray"]
+          }
+        ],
         "outbound": "direct"
       },
       {
@@ -193,13 +151,13 @@
       },
       {
         "type": "logical",
-        "mode": "and",
+        "mode": "or",
         "rules": [
           {
             "rule_set": "geosite-geolocation-cn"
           },
           {
-            "rule_set": "geoip-cn"
+            "rule_set": "geosite-apple-cn"
           }
         ],
         "outbound": "direct"
@@ -209,11 +167,11 @@
         "mode": "and",
         "rules": [
           {
-            "rule_set": "geosite-geolocation-!cn",
-            "invert": true
+            "rule_set": "geoip-cn"
           },
           {
-            "rule_set": "geoip-cn"
+            "rule_set": "geosite-geolocation-!cn",
+            "invert": true
           }
         ],
         "outbound": "direct"
