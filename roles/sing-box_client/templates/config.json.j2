@@ -110,32 +110,6 @@
         "mode": "or",
         "rules": [
           {
-            "network": "icmp"
-          },
-          {
-            "ip_is_private": true
-          },
-          {
-            "process_name": [
-              "xray",
-              "hysteria",
-              "fly",
-              "Teams",
-              "Motrix",
-              "Feishu"
-            ]
-          },
-          {
-            "process_path_regex": [".*xray"]
-          }
-        ],
-        "outbound": "direct"
-      },
-      {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
             "port": 853
           },
           {
@@ -150,14 +124,29 @@
       },
       {
         "type": "logical",
-        "mode": "and",
+        "mode": "or",
         "rules": [
+          {
+            "network": "icmp"
+          },
+          {
+            "ip_is_private": true
+          },
           {
             "rule_set": "geoip-cn"
           },
           {
-            "rule_set": "geosite-geolocation-!cn",
-            "invert": true
+            "process_name": [
+              "xray",
+              "hysteria",
+              "fly",
+              "Teams",
+              "Motrix",
+              "Feishu"
+            ]
+          },
+          {
+            "process_path_regex": [".*xray"]
           }
         ],
         "outbound": "direct"
