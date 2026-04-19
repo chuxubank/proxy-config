@@ -71,7 +71,7 @@
 
 - name: Configure OpenWrt opkg feeds
   ansible.builtin.template:
-    src: "{{ playbook_dir }}/roles/pve_openwrt/templates/distfeeds.conf.j2"
+    src: distfeeds.conf.j2
     dest: /etc/opkg/distfeeds.conf
     mode: "0644"
   when: xray_is_openwrt

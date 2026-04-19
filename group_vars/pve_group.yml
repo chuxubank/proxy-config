@@ -5,7 +5,7 @@ ansible_password: "{{ lookup('community.general.passwordstore', pve_pass_path) }
 
 proxmox_api_env:
   PROXMOX_HOST: "{{ inventory_hostname }}"
-  PROXMOX_USER: root@pam
+  PROXMOX_USER: "{{ lookup('community.general.passwordstore', pve_pass_path, subkey='user') }}"
   PROXMOX_PASSWORD: "{{ lookup('community.general.passwordstore', pve_pass_path) }}"
   PROXMOX_NODE: pve
   PROXMOX_VALIDATE_CERTS: "0"
