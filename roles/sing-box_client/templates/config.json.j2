@@ -94,11 +94,13 @@
         "type": "logical",
         "mode": "or",
         "rules": [
+          {% if host_env != "iv" %}
+          {
+            "ip_cidr": "192.168.1.0/24"
+          },
+          {% endif %}
           {
             "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"]
-          },
-          {
-            "domain_suffix": "invalley.co"
           }
         ],
         "outbound": "ts-ep"
