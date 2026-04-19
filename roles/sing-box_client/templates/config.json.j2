@@ -276,9 +276,10 @@
       "exit_node_allow_lan_access": true,
       "advertise_routes": [
         {% if host_env == "personal" %}
-        "192.168.50.0/24",
-        {% endif %}
+        "192.168.50.0/24"
+        {% elif host_env == "iv" %}
         "192.168.1.0/24"
+        {% endif %}
       ],
       "advertise_exit_node": true
     }
