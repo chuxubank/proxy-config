@@ -85,7 +85,7 @@
         "type": "logical",
         "mode": "or",
         "rules": [
-          {% if not host_name.startswith("iv") %}
+          {% if not host_name.startswith("IV") %}
           {
             "ip_cidr": "192.168.1.0/24"
           },
@@ -268,7 +268,7 @@
       "advertise_routes": [
         {% if host_name == "Midori" %}
         "192.168.50.0/24"
-        {% elif host_name.startswith("iv") %}
+        {% elif host_name.startswith("IV") %}
         "192.168.1.0/24",
         "192.168.2.0/24"
         {% endif %}
