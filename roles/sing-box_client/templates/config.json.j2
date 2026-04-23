@@ -47,7 +47,8 @@
         "mode": "or",
         "rules": [
           { "rule_set": "geosite-geolocation-cn" },
-          { "domain": ["{{ xray_env.DOMAIN }}"] }
+          { "domain": ["{{ xray_env.DOMAIN }}"] },
+          { "domain_keyword": ["mirror"] }
         ],
         "server": "ali"
       },
@@ -146,7 +147,8 @@
           },
           {
             "process_path_regex": [".*xray"]
-          }
+          },
+          { "domain_keyword": ["mirror"] }
         ],
         "outbound": "direct"
       }
