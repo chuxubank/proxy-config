@@ -275,6 +275,9 @@
         "192.168.2.0/24"
         {% endif %}
       ],
+      {% if host_name == "Midori" %}
+      "relay_server_port": {{ sing_box_tailscale_relay_port | int }},
+      {% endif %}
       "advertise_exit_node": true
     }
   ],
