@@ -276,7 +276,11 @@
         {% endif %}
       ],
       {% if host_name == "Midori" %}
-      "relay_server_port": {{ sing_box_tailscale_relay_port | int }},
+      "advertise_tags": ["tag:home-relay"],
+      "relay_server_port": {{ sing_box_tailscale_relay_server_port | int }},
+      "relay_server_static_endpoints": [
+        "{{ sing_box_tailscale_relay_server_static_endpoints }}"
+      ],
       {% endif %}
       "advertise_exit_node": true
     }
