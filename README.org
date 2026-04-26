@@ -27,10 +27,10 @@
 #+begin_src sh :results output silent :async
   rm ~/.config/xray/50-config.json || true
   rm ~/.config/sing-box/50-config.json || true
-  ansible-playbook playbook.yml --limit localhost
+  ansible-playbook playbook.yml --limit localhost --skip-tags "install"
 #+end_src
 
-*** Remote
+*** All
 #+begin_src sh :results output silent :async
   ansible-playbook playbook.yml
 #+end_src
