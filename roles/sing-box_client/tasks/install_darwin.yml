@@ -5,3 +5,18 @@
   vars:
     homebrew_packages:
       - sing-box
+
+- name: Ensure sudoers.d directory exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/sudoers.d
+    state: directory
+    mode: "0755"
+
+- name: Allow passwordless sudo for sing-box
+  become: true
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/sing-box
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
