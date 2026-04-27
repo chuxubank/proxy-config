@@ -46,6 +46,7 @@
 - name: Pull Docker Compose
   community.docker.docker_compose_v2_pull:
     project_src: "{{ proxy_config_dir }}"
+    profiles: "{{ proxy_profile }}"
   tags: pull
   when: not ansible_check_mode
 
