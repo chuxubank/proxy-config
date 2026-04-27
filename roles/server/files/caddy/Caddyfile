@@ -3,6 +3,13 @@
 	servers {
 		protocols h1 h2 h3
 	}
+	metrics {
+		per_host
+	}
+}
+
+:9180 {
+	metrics
 }
 
 *.{$DOMAIN:localhost} {

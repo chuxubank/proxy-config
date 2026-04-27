@@ -14,6 +14,8 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+    expose:
+      - "9180"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/site:/srv
@@ -32,6 +34,25 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
 
   xray:
     container_name: xray
@@ -81,3 +102,5 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  prometheus_data:
+  grafana_data:
