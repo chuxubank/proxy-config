@@ -62,6 +62,7 @@ services:
     restart: always
     ports:
       - "${REALITY_PORT}:${REALITY_PORT}"
+      - "${API_PORT}:${API_PORT}"
     expose:
       - "${XHTTP_PORT}"
     extra_hosts:
