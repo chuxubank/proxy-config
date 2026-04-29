@@ -210,11 +210,19 @@
   "inbounds": [
     {
       "type": "tun",
-      "tag": "tun-in",
       "address": ["172.18.0.1/30"],
       "auto_route": true,
       "stack": "gvisor",
-      "strict_route": true
+      "strict_route": true,
+      {% if host_name == "Yui" %}
+      "route_address": [
+        "192.168.1.0/24"
+      ],
+      "route_exclude_address": [
+        "192.168.1.1/32"
+      ],
+      {% endif %}
+      "tag": "tun-in"
     }
   ],
   "outbounds": [
