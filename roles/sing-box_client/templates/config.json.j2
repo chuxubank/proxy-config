@@ -204,7 +204,7 @@
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs"
       }
     ],
-    "final": "proxy",
+    "final": "select",
     "default_domain_resolver": "ali",
     "auto_detect_interface": true
   },
@@ -246,6 +246,18 @@
         }
       },
       "server_port": {{ xray_env.REALITY_PORT | int }}
+    },
+    {
+      "type": "selector",
+      "tag": "select",
+      "outbounds": [
+        {% if host_env == "iv" %}
+        "proxy-iv",
+        {% endif %}
+        "proxy-self"
+      ],
+      "default": "proxy-self",
+      "interrupt_exist_connections": false
     },
     {
       "type": "urltest",
