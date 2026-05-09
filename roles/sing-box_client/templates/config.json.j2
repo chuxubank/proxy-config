@@ -86,16 +86,6 @@
         "type": "logical",
         "mode": "or",
         "rules": [
-          {% if not host_name.startswith("IV") %}
-          {
-            "domain_suffix": "invalley.co"
-          },
-          {% endif %}
-          {% if host_name != "Midori" %}
-          {
-            "ip_cidr": "192.168.50.0/24"
-          },
-          {% endif %}
           {
             "ip_cidr": ["100.64.0.0/10", "fd7a:115c:a1e0::/48"]
           },
@@ -286,21 +276,6 @@
       "auth_key": "{{ sing_box_tailscale_auth_token }}",
       "accept_routes": true,
       "exit_node_allow_lan_access": true,
-      "advertise_routes": [
-        {% if host_name == "Midori" %}
-        "192.168.50.0/24"
-        {% elif host_name.startswith("IV") %}
-        "192.168.1.0/24",
-        "192.168.2.0/24"
-        {% endif %}
-      ],
-      {% if host_name == "Midori" %}
-      "advertise_tags": ["tag:home-relay"],
-      "relay_server_port": {{ sing_box_tailscale_relay_server_port | int }},
-      "relay_server_static_endpoints": [
-        "{{ sing_box_tailscale_relay_server_static_endpoints }}"
-      ],
-      {% endif %}
       "advertise_exit_node": true
     }
   ],
