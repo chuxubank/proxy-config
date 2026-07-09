@@ -33,6 +33,7 @@
   ansible.builtin.template:
     src: config.json.j2
     dest: "{{ sing_box_config_dir }}/50-config.json"
+    mode: "0600"
   notify:
     - Force sing-box log rotation
     - Restart sing-box service

@@ -64,7 +64,7 @@
   ansible.builtin.set_fact:
     openwrt_opkg_release_path: >-
       {{
-        openwrt_release == 'SNAPSHOT'
+        (openwrt_release == 'SNAPSHOT')
         | ternary('snapshots', 'releases/' ~ openwrt_release)
       }}
   when: xray_is_openwrt
@@ -80,6 +80,7 @@
   ansible.builtin.template:
     src: config.json.j2
     dest: "{{ xray_config_file }}"
+    mode: "0600"
   notify:
     - Force xray log rotation
     - Restart xray service

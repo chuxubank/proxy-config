@@ -39,3 +39,14 @@
 {$ASSPP_SUB_DOMAIN:asspp}.{$DOMAIN:localhost} {
 	reverse_proxy asspp:8080
 }
+
+{$GRAFANA_SUB_DOMAIN:grafana}.{$DOMAIN:localhost} {
+	reverse_proxy http://grafana:3000
+}
+
+{$PROM_SUB_DOMAIN:prometheus}.{$DOMAIN:localhost} {
+	basic_auth {
+		{$PROM_USER} {$PROM_PASSWORD_HASH}
+	}
+	reverse_proxy http://prometheus:9090
+}

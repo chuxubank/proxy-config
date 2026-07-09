@@ -42,8 +42,8 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
 
   grafana:
     image: grafana/grafana-oss:latest
@@ -51,8 +51,11 @@ services:
     restart: unless-stopped
     volumes:
       - grafana_data:/var/lib/grafana
-    ports:
-      - "3000:3000"
+    environment:
+      - GF_SERVER_ROOT_URL=https://${GRAFANA_SUB_DOMAIN:-grafana}.${DOMAIN}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    expose:
+      - "3000"
 
   xray:
     container_name: xray

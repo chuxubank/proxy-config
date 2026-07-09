@@ -8,6 +8,14 @@ proxy_env:
   ACME_CA: "acme-v02.api.letsencrypt.org"
   CF_API_TOKEN: "{{ lookup('community.general.passwordstore', cf_pass_path, subkey='api_token') }}"
 
+monitoring_env:
+  GRAFANA_SUB_DOMAIN: grafana
+  GRAFANA_ADMIN_PASSWORD: "{{ lookup('community.general.passwordstore', grafana_pass_path) }}"
+  PROM_SUB_DOMAIN: prometheus
+  PROM_USER: "{{ lookup('community.general.passwordstore', prom_pass_path, subkey='username') }}"
+  # bcrypt hash generated via: caddy hash-password
+  PROM_PASSWORD_HASH: "{{ lookup('community.general.passwordstore', prom_pass_path, subkey='password_hash') }}"
+
 rss_env:
   RSS_SUB_DOMAIN: rss
   DEFAULT_USER: "{{ lookup('community.general.passwordstore', rss_pass_path, subkey='username') }}"

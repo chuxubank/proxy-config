@@ -1,8 +1,9 @@
 ---
 - name: Ensure proxy-config directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ proxy_config_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Sync Docker Compose directory to remote server
   ansible.posix.synchronize:
@@ -16,22 +17,26 @@
   ansible.builtin.template:
     src: templates/env.j2
     dest: "{{ proxy_config_dir }}/.env"
+    mode: "0600"
 
 - name: Setup xray config
   ansible.builtin.template:
     src: templates/xray/config_server.json.j2
     dest: "{{ proxy_config_dir }}/xray/config.json"
+    mode: "0600"
 
 - name: Setup rss env
   ansible.builtin.template:
     src: templates/rss_env.j2
     dest: "{{ proxy_config_dir }}/rss/.env"
+    mode: "0600"
   when: rss_pass_path is defined
 
 - name: Setup rsshub env
   ansible.builtin.template:
     src: templates/rsshub_env.j2
     dest: "{{ proxy_config_dir }}/rsshub/.env"
+    mode: "0600"
   when: rss_pass_path is defined
 
 - name: Stop Docker Compose
@@ -39,7 +44,12 @@
     project_src: "{{ proxy_config_dir }}"
     profiles: "{{ proxy_profile }}"
     state: stopped
-  ignore_errors: true
+  register: compose_stop
+  # Tolerate "nothing to stop" on first run; surface any other failure.
+  failed_when:
+    - compose_stop is failed
+    - "'no container found' not in (compose_stop.msg | default(''))"
+    - "'not found' not in (compose_stop.msg | default(''))"
   tags: always
   when: not ansible_check_mode
 
