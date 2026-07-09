@@ -23,7 +23,9 @@
   ansible.builtin.template:
     src: templates/xray/config_server.json.j2
     dest: "{{ proxy_config_dir }}/xray/config.json"
-    mode: "0600"
+    # Bind-mounted into the xray container and read by its non-root process,
+    # so it must stay world-readable; 0600 causes "permission denied".
+    mode: "0644"
 
 - name: Setup rss env
   ansible.builtin.template:
