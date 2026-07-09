@@ -22,12 +22,34 @@
 
 ** Ansible
 
+Common workflows are wrapped in the =Makefile=. Run =make= (or =make help=) to
+list every target. Optional variables can be appended to any target:
+=LIMIT=, =TAGS=, =SKIP_TAGS=, =EXTRA=, =PLAYBOOK=.
+
+#+begin_src sh :results output silent
+  make deps                       # install Galaxy requirements
+  make syntax                     # fast parse validation
+  make check                      # dry-run against the inventory
+  make diff                       # dry-run with a diff of changes
+  make local                      # apply to localhost, skip binary installs
+  make local-install              # apply to localhost, incl. binary installs
+  make server                     # deploy to the vps_group
+  make pull                       # pull Docker Compose images on the server
+  make lint                       # ansible-lint (if installed)
+
+  make check LIMIT=bwg-cn2-gia    # override: limit to one host
+  make server TAGS=pull           # override: run only tagged tasks
+  make diff EXTRA="--ask-vault-pass"
+#+end_src
+
 *** Local
+
+Removes the generated client configs first so a fresh copy is rendered.
 
 #+begin_src sh :results output silent :async
   rm ~/.config/xray/50-config.json || true
   rm ~/.config/sing-box/50-config.json || true
-  ansible-playbook playbook.yml --limit localhost --skip-tags "install"
+  make local
 #+end_src
 
 *** All

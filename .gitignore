@@ -1,2 +1,5 @@
 .aider*
 /.agent-shell/
+
+# Galaxy dependencies installed via `make deps` (regenerable from requirements.yml)
+/.ansible/
