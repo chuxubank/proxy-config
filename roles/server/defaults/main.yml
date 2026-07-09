@@ -3,3 +3,10 @@
 proxy_config_dir: proxy-config
 # Docker Compose profiles to enable; empty list runs only unprofiled services.
 proxy_profile: []
+
+# Grafana dashboards fetched from grafana.com at deploy time (not committed).
+# id/revision map to https://grafana.com/api/dashboards/<id>/revisions/<revision>/download
+grafana_dashboards:
+  - id: 24146
+    revision: 1
+    filename: caddy-hosts.json

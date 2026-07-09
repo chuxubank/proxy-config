@@ -9,8 +9,35 @@
   ansible.posix.synchronize:
     src: files/
     delete: true
+    # Grafana dashboards are fetched on the remote (see below); keep them so
+    # delete=true does not wipe downloaded JSON and force a re-download.
+    rsync_opts:
+      - "--exclude=grafana/dashboards/*.json"
     dest: "{{ proxy_config_dir }}"
     dest_port: "{{ ansible_port | int }}"
+  when: not ansible_check_mode
+
+- name: Download Grafana dashboards from grafana.com
+  ansible.builtin.get_url:
+    url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/{{ item.revision }}/download"
+    dest: "{{ proxy_config_dir }}/grafana/dashboards/{{ item.filename }}"
+    mode: "0644"
+  loop: "{{ grafana_dashboards }}"
+  loop_control:
+    label: "{{ item.filename }}"
+  when: not ansible_check_mode
+
+- name: Bind provisioned dashboards to the Prometheus data source
+  ansible.builtin.replace:
+    path: "{{ proxy_config_dir }}/grafana/dashboards/{{ item.filename }}"
+    # Dashboards exported for UI import reference the data source via the
+    # ${DS_PROMETHEUS} input placeholder; provisioning skips that prompt, so
+    # rewrite it to the fixed uid declared in provisioning/datasources.
+    regexp: '\$\{DS_PROMETHEUS\}'
+    replace: "prometheus"
+  loop: "{{ grafana_dashboards }}"
+  loop_control:
+    label: "{{ item.filename }}"
   when: not ansible_check_mode
 
 - name: Setup env
