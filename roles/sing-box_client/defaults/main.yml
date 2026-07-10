@@ -1,0 +1,8 @@
+---
+sing_box_openwrt_start_service: true
+sing_box_tailscale_auth_token: >-
+  {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='auth-key-sing-box') }}
+sing_box_tailscale_relay_server_port: >-
+  {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='relay-server-port') }}
+sing_box_tailscale_relay_server_static_endpoints: >-
+  {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='relay-server-static-endpoints') }}

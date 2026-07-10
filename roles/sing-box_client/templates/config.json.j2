@@ -2,7 +2,9 @@
   "$schema": "https://gist.githubusercontent.com/artiga033/fea992d95ad44dc8d024b229223b1002/raw/sing-box.schema.json",
   "log": {
     "level": "trace",
+{% if not sing_box_is_openwrt %}
     "output": "{{ sing_box_log_dir }}/sing-box.log",
+{% endif %}
     "timestamp": true
   },
   "dns": {

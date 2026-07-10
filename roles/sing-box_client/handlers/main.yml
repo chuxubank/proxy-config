@@ -1,11 +1,23 @@
 - name: Force sing-box log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ sing_box_logrotate_config }}"
-  become: "{{ use_become }}"
+  changed_when: true
+  become: "{{ use_become | default(false) }}"
+  when: not sing_box_is_openwrt
 
-- name: Restart sing-box service
+- name: Restart sing-box service (OpenWrt)
+  community.general.openwrt_init:
+    name: "{{ sing_box_openwrt_service_name }}"
+    state: restarted
+  listen: Restart sing-box service
+  when:
+    - sing_box_is_openwrt
+    - sing_box_openwrt_start_service | bool
+
+- name: Restart sing-box service (default)
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/restart_service.yml"
   vars:
     service_name: sing-box
     service_template_content: "{{ lookup('template', sing_box_service_template) }}"
   listen: Restart sing-box service
+  when: not sing_box_is_openwrt

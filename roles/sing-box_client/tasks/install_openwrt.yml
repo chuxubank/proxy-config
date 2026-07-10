@@ -1,0 +1,50 @@
+---
+- name: Install sing-box packages with apk
+  community.general.apk:
+    name: "{{ sing_box_openwrt_packages }}"
+    state: present
+    update_cache: true
+
+- name: Read sing-box UCI options
+  ansible.builtin.command:
+    argv:
+      - uci
+      - -q
+      - get
+      - "sing-box.main.{{ item.key }}"
+  loop: "{{ sing_box_openwrt_uci_options | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: sing_box_openwrt_uci_values
+  changed_when: false
+  failed_when: false
+  vars:
+    sing_box_openwrt_uci_options:
+      enabled: "1"
+      user: root
+      conffile: "{{ sing_box_config_file }}"
+
+- name: Configure and commit sing-box UCI options
+  ansible.builtin.command:
+    argv:
+      - uci
+      - batch
+    stdin: |-
+      set sing-box.main.{{ item.item.key }}='{{ item.item.value }}'
+      commit sing-box
+  loop: "{{ sing_box_openwrt_uci_values.results }}"
+  when: (item.stdout | default('')) != item.item.value
+  changed_when: true
+  loop_control:
+    label: "{{ item.item.key }}"
+
+- name: Ensure sing-box service is enabled on OpenWrt
+  community.general.openwrt_init:
+    name: "{{ sing_box_openwrt_service_name }}"
+    enabled: true
+
+- name: Ensure sing-box service is started on OpenWrt
+  community.general.openwrt_init:
+    name: "{{ sing_box_openwrt_service_name }}"
+    state: started
+  when: sing_box_openwrt_start_service | bool
