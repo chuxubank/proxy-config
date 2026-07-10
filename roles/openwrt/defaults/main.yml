@@ -1,0 +1,4 @@
+---
+openwrt_official_package_source: https://downloads.openwrt.org
+openwrt_package_mirror: https://downloads.openwrt.org
+openwrt_mirror_snapshots: false

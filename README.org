@@ -23,8 +23,9 @@
 ** Ansible
 
 Common workflows are wrapped in the =Makefile=. Run =make= (or =make help=) to
-list every target. Optional variables can be appended to any target:
-=LIMIT=, =TAGS=, =SKIP_TAGS=, =EXTRA=, =PLAYBOOK=.
+list every target. =check= and =diff= accept =LIMIT=, =TAGS=, =SKIP_TAGS=, and
+=EXTRA=. Role deployment targets accept =TAGS=, =SKIP_TAGS=, and =EXTRA= where
+applicable. =PLAYBOOK= can override the playbook path globally.
 
 #+begin_src sh :results output silent
   make deps                       # install Galaxy requirements
@@ -34,12 +35,29 @@ list every target. Optional variables can be appended to any target:
   make local                      # apply to localhost, skip binary installs
   make local-install              # apply to localhost, incl. binary installs
   make server                     # deploy to the vps_group
+  make pve                        # apply the roles in the Proxmox play
+  make openwrt                    # apply the roles in the OpenWrt play
   make pull                       # pull Docker Compose images on the server
   make lint                       # ansible-lint (if installed)
 
   make check LIMIT=bwg-cn2-gia    # override: limit to one host
   make server TAGS=pull           # override: run only tagged tasks
   make diff EXTRA="--ask-vault-pass"
+#+end_src
+
+*** OpenWrt
+
+The =openwrt= base role bootstraps Python, gathers facts, preserves the
+image-provided feed list, and replaces only the official download host with
+=openwrt_package_mirror=. OpenWrt 25.12 or newer with =apk= is required.
+Snapshot builds retain the official source by default to avoid mirror
+synchronization gaps. Client roles such as =xray_client= and =sing-box_client=
+can run after this base role. Run the VM and guest stages separately so the
+guest has time to boot and become reachable:
+
+#+begin_src sh :results output silent :async
+  make pve
+  make openwrt
 #+end_src
 
 *** Local

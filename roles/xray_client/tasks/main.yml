@@ -1,6 +1,6 @@
 ---
 - name: Ensure xray config directory exists
-  become: "{{ xray_is_openwrt | ternary(true, use_become | default(false)) }}"
+  become: "{{ (not xray_is_openwrt) and (use_become | default(false)) }}"
   ansible.builtin.file:
     path: "{{ xray_config_dir }}"
     state: directory
@@ -8,12 +8,13 @@
     owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
 
 - name: Ensure xray log directory exists
-  become: "{{ xray_is_openwrt | ternary(true, use_become | default(false)) }}"
+  become: "{{ (not xray_is_openwrt) and (use_become | default(false)) }}"
   ansible.builtin.file:
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
     owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
+  when: not xray_is_openwrt
 
 - name: Ensure logrotate config directory exists
   become: "{{ use_become | default(false) }}"
@@ -31,50 +32,6 @@
   notify:
     - Force xray log rotation
   when: not xray_is_openwrt
-
-- name: Read OpenWrt release info
-  ansible.builtin.slurp:
-    src: /etc/openwrt_release
-  register: openwrt_release_file
-  when: xray_is_openwrt
-
-- name: Parse OpenWrt release info
-  ansible.builtin.set_fact:
-    openwrt_release: >-
-      {{
-        (openwrt_release_text | regex_findall("DISTRIB_RELEASE='([^']+)'"))
-        | first
-        | default('SNAPSHOT', true)
-      }}
-    openwrt_target: >-
-      {{
-        (openwrt_release_text | regex_findall("DISTRIB_TARGET='([^']+)'"))
-        | first
-      }}
-    openwrt_arch: >-
-      {{
-        (openwrt_release_text | regex_findall("DISTRIB_ARCH='([^']+)'"))
-        | first
-      }}
-  vars:
-    openwrt_release_text: "{{ openwrt_release_file.content | b64decode }}"
-  when: xray_is_openwrt
-
-- name: Build OpenWrt mirror path
-  ansible.builtin.set_fact:
-    openwrt_opkg_release_path: >-
-      {{
-        (openwrt_release == 'SNAPSHOT')
-        | ternary('snapshots', 'releases/' ~ openwrt_release)
-      }}
-  when: xray_is_openwrt
-
-- name: Configure OpenWrt opkg feeds
-  ansible.builtin.template:
-    src: distfeeds.conf.j2
-    dest: /etc/opkg/distfeeds.conf
-    mode: "0644"
-  when: xray_is_openwrt
 
 - name: Setup xray config
   ansible.builtin.template:

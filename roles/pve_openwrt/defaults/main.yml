@@ -9,9 +9,7 @@ openwrt_vm_net0: "virtio,bridge=vmbr0"
 openwrt_vm_ipconfig0: "ip={{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='ip') }}/24"
 openwrt_vm_scsihw: virtio-scsi-pci
 openwrt_vm_machine: q35
-openwrt_vm_hostpci:
-  hostpci0: "host=02:00.0,pcie=1"
-  hostpci1: "host=03:00.0,pcie=1"
+openwrt_vm_hostpci: {}
 openwrt_vm_storage: local-lvm
 openwrt_vm_disk_interface: scsi0
 openwrt_vm_onboot: true
@@ -19,7 +17,14 @@ openwrt_vm_start: true
 
 openwrt_version: "25.12.2"
 openwrt_image_url: >-
-  https://downloads.openwrt.org/releases/{{ openwrt_version }}/targets/x86/64/openwrt-{{ openwrt_version }}-x86-64-generic-squashfs-combined.img.gz
+  {{
+    'https://downloads.openwrt.org/releases/' ~ openwrt_version ~
+    '/targets/x86/64/openwrt-' ~ openwrt_version ~
+    '-x86-64-generic-squashfs-combined.img.gz'
+  }}
+openwrt_image_checksum_url: >-
+  https://downloads.openwrt.org/releases/{{ openwrt_version }}/targets/x86/64/sha256sums
+openwrt_image_checksum: "sha256:{{ openwrt_image_checksum_url }}"
 openwrt_image_dir: /var/lib/vz/template/qemu
 openwrt_image_archive_path: "{{ openwrt_image_dir }}/{{ openwrt_image_url | basename }}"
 openwrt_image_path: "{{ openwrt_image_archive_path | regex_replace('\\.gz$', '') }}"

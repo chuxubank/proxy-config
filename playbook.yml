@@ -11,15 +11,15 @@
   roles:
     - sing-box_client
 
-- name: Setup Proxmox OpenWrt VM
+- name: Setup Proxmox workloads
   hosts: pve_group
   environment: "{{ proxmox_api_env | default({}) }}"
   roles:
     - pve_openwrt
 
-- name: Setup OpenWrt Xray Client
+- name: Setup OpenWrt Proxy Client
   hosts: openwrt_group
-  vars_files:
-    - roles/pve_openwrt/vars/openwrt_mirror.yml
+  gather_facts: false
   roles:
+    - openwrt
     - xray_client

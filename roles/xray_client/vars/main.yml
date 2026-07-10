@@ -17,6 +17,8 @@ xray_log_dir: >-
 xray_logrotate_config: "{{ logrotate_config_dir }}/xray"
 xray_openwrt_packages:
   - xray-core
+  - v2ray-geoip
+  - v2ray-geosite
 xray_openwrt_service_name: xray
 xray_service_template: >-
   {%- if ansible_facts['system'] == 'Darwin' -%}

@@ -1,4 +1,6 @@
 ---
+openwrt_pass_path: "Network/Home/OpenWrt/ssh"
+
 ansible_host: "{{ lookup('community.general.passwordstore', pve_pass_path, subkey='ip') }}"
 ansible_port: "{{ lookup('community.general.passwordstore', pve_pass_path, subkey='port') }}"
 ansible_password: "{{ lookup('community.general.passwordstore', pve_pass_path) }}"
@@ -9,3 +11,7 @@ proxmox_api_env:
   PROXMOX_PASSWORD: "{{ lookup('community.general.passwordstore', pve_pass_path) }}"
   PROXMOX_NODE: pve
   PROXMOX_VALIDATE_CERTS: "0"
+
+openwrt_vm_hostpci:
+  hostpci0: "host=02:00.0,pcie=1"
+  hostpci1: "host=03:00.0,pcie=1"

@@ -1,9 +1,38 @@
 ---
-- name: Install xray packages on OpenWrt
-  community.general.opkg:
+- name: Install xray packages with apk
+  community.general.apk:
     name: "{{ xray_openwrt_packages }}"
     state: present
     update_cache: true
+
+- name: Read xray UCI enabled state
+  ansible.builtin.command:
+    argv:
+      - uci
+      - -q
+      - get
+      - xray.enabled.enabled
+  register: xray_openwrt_uci_enabled
+  changed_when: false
+  failed_when: false
+
+- name: Enable xray in UCI
+  ansible.builtin.command:
+    argv:
+      - uci
+      - set
+      - xray.enabled.enabled=1
+  when: (xray_openwrt_uci_enabled.stdout | default('')) != '1'
+  changed_when: true
+
+- name: Commit xray UCI configuration
+  ansible.builtin.command:
+    argv:
+      - uci
+      - commit
+      - xray
+  when: (xray_openwrt_uci_enabled.stdout | default('')) != '1'
+  changed_when: true
 
 - name: Ensure xray service enabled and started on OpenWrt
   community.general.openwrt_init:

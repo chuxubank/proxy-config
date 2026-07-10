@@ -1,11 +1,9 @@
 all:
   hosts:
     bwg-cn2-gia:
-      proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
     localhost:
       ansible_connection: local
-      proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
 
     pve:
       pve_pass_path: "Network/Home/PVE/ssh"
@@ -26,6 +24,7 @@ all:
         bwg-cn2-gia:
         localhost:
       vars:
+        proxy_pass_path: "Network/Host/BandwagonHost/CN2/ssh"
         xray_client_pass_path: "Network/Xray/Client/Misaka"
         xray_reality_pass_path: "Network/Xray/Reality"
         xray_xhttp_pass_path: "Network/Xray/XHTTP"
@@ -39,5 +38,4 @@ all:
         pve:
 
     openwrt_group:
-      hosts:
-        pve:
+      hosts: {}

@@ -16,10 +16,14 @@
     url: "{{ openwrt_image_url }}"
     dest: "{{ openwrt_image_archive_path }}"
     mode: "0644"
-    checksum: "{{ openwrt_image_checksum | default(omit) }}"
+    checksum: "{{ openwrt_image_checksum }}"
 
 - name: Decompress OpenWrt image
-  ansible.builtin.command: "gzip -dk {{ openwrt_image_archive_path }}"
+  ansible.builtin.command:
+    argv:
+      - gzip
+      - -dk
+      - "{{ openwrt_image_archive_path }}"
   args:
     creates: "{{ openwrt_image_path }}"
   when: openwrt_image_archive_path is search("\\.gz$")
@@ -35,12 +39,13 @@
       net0: "{{ openwrt_vm_net0 }}"
     ipconfig:
       ipconfig0: "{{ openwrt_vm_ipconfig0 }}"
-    hostpci: "{{ openwrt_vm_hostpci | default(omit) }}"
+    hostpci: "{{ openwrt_vm_hostpci if openwrt_vm_hostpci | length > 0 else omit }}"
     scsihw: "{{ openwrt_vm_scsihw }}"
     machine: "{{ openwrt_vm_machine }}"
     ostype: l26
     onboot: "{{ openwrt_vm_onboot }}"
     state: present
+    update: true
 
 - name: Read OpenWrt VM config
   ansible.builtin.command: "qm config {{ openwrt_vm_id }}"
@@ -55,15 +60,47 @@
         | regex_search('^' ~ openwrt_vm_disk_interface ~ ':', multiline=True)
         is not none
       }}
+    openwrt_unused_disks: >-
+      {{
+        openwrt_vm_config.stdout
+        | regex_findall('^unused\d+:\s*([^,\n]+)', multiline=True)
+      }}
 
 - name: Import and attach OpenWrt disk
   when: not openwrt_disk_attached
   block:
     - name: Import OpenWrt disk into Proxmox storage
-      ansible.builtin.command: >-
-        qm importdisk {{ openwrt_vm_id }} {{ openwrt_image_path }} {{ openwrt_vm_storage }}
-      register: openwrt_disk_import
+      ansible.builtin.command:
+        argv:
+          - qm
+          - importdisk
+          - "{{ openwrt_vm_id }}"
+          - "{{ openwrt_image_path }}"
+          - "{{ openwrt_vm_storage }}"
       changed_when: true
+      when: openwrt_unused_disks | length == 0
+
+    - name: Read imported OpenWrt disk
+      ansible.builtin.command: "qm config {{ openwrt_vm_id }}"
+      register: openwrt_vm_config_after_import
+      changed_when: false
+
+    - name: Find imported OpenWrt disks
+      ansible.builtin.set_fact:
+        openwrt_imported_disks: >-
+          {{
+            openwrt_vm_config_after_import.stdout
+            | regex_findall('^unused\d+:\s*([^,\n]+)', multiline=True)
+          }}
+
+    - name: Require an imported OpenWrt disk
+      ansible.builtin.assert:
+        that: openwrt_imported_disks | length > 0
+        fail_msg: qm importdisk completed without creating an unused disk.
+
+    - name: Select imported OpenWrt disk
+      ansible.builtin.set_fact:
+        openwrt_disk_volume: "{{ openwrt_imported_disks | first }}"
 
     - name: Attach imported OpenWrt disk
       community.proxmox.proxmox_kvm:
@@ -72,16 +109,6 @@
         scsi: "{{ { openwrt_vm_disk_interface: openwrt_disk_volume } }}"
         update: true
         update_unsafe: true
-      vars:
-        openwrt_disk_volume: >-
-          {{
-            (
-              (openwrt_disk_import.stdout ~ openwrt_disk_import.stderr)
-              | regex_findall("as '([^']+)'")
-            )
-            | first
-            | default(openwrt_vm_storage ~ ':vm-' ~ openwrt_vm_id ~ '-disk-0', true)
-          }}
 
 - name: Refresh OpenWrt VM config
   ansible.builtin.command: "qm config {{ openwrt_vm_id }}"

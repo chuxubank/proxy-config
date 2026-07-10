@@ -1,7 +1,9 @@
 {
   "log": {
+{% if not xray_is_openwrt %}
     "access": "{{ xray_log_dir }}/xray-access.log",
     "error": "{{ xray_log_dir }}/xray-error.log",
+{% endif %}
     "loglevel": "debug",
     "dnsLog": true
   },

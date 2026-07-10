@@ -1,7 +1,7 @@
 - name: Force xray log rotation
   ansible.builtin.command:
     cmd: "logrotate -f {{ xray_logrotate_config }}"
-  become: "{{ use_become }}"
+  become: "{{ use_become | default(false) }}"
   when: not xray_is_openwrt
 
 - name: Restart xray service (OpenWrt)

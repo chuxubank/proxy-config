@@ -1,0 +1,57 @@
+---
+- name: Check whether Python is available on OpenWrt
+  ansible.builtin.raw: python3 -c 'import json, zipfile'
+  register: openwrt_python_check
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Bootstrap Python on OpenWrt
+  ansible.builtin.raw: apk update && apk add python3
+  when:
+    - openwrt_python_check.rc != 0
+    - not ansible_check_mode
+  changed_when: true
+
+- name: Verify Python is available on OpenWrt
+  ansible.builtin.raw: python3 -c 'import json, zipfile'
+  register: openwrt_python_verify
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Require Python before managing OpenWrt
+  ansible.builtin.assert:
+    that: openwrt_python_verify.rc == 0
+    fail_msg: >-
+      The OpenWrt Python runtime is incomplete. Run make openwrt once without
+      --check so the openwrt role can bootstrap it.
+
+- name: Gather OpenWrt facts
+  ansible.builtin.setup:
+
+- name: Check for OpenWrt apk feeds
+  ansible.builtin.stat:
+    path: /etc/apk/repositories.d/distfeeds.list
+  register: openwrt_apk_feeds
+
+- name: Require OpenWrt apk feeds
+  ansible.builtin.assert:
+    that: openwrt_apk_feeds.stat.exists
+    fail_msg: OpenWrt apk feeds were not found; OpenWrt 25.12 or newer is required.
+
+- name: Configure OpenWrt package mirror
+  ansible.builtin.replace:
+    path: /etc/apk/repositories.d/distfeeds.list
+    regexp: https?://[^/\s]+(?:/openwrt)?(?=/(?:releases|snapshots)/)
+    replace: >-
+      {{
+        (
+          openwrt_package_mirror
+          if ansible_facts['distribution_version'] | lower != 'snapshot'
+          or openwrt_mirror_snapshots | bool
+          else openwrt_official_package_source
+        )
+        | regex_replace('/$', '')
+      }}
+    backup: true
