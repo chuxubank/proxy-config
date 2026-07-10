@@ -8,7 +8,8 @@ Keep templates, handlers, and files under the standard Ansible role layout.
 
 ## Build, Test, and Development Commands
 Common workflows are wrapped in the `Makefile` (run `make help` to list targets); it exports `ANSIBLE_CONFIG=ansible.cfg` and accepts `LIMIT`/`TAGS`/`SKIP_TAGS`/`EXTRA` overrides.
-- `make deps` (or `ansible-galaxy install -r requirements.yml`) — pulls the `geerlingguy.docker` dependency into the gitignored `.ansible/` cache before any run.
+- `make deps` (or `ansible-galaxy install -r requirements.yml`) installs required
+  roles and collections into the gitignored `.ansible/` cache before any run.
 - `make local` — applies workstation changes to `localhost`, skipping the `install` tag; `make local-install` includes binary installs.
 - `make server` / `make pull` — deploy to `vps_group` / pull Docker Compose images on the server.
 - `make check` / `make diff` — dry-run (with diff) against the inventory to validate proposed edits.

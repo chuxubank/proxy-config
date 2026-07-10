@@ -211,7 +211,7 @@
     }
   ],
   "outbounds": [
-    {% if host_env == "iv" %}
+    {% if host_env | default('') == "iv" %}
     {
       "type": "http",
       "tag": "proxy-iv",
@@ -243,7 +243,7 @@
       "type": "selector",
       "tag": "select",
       "outbounds": [
-        {% if host_env == "iv" %}
+        {% if host_env | default('') == "iv" %}
         "proxy-iv",
         {% endif %}
         "proxy-self"
@@ -255,7 +255,7 @@
       "type": "urltest",
       "tag": "proxy",
       "outbounds": [
-        {% if host_env == "iv" %}
+        {% if host_env | default('') == "iv" %}
         "proxy-iv",
         {% endif %}
         "proxy-self"

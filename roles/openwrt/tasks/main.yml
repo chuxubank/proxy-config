@@ -55,3 +55,8 @@
         | regex_replace('/$', '')
       }}
     backup: true
+
+- name: Update OpenWrt package index
+  community.general.apk:
+    update_cache: true
+  changed_when: false

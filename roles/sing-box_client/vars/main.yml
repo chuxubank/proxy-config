@@ -18,6 +18,18 @@ sing_box_logrotate_config: "{{ (logrotate_config_dir | default('/etc/logrotate.d
 sing_box_openwrt_packages:
   - sing-box
 sing_box_openwrt_service_name: sing-box
+sing_box_install_platform: >-
+  {{
+    'openwrt'
+    if sing_box_on_openwrt
+    else ansible_facts['distribution'] | lower | replace(' ', '_')
+  }}
+sing_box_binary: >-
+  {{
+    (brew_path ~ '/bin/sing-box')
+    if ansible_facts['system'] == 'Darwin'
+    else '/usr/bin/sing-box'
+  }}
 sing_box_service_template: >-
   {{
     {

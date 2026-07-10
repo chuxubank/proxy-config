@@ -14,11 +14,3 @@
     mode: "0644"
   notify:
     - Restart xray service
-
-- name: Ensure xray service is enabled and started
-  become: "{{ use_become | default(true) }}"
-  ansible.builtin.systemd:
-    name: xray.service
-    enabled: true
-    state: started
-    daemon_reload: true

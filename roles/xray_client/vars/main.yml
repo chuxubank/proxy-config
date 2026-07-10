@@ -20,11 +20,16 @@ xray_openwrt_packages:
   - v2ray-geoip
   - v2ray-geosite
 xray_openwrt_service_name: xray
+xray_binary: >-
+  {{
+    (brew_path ~ '/bin/xray')
+    if ansible_facts['system'] == 'Darwin'
+    else '/usr/bin/xray'
+  }}
 xray_service_template: >-
-  {%- if ansible_facts['system'] == 'Darwin' -%}
-  service.plist.j2
-  {%- elif ansible_facts['system'] == 'Linux' -%}
-  service.systemd.j2
-  {%- else -%}
-  service.conf.j2
-  {%- endif -%}
+  {{
+    {
+      'Darwin': 'service.plist.j2',
+      'Linux': 'service.systemd.j2'
+    }.get(ansible_facts['system'], 'service.conf.j2')
+  }}

@@ -1,0 +1,34 @@
+---
+- name: Read OpenWrt UCI options
+  ansible.builtin.command:
+    argv:
+      - uci
+      - -q
+      - get
+      - "{{ item.key }}"
+  loop: "{{ common_openwrt_uci_options | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: common_openwrt_uci_values
+  changed_when: false
+  failed_when: false
+
+- name: Configure and commit OpenWrt UCI options
+  ansible.builtin.command:
+    argv:
+      - uci
+      - batch
+    stdin: |-
+      set {{ item.item.key }}='{{ item.item.value }}'
+      commit {{ common_openwrt_uci_package }}
+  loop: "{{ common_openwrt_uci_values.results }}"
+  when: (item.stdout | default('')) != item.item.value
+  changed_when: true
+  loop_control:
+    label: "{{ item.item.key }}"
+
+- name: Ensure OpenWrt service is enabled and started
+  community.general.openwrt_init:
+    name: "{{ common_openwrt_service_name }}"
+    enabled: true
+    state: started

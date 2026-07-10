@@ -1,4 +1,8 @@
 ---
+- name: Include sing-box install tasks
+  ansible.builtin.include_tasks: install.yml
+  tags: install
+
 - name: Ensure sing-box config directory exists
   ansible.builtin.file:
     path: "{{ sing_box_config_dir }}"
@@ -38,10 +42,28 @@
     src: config.json.j2
     dest: "{{ sing_box_config_file }}"
     mode: "0600"
+    validate: "{{ sing_box_binary }} check -c %s"
   notify:
     - Force sing-box log rotation
     - Restart sing-box service
 
-- name: Include sing-box install tasks
-  ansible.builtin.include_tasks: install.yml
+- name: Configure sing-box service on OpenWrt
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: configure_openwrt_service
+  vars:
+    common_openwrt_service_name: "{{ sing_box_openwrt_service_name }}"
+    common_openwrt_uci_package: sing-box
+    common_openwrt_uci_options:
+      sing-box.main.enabled: "1"
+      sing-box.main.user: root
+      sing-box.main.conffile: "{{ sing_box_config_file }}"
+  when: sing_box_on_openwrt
+  tags: install
+
+- name: Configure sing-box service on Linux
+  ansible.builtin.include_tasks: service_linux.yml
+  when:
+    - not sing_box_on_openwrt
+    - ansible_facts['system'] == 'Linux'
   tags: install

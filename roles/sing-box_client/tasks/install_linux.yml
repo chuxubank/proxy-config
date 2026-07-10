@@ -13,11 +13,3 @@
     mode: "0644"
   notify:
     - Restart sing-box service
-
-- name: Ensure sing-box service is enabled and started
-  become: "{{ use_become | default(true) }}"
-  ansible.builtin.systemd:
-    name: sing-box.service
-    enabled: true
-    state: started
-    daemon_reload: true
