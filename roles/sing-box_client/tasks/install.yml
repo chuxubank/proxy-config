@@ -2,7 +2,7 @@
 - name: Include OS-specific install tasks for sing-box
   ansible.builtin.include_tasks: "{{ sing_box_install_task_file }}"
   with_first_found:
-    - "install_{{ sing_box_is_openwrt | ternary('openwrt', ansible_facts.distribution | lower | replace(' ', '_')) }}.yml"
+    - "install_{{ sing_box_on_openwrt | ternary('openwrt', ansible_facts.distribution | lower | replace(' ', '_')) }}.yml"
     - "install_{{ ansible_facts.distribution | lower | replace(' ', '_') }}.yml"
     - "install_{{ ansible_facts.system | lower }}.yml"
     - install_default.yml

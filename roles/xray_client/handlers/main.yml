@@ -2,14 +2,14 @@
   ansible.builtin.command:
     cmd: "logrotate -f {{ xray_logrotate_config }}"
   become: "{{ use_become | default(false) }}"
-  when: not xray_is_openwrt
+  when: not xray_on_openwrt
 
 - name: Restart xray service (OpenWrt)
   community.general.openwrt_init:
     name: "{{ xray_openwrt_service_name }}"
     state: restarted
   listen: Restart xray service
-  when: xray_is_openwrt
+  when: xray_on_openwrt
 
 - name: Restart xray service (default)
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/restart_service.yml"
@@ -17,4 +17,4 @@
     service_name: xray
     service_template_content: "{{ lookup('template', xray_service_template) }}"
   listen: Restart xray service
-  when: not xray_is_openwrt
+  when: not xray_on_openwrt

@@ -1,20 +1,20 @@
 ---
 - name: Ensure xray config directory exists
-  become: "{{ (not xray_is_openwrt) and (use_become | default(false)) }}"
+  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
   ansible.builtin.file:
     path: "{{ xray_config_dir }}"
     state: directory
     mode: "0755"
-    owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
+    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
 
 - name: Ensure xray log directory exists
-  become: "{{ (not xray_is_openwrt) and (use_become | default(false)) }}"
+  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
   ansible.builtin.file:
     path: "{{ xray_log_dir }}"
     state: directory
     mode: "0755"
-    owner: "{{ xray_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
-  when: not xray_is_openwrt
+    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
+  when: not xray_on_openwrt
 
 - name: Ensure logrotate config directory exists
   become: "{{ use_become | default(false) }}"
@@ -22,7 +22,7 @@
     path: "{{ logrotate_config_dir }}"
     state: directory
     mode: "0755"
-  when: not xray_is_openwrt
+  when: not xray_on_openwrt
 
 - name: Setup logrotate
   become: "{{ use_become | default(false) }}"
@@ -31,7 +31,7 @@
     dest: "{{ xray_logrotate_config }}"
   notify:
     - Force xray log rotation
-  when: not xray_is_openwrt
+  when: not xray_on_openwrt
 
 - name: Setup xray config
   ansible.builtin.template:
@@ -49,7 +49,7 @@
 - name: Render share text
   ansible.builtin.set_fact:
     xray_share_text: "{{ lookup('template', 'share.txt.j2') | trim }}"
-  when: not xray_is_openwrt
+  when: not xray_on_openwrt
 
 - name: Display share links
   ansible.builtin.debug:
@@ -63,11 +63,11 @@
   changed_when: false
   when:
     - xray_share_text != ""
-    - not xray_is_openwrt
+    - not xray_on_openwrt
 
 - name: Show QR code
   ansible.builtin.debug:
     msg: "{{ qrencode_output.stdout }}"
   when:
     - qrencode_output is defined
-    - not xray_is_openwrt
+    - not xray_on_openwrt

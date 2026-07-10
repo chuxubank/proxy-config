@@ -4,16 +4,16 @@
     path: "{{ sing_box_config_dir }}"
     state: directory
     mode: "0755"
-    owner: "{{ sing_box_is_openwrt | ternary('root', ansible_facts['user_id']) }}"
+    owner: "{{ sing_box_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
 
 - name: Ensure sing-box log directory exists
-  become: "{{ (not sing_box_is_openwrt) and (use_become | default(false)) }}"
+  become: "{{ (not sing_box_on_openwrt) and (use_become | default(false)) }}"
   ansible.builtin.file:
     path: "{{ sing_box_log_dir }}"
     state: directory
     mode: "0755"
     owner: "{{ ansible_facts['user_id'] }}"
-  when: not sing_box_is_openwrt
+  when: not sing_box_on_openwrt
 
 - name: Ensure logrotate config directory exists
   become: "{{ use_become | default(false) }}"
@@ -21,7 +21,7 @@
     path: "{{ logrotate_config_dir }}"
     state: directory
     mode: "0755"
-  when: not sing_box_is_openwrt
+  when: not sing_box_on_openwrt
 
 - name: Setup logrotate
   become: "{{ use_become | default(false) }}"
@@ -31,7 +31,7 @@
     mode: "0644"
   notify:
     - Force sing-box log rotation
-  when: not sing_box_is_openwrt
+  when: not sing_box_on_openwrt
 
 - name: Setup sing-box config
   ansible.builtin.template:

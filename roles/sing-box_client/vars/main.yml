@@ -1,17 +1,17 @@
-sing_box_is_openwrt: "{{ ansible_facts['distribution'] | lower == 'openwrt' }}"
+sing_box_on_openwrt: "{{ ansible_facts['distribution'] | lower == 'openwrt' }}"
 sing_box_config_dir: >-
   {{
-    sing_box_is_openwrt
+    sing_box_on_openwrt
     | ternary('/etc/sing-box', ansible_facts['env']['HOME'] ~ '/.config/sing-box')
   }}
 sing_box_config_file: >-
   {{
-    sing_box_is_openwrt
+    sing_box_on_openwrt
     | ternary(sing_box_config_dir ~ '/config.json', sing_box_config_dir ~ '/50-config.json')
   }}
 sing_box_log_dir: >-
   {{
-    sing_box_is_openwrt
+    sing_box_on_openwrt
     | ternary('/var/log/sing-box', (log_dir | default('/var/log')) ~ '/sing-box')
   }}
 sing_box_logrotate_config: "{{ (logrotate_config_dir | default('/etc/logrotate.d')) }}/sing-box"
