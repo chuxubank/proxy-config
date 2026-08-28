@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   freshrss:
     image: freshrss/freshrss
@@ -6,9 +12,7 @@ services:
     container_name: freshrss
     hostname: freshrss
     restart: unless-stopped
-    logging:
-      options:
-        max-size: 10m
+    logging: *default-logging
     volumes:
       - freshrss_data:/var/www/FreshRSS/data
       - ./extensions:/var/www/FreshRSS/extensions

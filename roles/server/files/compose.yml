@@ -3,6 +3,12 @@ include:
   - path: ./rsshub/compose.yml
   - path: ./asspp/compose.yml
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   caddy:
     container_name: caddy
@@ -29,21 +35,18 @@ services:
         required: false
       - path: ./asspp/.env
         required: false
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+    logging: *default-logging
 
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    mem_limit: 256m
+    logging: *default-logging
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.size=512MB
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -54,11 +57,8 @@ services:
     image: grafana/grafana-oss:latest
     container_name: grafana
     restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    mem_limit: 384m
+    logging: *default-logging
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -85,11 +85,7 @@ services:
     volumes:
       - ./xray/:/usr/local/etc/xray/
       - caddy_data:/data
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
+    logging: *default-logging
 
   warp:
     container_name: warp
@@ -101,6 +97,7 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     expose:
       - "9091"
+    logging: *default-logging
     healthcheck:
       test:
         [

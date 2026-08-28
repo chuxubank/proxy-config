@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   rsshub:
     image: diygod/rsshub
@@ -5,6 +11,7 @@ services:
     profiles:
       - rss
     restart: always
+    logging: *default-logging
     environment:
       NODE_ENV: production
       CACHE_TYPE: redis
@@ -25,6 +32,7 @@ services:
     profiles:
       - rss
     restart: always
+    logging: *default-logging
     ulimits:
       core:
         hard: 0
@@ -41,6 +49,7 @@ services:
     profiles:
       - rss
     restart: always
+    logging: *default-logging
     volumes:
       - redis_data:/data
     healthcheck:
