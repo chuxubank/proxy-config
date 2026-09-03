@@ -17,15 +17,22 @@
   sing-box check -C $HOME/.config/sing-box
 #+end_src
 
+*** API and Dashboard
+The native sing-box gRPC/gRPC-Web API and dashboard listen on loopback only.
+Open [[http://127.0.0.1:9090/dashboard/]] and connect to =127.0.0.1:9090=
+without a secret. The listener is intentionally unavailable from LAN and
+Tailscale; change the listen address and configure =services[].secret= before
+enabling remote access.
+
 *** iCloud profile
 Exports a portable profile to the sing-box Apple client iCloud containers,
 landing at =iCloud Drive/sing-box/sing-box.json=. In the app, add a profile of
 type =iCloud= and set =Path= to =sing-box.json=.
 
-Dropped from this profile: the host-local log path and the site-local outbounds
-gated on =host_env=. Everything else, Tailscale included, matches the
-workstation config, so the file carries the Tailscale auth key and is written
-=0600=.
+Dropped from this profile: the host-local log path, the loopback API/dashboard,
+and the site-local outbounds gated on =host_env=. Everything else, Tailscale
+included, matches the workstation config, so the file carries the Tailscale
+auth key and is written =0600=.
 #+begin_src sh :results output silent
   make local TAGS=icloud
 #+end_src

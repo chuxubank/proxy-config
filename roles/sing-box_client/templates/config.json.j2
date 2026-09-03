@@ -304,14 +304,24 @@
     "cache_file": {
       "enabled": true,
       "store_dns": true
-    },
-    "clash_api": {
-      "external_controller": "127.0.0.1:9090",
-      "access_control_allow_origin": [
-        "http://127.0.0.1",
-        "http://yacd.haishan.me"
-      ],
-      "access_control_allow_private_network": true
     }
-  }
+  }{{ "," if not sing_box_icloud_profile else "" }}
+{% if not sing_box_icloud_profile %}
+  "services": [
+    {
+      "type": "api",
+      "tag": "api",
+      "listen": "127.0.0.1",
+      "listen_port": 9090,
+      "access_control_allow_origin": [
+        "http://127.0.0.1:9090",
+        "http://localhost:9090"
+      ],
+      "dashboard": {
+        "enabled": true,
+        "http_client": "rule-set"
+      }
+    }
+  ]
+{% endif %}
 }
