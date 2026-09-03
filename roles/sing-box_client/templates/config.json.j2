@@ -55,16 +55,34 @@
         "server": "ali"
       },
       {
-        "rule_set": "geoip-cn",
-        "server": "ali"
+        "action": "evaluate",
+        "server": "ali",
+        "tag": "cn-probe"
       },
       {
+        "match_response": "cn-probe",
+        "rule_set": "geoip-cn",
+        "action": "respond"
+      },
+      {
+        "action": "evaluate",
+        "server": "ts",
+        "tag": "ts-probe"
+      },
+      {
+        "match_response": "ts-probe",
         "ip_accept_any": true,
-        "server": "ts"
+        "action": "respond"
       }
     ],
     "strategy": "ipv4_only"
   },
+  "http_clients": [
+    {
+      "tag": "rule-set",
+      "detour": "select"
+    }
+  ],
   "route": {
     "rules": [
       {
@@ -197,6 +215,7 @@
     ],
     "final": "select",
     "default_domain_resolver": "ali",
+    "default_http_client": "rule-set",
     "auto_detect_interface": true
   },
   "inbounds": [
