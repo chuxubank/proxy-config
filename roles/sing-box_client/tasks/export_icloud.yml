@@ -1,0 +1,31 @@
+---
+- name: Check for sing-box iCloud containers
+  ansible.builtin.stat:
+    path: "{{ item | dirname }}"
+  loop: "{{ sing_box_icloud_containers }}"
+  loop_control:
+    label: "{{ item | dirname | basename }}"
+  register: sing_box_icloud_container_stat
+
+- name: Ensure iCloud Documents directory exists
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    state: directory
+    mode: "0700"
+  loop: "{{ sing_box_icloud_container_stat.results }}"
+  loop_control:
+    label: "{{ item.item | dirname | basename }}"
+  when: item.stat.exists
+
+- name: Export sing-box profile to iCloud
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ item.item }}/{{ sing_box_icloud_profile_file }}"
+    mode: "0600"
+    validate: "{{ sing_box_binary }} check -c %s"
+  vars:
+    sing_box_icloud_profile: true
+  loop: "{{ sing_box_icloud_container_stat.results }}"
+  loop_control:
+    label: "{{ item.item | dirname | basename }}"
+  when: item.stat.exists

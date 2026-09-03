@@ -67,3 +67,11 @@
     - not sing_box_on_openwrt
     - ansible_facts['system'] == 'Linux'
   tags: install
+
+- name: Export sing-box profile for the Apple clients
+  ansible.builtin.include_tasks:
+    file: export_icloud.yml
+    apply:
+      tags: icloud
+  when: ansible_facts['system'] == 'Darwin'
+  tags: icloud

@@ -17,6 +17,19 @@
   sing-box check -C $HOME/.config/sing-box
 #+end_src
 
+*** iCloud profile
+Exports a portable profile to the sing-box Apple client iCloud containers,
+landing at =iCloud Drive/sing-box/sing-box.json=. In the app, add a profile of
+type =iCloud= and set =Path= to =sing-box.json=.
+
+Dropped from this profile: the host-local log path and the site-local outbounds
+gated on =host_env=. Everything else, Tailscale included, matches the
+workstation config, so the file carries the Tailscale auth key and is written
+=0600=.
+#+begin_src sh :results output silent
+  make local TAGS=icloud
+#+end_src
+
 *** Log
 [[file:~/Library/Logs/sing-box/sing-box.log]]
 
@@ -42,6 +55,7 @@ applicable. =PLAYBOOK= can override the playbook path globally.
 
   make check LIMIT=bwg-cn2-gia    # override: limit to one host
   make server TAGS=pull           # override: run only tagged tasks
+  make local TAGS=icloud          # override: re-export the iCloud profile only
   make diff EXTRA="--ask-vault-pass"
 #+end_src
 

@@ -37,3 +37,10 @@ sing_box_service_template: >-
       'Linux': 'service.systemd.j2'
     }.get(ansible_facts['system'], 'service.conf.j2')
   }}
+# Ubiquity containers for the sing-box Apple clients. sfamt is the
+# BASE_PACKAGE_IDENTIFIER used by sing-box-for-apple; sfavt is a separate
+# distribution. Missing containers are skipped, so both can be listed.
+# Documents/ surfaces as "iCloud Drive/sing-box" in Files and Finder.
+sing_box_icloud_containers:
+  - "{{ ansible_facts['env']['HOME'] }}/Library/Mobile Documents/iCloud~io~nekohasekai~sfavt/Documents"
+  - "{{ ansible_facts['env']['HOME'] }}/Library/Mobile Documents/iCloud~io~nekohasekai~sfamt/Documents"
