@@ -70,7 +70,7 @@ applicable. =PLAYBOOK= can override the playbook path globally.
   make deps                       # install Galaxy requirements
   make syntax                     # fast parse validation
   make test                       # render and check sing-box profiles
-  make ci                         # syntax + sing-box profile checks
+  make ci                         # syntax + sing-box profile checks (GHA: Linux/macOS/Windows)
   make check                      # dry-run against the inventory
   make diff                       # dry-run with a diff of changes
   make local                      # apply to localhost, skip binary installs

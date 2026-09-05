@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - name: Check out
@@ -32,3 +32,67 @@ jobs:
 
       - name: Run CI
         run: make ci
+
+      - name: Upload rendered profiles
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-profiles
+          path: tests/.render/*.json
+          if-no-files-found: error
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible
+        run: pip install ansible-core
+
+      - name: Install Galaxy requirements
+        run: make deps
+
+      - name: Install sing-box
+        run: brew install sing-box
+
+      - name: Run CI
+        run: make ci
+
+  windows:
+    runs-on: windows-latest
+    needs: linux
+    steps:
+      - name: Download rendered profiles
+        uses: actions/download-artifact@v4
+        with:
+          name: sing-box-profiles
+          path: profiles
+
+      - name: Install sing-box
+        shell: pwsh
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/SagerNet/sing-box/releases/latest'
+          $asset = $rel.assets |
+            Where-Object { $_.name -match 'windows-amd64\.zip$' } |
+            Select-Object -First 1
+          if (-not $asset) { throw 'windows-amd64 zip not found on latest release' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile sing-box.zip
+          Expand-Archive -Path sing-box.zip -DestinationPath sing-box-dist -Force
+          $exe = Get-ChildItem -Path sing-box-dist -Recurse -Filter sing-box.exe |
+            Select-Object -First 1
+          if (-not $exe) { throw 'sing-box.exe not found in release zip' }
+          Add-Content -Path $env:GITHUB_PATH -Value $exe.DirectoryName
+
+      - name: Check profiles
+        shell: pwsh
+        run: |
+          Get-ChildItem profiles -Filter *.json | ForEach-Object {
+            & sing-box.exe check -c $_.FullName
+            if ($LASTEXITCODE -ne 0) { throw "sing-box check failed: $($_.Name)" }
+          }

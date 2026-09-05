@@ -4,5 +4,8 @@
 # Galaxy dependencies installed via `make deps` (regenerable from requirements.yml)
 /.ansible/
 
+# Rendered sing-box profiles from `make test`
+/tests/.render/
+
 # Grafana dashboards fetched from grafana.com at deploy time (see roles/server)
 /roles/server/files/grafana/dashboards/*.json

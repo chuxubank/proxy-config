@@ -11,6 +11,7 @@
     sing_box_icloud_profile: false
     sing_box_windows_profile: false
     sing_box_template: "{{ playbook_dir }}/../roles/sing-box_client/templates/config.json.j2"
+    sing_box_ci_render_dir: "{{ playbook_dir }}/.render"
     sing_box_tailscale_auth_token: tskey-auth-ci000000000000000000000000
     xray_env:
       ADDRESS: 203.0.113.10
@@ -25,23 +26,23 @@
       ansible.builtin.include_vars:
         file: "{{ playbook_dir }}/../roles/sing-box_client/vars/main.yml"
 
-    - name: Create render directory
-      ansible.builtin.tempfile:
+    - name: Ensure render directory exists
+      ansible.builtin.file:
+        path: "{{ sing_box_ci_render_dir }}"
         state: directory
-        prefix: sing-box-ci-
-      register: sing_box_ci_dir
+        mode: "0755"
 
     - name: Render workstation profile
       ansible.builtin.template:
         src: "{{ sing_box_template }}"
-        dest: "{{ sing_box_ci_dir.path }}/workstation.json"
+        dest: "{{ sing_box_ci_render_dir }}/workstation.json"
         mode: "0600"
         validate: sing-box check -c %s
 
     - name: Render Windows profile
       ansible.builtin.template:
         src: "{{ sing_box_template }}"
-        dest: "{{ sing_box_ci_dir.path }}/windows.json"
+        dest: "{{ sing_box_ci_render_dir }}/windows.json"
         mode: "0600"
         validate: sing-box check -c %s
       vars:
@@ -50,7 +51,7 @@
     - name: Render iCloud profile
       ansible.builtin.template:
         src: "{{ sing_box_template }}"
-        dest: "{{ sing_box_ci_dir.path }}/icloud.json"
+        dest: "{{ sing_box_ci_render_dir }}/icloud.json"
         mode: "0600"
         validate: sing-box check -c %s
       vars:
@@ -58,17 +59,17 @@
 
     - name: Load workstation profile
       ansible.builtin.slurp:
-        src: "{{ sing_box_ci_dir.path }}/workstation.json"
+        src: "{{ sing_box_ci_render_dir }}/workstation.json"
       register: sing_box_ci_workstation_file
 
     - name: Load Windows profile
       ansible.builtin.slurp:
-        src: "{{ sing_box_ci_dir.path }}/windows.json"
+        src: "{{ sing_box_ci_render_dir }}/windows.json"
       register: sing_box_ci_windows_file
 
     - name: Load iCloud profile
       ansible.builtin.slurp:
-        src: "{{ sing_box_ci_dir.path }}/icloud.json"
+        src: "{{ sing_box_ci_render_dir }}/icloud.json"
       register: sing_box_ci_icloud_file
 
     - name: Decode rendered profiles
