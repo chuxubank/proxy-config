@@ -33,11 +33,16 @@ jobs:
       - name: Run CI
         run: make ci
 
+      - name: Stage rendered profiles
+        run: |
+          mkdir -p "${{ runner.temp }}/sing-box-profiles"
+          cp tests/.render/*.json "${{ runner.temp }}/sing-box-profiles/"
+
       - name: Upload rendered profiles
         uses: actions/upload-artifact@v4
         with:
           name: sing-box-profiles
-          path: tests/.render/*.json
+          path: ${{ runner.temp }}/sing-box-profiles/*.json
           if-no-files-found: error
 
   macos:
@@ -58,7 +63,27 @@ jobs:
         run: make deps
 
       - name: Install sing-box
-        run: brew install sing-box
+        run: |
+          set -euo pipefail
+          tmp="${{ runner.temp }}/sing-box-dl"
+          mkdir -p "$tmp" "$HOME/.local/bin"
+          url=$(python3 -c '
+          import json, os, urllib.request
+          req = urllib.request.Request(
+              "https://api.github.com/repos/SagerNet/sing-box/releases/latest",
+              headers={"User-Agent": "proxy-config-ci"},
+          )
+          with urllib.request.urlopen(req) as resp:
+              rel = json.load(resp)
+          tag = rel["tag_name"].lstrip("v")
+          arch = {"x86_64": "amd64", "arm64": "arm64", "aarch64": "arm64"}[os.uname().machine]
+          name = f"sing-box-{tag}-darwin-{arch}.tar.gz"
+          print(next(a["browser_download_url"] for a in rel["assets"] if a["name"] == name))
+          ')
+          curl -fsSL "$url" | tar -xz -C "$tmp"
+          bin=$(find "$tmp" -type f -name sing-box | head -n1)
+          install -m 755 "$bin" "$HOME/.local/bin/sing-box"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run CI
         run: make ci
