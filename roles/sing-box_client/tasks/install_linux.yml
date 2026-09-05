@@ -3,7 +3,7 @@
   ansible.builtin.package:
     name:
       - sing-box
-    state: present
+    state: latest
 
 - name: Deploy sing-box systemd unit
   become: "{{ use_become | default(true) }}"

@@ -5,6 +5,9 @@
   vars:
     homebrew_packages:
       - sing-box
+    homebrew_state: latest
+    homebrew_update: true
+    homebrew_no_auto_update: "0"
 
 - name: Ensure sudoers.d directory exists
   become: true
