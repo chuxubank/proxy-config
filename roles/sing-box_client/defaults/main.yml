@@ -2,10 +2,14 @@
 sing_box_tailscale_auth_token: >-
   {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='auth-key-sing-box') }}
 
-# Renders a portable profile: drops the host-local log path and the site-local
-# outbounds gated on host_env. Tailscale is kept, so the rendered file carries
-# sing_box_tailscale_auth_token — see the iCloud export task for file mode.
+# Portable profiles drop the host-local log path and the site-local outbounds
+# gated on host_env. Tailscale is kept, so the rendered file carries
+# sing_box_tailscale_auth_token — see the export tasks for file mode.
 sing_box_icloud_profile: false
 # File name inside iCloud Drive/sing-box; used as the Path when adding an
 # iCloud profile in SFI/SFM.
 sing_box_icloud_profile_file: sing-box.json
+# Windows desktop keeps the loopback API/dashboard; iCloud drops it.
+sing_box_windows_profile: false
+sing_box_windows_profile_file: sing-box.json
+sing_box_windows_profile_dir: "{{ sing_box_config_dir }}/windows"

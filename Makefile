@@ -16,7 +16,7 @@ CHECK_FLAGS      = $(LIMIT_FLAG) $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
-.PHONY: help deps syntax check diff local local-install server pve openwrt pull lint
+.PHONY: help deps syntax check diff local local-install server pve openwrt pull lint test ci
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -53,6 +53,18 @@ pull: ## Pull Docker Compose images on the server
 	$(ANSIBLE_PLAYBOOK) --limit vps_group --tags pull $(EXTRA)
 
 lint: ## Run ansible-lint if available
-	@command -v ansible-lint >/dev/null 2>&1 \
-		&& ansible-lint $(PLAYBOOK) \
-		|| echo "ansible-lint not installed; skipping"
+	@if command -v ansible-lint >/dev/null 2>&1; then \
+	  ansible-lint $(PLAYBOOK); \
+	elif [ -n "$$CI" ]; then \
+	  echo "ansible-lint is required in CI" >&2; \
+	  exit 1; \
+	else \
+	  echo "ansible-lint not installed; skipping"; \
+	fi
+
+test: ## Render and validate sing-box client profiles
+	@command -v sing-box >/dev/null 2>&1 \
+	  || { echo "sing-box not installed; needed for profile checks" >&2; exit 1; }
+	ansible-playbook tests/sing-box.yml --inventory tests/inventory.yml $(EXTRA)
+
+ci: syntax test ## CI checks (syntax and sing-box profile validation)

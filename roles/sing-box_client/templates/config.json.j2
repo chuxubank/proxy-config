@@ -1,8 +1,9 @@
+{% set portable = sing_box_icloud_profile or sing_box_windows_profile %}
 {
   "$schema": "https://sing-box.sagernet.org/schema.json",
   "log": {
     "level": "trace",
-{% if not sing_box_on_openwrt and not sing_box_icloud_profile %}
+{% if not sing_box_on_openwrt and not portable %}
     "output": "{{ sing_box_log_dir }}/sing-box.log",
 {% endif %}
     "timestamp": true
@@ -153,11 +154,19 @@
           {
             "process_name": [
               "xray",
+              "xray.exe",
               "hysteria",
+              "hysteria.exe",
               "fly",
+              "fly.exe",
               "Teams",
+              "Teams.exe",
+              "ms-teams.exe",
               "Motrix",
-              "Feishu"
+              "Motrix.exe",
+              "Feishu",
+              "Feishu.exe",
+              "Lark.exe"
             ]
           },
           {
@@ -230,7 +239,7 @@
     }
   ],
   "outbounds": [
-    {% if host_env | default('') == "iv" and not sing_box_icloud_profile %}
+    {% if host_env | default('') == "iv" and not portable %}
     {
       "type": "http",
       "tag": "proxy-iv",
@@ -262,7 +271,7 @@
       "type": "selector",
       "tag": "select",
       "outbounds": [
-        {% if host_env | default('') == "iv" and not sing_box_icloud_profile %}
+        {% if host_env | default('') == "iv" and not portable %}
         "proxy-iv",
         {% endif %}
         "proxy-self"
@@ -274,7 +283,7 @@
       "type": "urltest",
       "tag": "proxy",
       "outbounds": [
-        {% if host_env | default('') == "iv" and not sing_box_icloud_profile %}
+        {% if host_env | default('') == "iv" and not portable %}
         "proxy-iv",
         {% endif %}
         "proxy-self"

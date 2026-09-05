@@ -3,7 +3,9 @@
     cmd: "logrotate -f {{ sing_box_logrotate_config }}"
   changed_when: true
   become: "{{ use_become | default(false) }}"
-  when: not sing_box_on_openwrt
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows
 
 - name: Restart sing-box service (OpenWrt)
   community.general.openwrt_init:
@@ -18,4 +20,6 @@
     service_name: sing-box
     service_template_content: "{{ lookup('template', sing_box_service_template) }}"
   listen: Restart sing-box service
-  when: not sing_box_on_openwrt
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows

@@ -9,6 +9,7 @@
     state: directory
     mode: "0755"
     owner: "{{ sing_box_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
+  when: not sing_box_on_windows
 
 - name: Ensure sing-box log directory exists
   become: "{{ (not sing_box_on_openwrt) and (use_become | default(false)) }}"
@@ -17,7 +18,9 @@
     state: directory
     mode: "0755"
     owner: "{{ ansible_facts['user_id'] }}"
-  when: not sing_box_on_openwrt
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows
 
 - name: Ensure logrotate config directory exists
   become: "{{ use_become | default(false) }}"
@@ -25,7 +28,9 @@
     path: "{{ logrotate_config_dir }}"
     state: directory
     mode: "0755"
-  when: not sing_box_on_openwrt
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows
 
 - name: Setup logrotate
   become: "{{ use_become | default(false) }}"
@@ -35,7 +40,9 @@
     mode: "0644"
   notify:
     - Force sing-box log rotation
-  when: not sing_box_on_openwrt
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows
 
 - name: Setup sing-box config
   ansible.builtin.template:
@@ -46,6 +53,7 @@
   notify:
     - Force sing-box log rotation
     - Restart sing-box service
+  when: not sing_box_on_windows
 
 - name: Configure sing-box service on OpenWrt
   ansible.builtin.include_role:
@@ -75,3 +83,13 @@
       tags: icloud
   when: ansible_facts['system'] == 'Darwin'
   tags: icloud
+
+- name: Export sing-box profile for Windows clients
+  ansible.builtin.include_tasks:
+    file: export_windows.yml
+    apply:
+      tags: windows
+  when:
+    - not sing_box_on_openwrt
+    - not sing_box_on_windows
+  tags: windows

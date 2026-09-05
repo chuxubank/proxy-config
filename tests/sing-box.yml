@@ -1,0 +1,100 @@
+---
+- name: Validate sing-box client templates
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    host_env: ""
+    brew_path: /opt/homebrew
+    log_dir: /tmp/sing-box-ci/logs
+    logrotate_config_dir: /tmp/sing-box-ci/logrotate
+    sing_box_icloud_profile: false
+    sing_box_windows_profile: false
+    sing_box_template: "{{ playbook_dir }}/../roles/sing-box_client/templates/config.json.j2"
+    sing_box_tailscale_auth_token: tskey-auth-ci000000000000000000000000
+    xray_env:
+      ADDRESS: 203.0.113.10
+      DOMAIN: example.test
+      CLIENT_ID: 00000000-0000-4000-8000-000000000000
+      REALITY_TARGET: www.cloudflare.com
+      REALITY_PUBLIC_KEY: 0123456789abcdef0123456789abcdef0123456789a
+      REALITY_SHORT_ID: abcd1234
+      REALITY_PORT: 443
+  tasks:
+    - name: Load sing-box role vars
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/../roles/sing-box_client/vars/main.yml"
+
+    - name: Create render directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: sing-box-ci-
+      register: sing_box_ci_dir
+
+    - name: Render workstation profile
+      ansible.builtin.template:
+        src: "{{ sing_box_template }}"
+        dest: "{{ sing_box_ci_dir.path }}/workstation.json"
+        mode: "0600"
+        validate: sing-box check -c %s
+
+    - name: Render Windows profile
+      ansible.builtin.template:
+        src: "{{ sing_box_template }}"
+        dest: "{{ sing_box_ci_dir.path }}/windows.json"
+        mode: "0600"
+        validate: sing-box check -c %s
+      vars:
+        sing_box_windows_profile: true
+
+    - name: Render iCloud profile
+      ansible.builtin.template:
+        src: "{{ sing_box_template }}"
+        dest: "{{ sing_box_ci_dir.path }}/icloud.json"
+        mode: "0600"
+        validate: sing-box check -c %s
+      vars:
+        sing_box_icloud_profile: true
+
+    - name: Load workstation profile
+      ansible.builtin.slurp:
+        src: "{{ sing_box_ci_dir.path }}/workstation.json"
+      register: sing_box_ci_workstation_file
+
+    - name: Load Windows profile
+      ansible.builtin.slurp:
+        src: "{{ sing_box_ci_dir.path }}/windows.json"
+      register: sing_box_ci_windows_file
+
+    - name: Load iCloud profile
+      ansible.builtin.slurp:
+        src: "{{ sing_box_ci_dir.path }}/icloud.json"
+      register: sing_box_ci_icloud_file
+
+    - name: Decode rendered profiles
+      ansible.builtin.set_fact:
+        sing_box_ci_workstation: "{{ sing_box_ci_workstation_file.content | b64decode | from_json }}"
+        sing_box_ci_windows: "{{ sing_box_ci_windows_file.content | b64decode | from_json }}"
+        sing_box_ci_icloud: "{{ sing_box_ci_icloud_file.content | b64decode | from_json }}"
+
+    - name: Assert workstation profile keeps logs and API
+      ansible.builtin.assert:
+        that:
+          - sing_box_ci_workstation.log.output is defined
+          - sing_box_ci_workstation.services | length > 0
+        quiet: true
+
+    - name: Assert Windows profile drops logs and keeps API
+      ansible.builtin.assert:
+        that:
+          - sing_box_ci_windows.log.output is not defined
+          - sing_box_ci_windows.services | length > 0
+          - '"xray.exe" in (sing_box_ci_windows | to_json)'
+        quiet: true
+
+    - name: Assert iCloud profile drops logs and API
+      ansible.builtin.assert:
+        that:
+          - sing_box_ci_icloud.log.output is not defined
+          - sing_box_ci_icloud.services is not defined
+        quiet: true

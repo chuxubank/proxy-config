@@ -13,7 +13,9 @@ Common workflows are wrapped in the `Makefile` (run `make help` to list targets)
 - `make local` — applies workstation changes to `localhost`, skipping the `install` tag; `make local-install` includes binary installs.
 - `make server` / `make pull` — deploy to `vps_group` / pull Docker Compose images on the server.
 - `make check` / `make diff` — dry-run (with diff) against the inventory to validate proposed edits.
-- `make syntax` — fast parse validation for CI hooks or pre-commit checks.
+- `make syntax` — fast parse validation without the dynamic Proxmox inventory.
+- `make test` — render workstation/Windows/iCloud sing-box profiles with stub secrets and `sing-box check`.
+- `make ci` — `syntax` plus `test`; this is the GitHub Actions hook.
 
 ## Coding Style & Naming Conventions
 Use YAML with two-space indentation and wrap lines before 120 chars. Variables follow `snake_case`, secrets end with `_token` or `_password`, and inventory group names should mirror their directory names for clarity. Templates live in `roles/<role>/templates/*.j2` and should emit JSON or TOML formatted with the same spacing seen in existing client configs. Prefer `block` + `when` constructs over long `when` chains, and keep tasks idempotent by using `creates`, `changed_when`, or module checks.

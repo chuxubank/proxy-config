@@ -35,6 +35,8 @@ var_path: >-
 log_dir: >-
   {%- if ansible_facts['system'] == 'Darwin' -%}
   {{ ansible_facts['env']['HOME'] }}/Library/Logs
+  {%- elif ansible_facts['os_family'] | default('') == 'Windows' -%}
+  {{ ansible_facts['env']['LOCALAPPDATA'] }}
   {%- else -%}
   /var/log
   {%- endif -%}

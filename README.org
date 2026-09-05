@@ -37,6 +37,25 @@ auth key and is written =0600=.
   make local TAGS=icloud
 #+end_src
 
+*** Windows profile
+Exports a portable profile for the official Windows sing-box client
+(=winget install sing-box=), landing at
+=~/.config/sing-box/windows/sing-box.json=. Copy that file to the Windows
+machine. TUN needs an elevated process and the =wintun= DLL that ships with
+the winget/scoop package. From an elevated prompt:
+
+#+begin_example
+  sing-box.exe run -c sing-box.json --directory %LOCALAPPDATA%\sing-box
+#+end_example
+
+Dropped from this profile: the host-local log path and the site-local
+outbounds gated on =host_env=. The loopback API/dashboard stays, unlike the
+iCloud export. Tailscale is kept, so the file carries the Tailscale auth key
+and is written =0600=. Process rules include the Windows =.exe= names.
+#+begin_src sh :results output silent
+  make local TAGS=windows
+#+end_src
+
 *** Log
 [[file:~/Library/Logs/sing-box/sing-box.log]]
 
@@ -50,6 +69,8 @@ applicable. =PLAYBOOK= can override the playbook path globally.
 #+begin_src sh :results output silent
   make deps                       # install Galaxy requirements
   make syntax                     # fast parse validation
+  make test                       # render and check sing-box profiles
+  make ci                         # syntax + sing-box profile checks
   make check                      # dry-run against the inventory
   make diff                       # dry-run with a diff of changes
   make local                      # apply to localhost, skip binary installs
@@ -63,6 +84,7 @@ applicable. =PLAYBOOK= can override the playbook path globally.
   make check LIMIT=bwg-cn2-gia    # override: limit to one host
   make server TAGS=pull           # override: run only tagged tasks
   make local TAGS=icloud          # override: re-export the iCloud profile only
+  make local TAGS=windows         # override: re-export the Windows profile only
   make diff EXTRA="--ask-vault-pass"
 #+end_src
 
