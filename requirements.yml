@@ -3,7 +3,9 @@ roles:
   - name: geerlingguy.docker
 
 collections:
+  - name: ansible.mcp
   - name: ansible.posix
+  - name: ansible.utils
   - name: community.docker
   - name: community.general
   - name: community.proxmox

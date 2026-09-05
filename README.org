@@ -79,6 +79,7 @@ applicable. =PLAYBOOK= can override the playbook path globally.
   make pve                        # apply the roles in the Proxmox play
   make openwrt                    # apply the roles in the OpenWrt play
   make pull                       # pull Docker Compose images on the server
+  make mcp                        # probe MCP servers via ansible.mcp
   make lint                       # ansible-lint (if installed)
 
   make check LIMIT=bwg-cn2-gia    # override: limit to one host
@@ -86,6 +87,16 @@ applicable. =PLAYBOOK= can override the playbook path globally.
   make local TAGS=icloud          # override: re-export the iCloud profile only
   make local TAGS=windows         # override: re-export the Windows profile only
   make diff EXTRA="--ask-vault-pass"
+#+end_src
+
+*** MCP
+=mcp.yml= uses the =ansible.mcp= collection to talk to MCP servers listed in
+=mcp/manifest.json=. Inventory group =mcp_group= currently has =mcp-fetch=
+(=uvx mcp-server-fetch=). Add servers to the manifest and group; keep tokens
+in extra-vars or =pass=, not in the manifest. Probe with:
+
+#+begin_src sh :results output silent
+  make mcp
 #+end_src
 
 *** OpenWrt

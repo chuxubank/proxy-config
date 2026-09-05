@@ -1,0 +1,20 @@
+---
+- name: Probe MCP servers
+  hosts: mcp_group
+  gather_facts: false
+  tasks:
+    - name: Retrieve MCP server information
+      ansible.mcp.server_info:
+      register: mcp_server
+
+    - name: Show MCP server information
+      ansible.builtin.debug:
+        var: mcp_server
+
+    - name: List MCP tools
+      ansible.mcp.tools_info:
+      register: mcp_tools
+
+    - name: Show MCP tools
+      ansible.builtin.debug:
+        var: mcp_tools

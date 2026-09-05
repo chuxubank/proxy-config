@@ -39,3 +39,8 @@ all:
 
     openwrt_group:
       hosts: {}
+
+    mcp_group:
+      hosts:
+        mcp-fetch:
+          ansible_mcp_server_name: fetch

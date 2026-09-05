@@ -1,8 +1,8 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The root `playbook.yml` stitches together roles for `localhost`, VPS, and Proxmox/OpenWrt targets. Hosts come from the static `inventory.yml` plus the dynamic `inventory.proxmox.yml` (both wired in via `ansible.cfg`).
-Shared variables live in `group_vars/{local_group,vps_group,xray_group,pve_group,openwrt_group}.yml`, while host-specific overrides belong in `host_vars/<host>.yml` (e.g. `host_vars/bwg-cn2-gia.yml`).
+The root `playbook.yml` stitches together roles for `localhost`, VPS, and Proxmox/OpenWrt targets. `mcp.yml` talks to MCP servers through the `ansible.mcp` collection (`mcp_group` + `mcp/manifest.json`). Hosts come from the static `inventory.yml` plus the dynamic `inventory.proxmox.yml` (both wired in via `ansible.cfg`).
+Shared variables live in `group_vars/{local_group,vps_group,xray_group,pve_group,openwrt_group,mcp_group}.yml`, while host-specific overrides belong in `host_vars/<host>.yml` (e.g. `host_vars/bwg-cn2-gia.yml`).
 Implementation details are split into roles: `roles/common` handles base packages and Homebrew/Docker setup, `roles/server` provisions the upstream proxy (Caddy, Xray, monitoring, RSS) via Docker Compose, `roles/{xray_client,sing-box_client}` manage local client configs, and `roles/{pve_openwrt,arch_bootstrap}` cover homelab bootstrap flows.
 Keep templates, handlers, and files under the standard Ansible role layout.
 
@@ -13,7 +13,8 @@ Common workflows are wrapped in the `Makefile` (run `make help` to list targets)
 - `make local` — applies workstation changes to `localhost`, skipping the `install` tag; `make local-install` includes binary installs.
 - `make server` / `make pull` — deploy to `vps_group` / pull Docker Compose images on the server.
 - `make check` / `make diff` — dry-run (with diff) against the inventory to validate proposed edits.
-- `make syntax` — fast parse validation without the dynamic Proxmox inventory.
+- `make mcp` — probe `mcp_group` servers with `ansible.mcp.server_info` / `tools_info`.
+- `make syntax` — fast parse validation of `playbook.yml` and `mcp.yml` without the dynamic Proxmox inventory.
 - `make test` — render workstation/Windows/iCloud sing-box profiles with stub secrets and `sing-box check`.
 - `make ci` — `syntax` plus `test`; GitHub Actions runs this on Ubuntu and macOS, then checks the rendered profiles with the Windows sing-box binary.
 

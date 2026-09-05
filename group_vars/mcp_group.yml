@@ -1,0 +1,3 @@
+---
+ansible_connection: ansible.mcp.mcp
+ansible_mcp_manifest_path: "{{ playbook_dir }}/mcp/manifest.json"

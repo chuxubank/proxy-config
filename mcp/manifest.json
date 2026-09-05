@@ -1,0 +1,8 @@
+{
+  "fetch": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["mcp-server-fetch"],
+    "description": "Fetch URL content over HTTP"
+  }
+}
