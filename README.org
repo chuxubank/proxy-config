@@ -13,8 +13,12 @@
 ** sing-box
 
 *** Config
+Workstation and OpenWrt both load a config directory (=-C=). The rendered
+profile is =50-config.json=. OpenWrt keeps the stock UCI =conffile= key and
+points it at =/etc/sing-box=; the init uses =-C= when that path is a directory.
 #+begin_src sh :results output silent
   sing-box check -C $HOME/.config/sing-box
+  # OpenWrt: sing-box check -C /etc/sing-box
 #+end_src
 
 *** API and Dashboard

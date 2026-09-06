@@ -55,6 +55,39 @@
     - Restart sing-box service
   when: not sing_box_on_windows
 
+- name: Remove leftover OpenWrt sing-box config.json
+  ansible.builtin.file:
+    path: "{{ sing_box_config_dir }}/config.json"
+    state: absent
+  when: sing_box_on_openwrt
+  notify:
+    - Restart sing-box service
+
+- name: Install OpenWrt sing-box init script
+  ansible.builtin.copy:
+    src: openwrt.init
+    dest: /etc/init.d/{{ sing_box_openwrt_service_name }}
+    mode: "0755"
+  when: sing_box_on_openwrt
+  notify:
+    - Restart sing-box service
+  tags: install
+
+- name: Drop leftover OpenWrt sing-box confdir option
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if uci -q get sing-box.main.confdir >/dev/null; then
+      uci -q delete sing-box.main.confdir
+      uci commit sing-box
+      echo CHANGED
+    fi
+  register: sing_box_openwrt_confdir
+  changed_when: "'CHANGED' in sing_box_openwrt_confdir.stdout"
+  when: sing_box_on_openwrt
+  notify:
+    - Restart sing-box service
+  tags: install
+
 - name: Configure sing-box service on OpenWrt
   ansible.builtin.include_role:
     name: common
@@ -65,7 +98,7 @@
     common_openwrt_uci_options:
       sing-box.main.enabled: "1"
       sing-box.main.user: root
-      sing-box.main.conffile: "{{ sing_box_config_file }}"
+      sing-box.main.conffile: "{{ sing_box_config_dir }}"
   when: sing_box_on_openwrt
   tags: install
 
