@@ -115,6 +115,63 @@
   register: openwrt_vm_config
   changed_when: false
 
+- name: Detect OpenWrt disk size
+  ansible.builtin.set_fact:
+    openwrt_disk_size: >-
+      {{
+        [
+          openwrt_vm_config.stdout
+          | regex_search(
+              '^' ~ openwrt_vm_disk_interface ~ ':.*size=([^,\n]+)',
+              '\\1',
+              multiline=True
+            )
+        ] | flatten | first | default('0', true)
+      }}
+
+- name: Grow OpenWrt virtual disk
+  ansible.builtin.command:
+    argv:
+      - qm
+      - resize
+      - "{{ openwrt_vm_id }}"
+      - "{{ openwrt_vm_disk_interface }}"
+      - "{{ openwrt_vm_disk_size }}"
+  when:
+    - openwrt_disk_size | human_to_bytes < openwrt_vm_disk_size | human_to_bytes
+
+- name: Read OpenWrt VM status
+  ansible.builtin.command: "qm status {{ openwrt_vm_id }}"
+  register: openwrt_vm_status
+  changed_when: false
+
+- name: Expand OpenWrt ext4 root filesystem
+  when:
+    - openwrt_image_type is search('ext4')
+    - openwrt_vm_status.stdout is search('stopped')
+  ansible.builtin.shell: |
+    set -euo pipefail
+    vol="$(qm config {{ openwrt_vm_id }} | awk -v iface='{{ openwrt_vm_disk_interface }}:' '$1 == iface { print $2; exit }' | cut -d, -f1)"
+    disk="$(pvesm path "$vol")"
+    loop="$(losetup --show -f -P "$disk")"
+    cleanup() { losetup -d "$loop" || true; }
+    trap cleanup EXIT
+    echo ',+' | sfdisk --force -N 2 "$loop"
+    losetup -d "$loop"
+    trap - EXIT
+    loop="$(losetup --show -f -P "$disk")"
+    trap cleanup EXIT
+    set +e
+    e2fsck -f -y "${loop}p2"
+    fsck_rc=$?
+    set -e
+    [ "$fsck_rc" -eq 0 ] || [ "$fsck_rc" -eq 1 ]
+    resize2fs "${loop}p2"
+  register: openwrt_fs_expand
+  changed_when: >-
+    'Nothing to do' not in openwrt_fs_expand.stdout
+    and 'already' not in (openwrt_fs_expand.stderr | default(''))
+
 - name: Ensure OpenWrt VM settings
   community.proxmox.proxmox_kvm:
     node: "{{ openwrt_proxmox_node }}"

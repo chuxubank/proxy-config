@@ -2,3 +2,11 @@
 openwrt_official_package_source: https://downloads.openwrt.org
 openwrt_package_mirror: https://downloads.openwrt.org
 openwrt_mirror_snapshots: false
+
+# Same-LAN side gateway (旁路由): no DHCP, default route via the main router.
+openwrt_side_router: true
+openwrt_lan_ipaddr: "{{ ansible_host }}/24"
+openwrt_lan_gateway: "{{ ansible_host.split('.')[:-1] | join('.') }}.1"
+openwrt_lan_subnet: "{{ ansible_host.split('.')[:-1] | join('.') }}.0/24"
+openwrt_lan_dns: 8.8.8.8
+openwrt_lan_device: br-lan

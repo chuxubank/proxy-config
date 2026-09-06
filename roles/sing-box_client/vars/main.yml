@@ -17,6 +17,9 @@ sing_box_log_dir: >-
   }}
 sing_box_logrotate_config: "{{ (logrotate_config_dir | default('/etc/logrotate.d')) }}/sing-box"
 sing_box_openwrt_packages:
+  - kmod-tun
+  - kmod-inet-diag
+  - kmod-nft-queue
   - sing-box
 sing_box_openwrt_service_name: sing-box
 sing_box_install_platform: >-

@@ -1,0 +1,4 @@
+chain srcnat_side_router {
+  type nat hook postrouting priority 100; policy accept;
+  iifname "{{ openwrt_lan_device }}" oifname "{{ openwrt_lan_device }}" ip daddr != {{ openwrt_lan_subnet }} masquerade
+}

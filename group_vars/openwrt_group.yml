@@ -10,5 +10,6 @@ ansible_user: >-
 ansible_port: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='port') | default(22, true) }}"
 ansible_password: "{{ lookup('community.general.passwordstore', openwrt_pass_path) }}"
 ansible_python_interpreter: /usr/bin/python3
+ansible_pipelining: true
 
 openwrt_package_mirror: https://mirrors.tuna.tsinghua.edu.cn/openwrt

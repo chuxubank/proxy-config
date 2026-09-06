@@ -27,11 +27,13 @@
         "server": "1.1.1.1",
         "detour": "proxy"
       },
+{% if not sing_box_on_openwrt %}
       {
         "tag": "ts",
         "type": "tailscale",
         "endpoint": "ts-ep"
       },
+{% endif %}
       { "type": "local", "tag": "local" }
     ],
     "rules": [
@@ -55,6 +57,10 @@
         ],
         "server": "ali"
       },
+{% if sing_box_on_openwrt %}
+      {
+        "server": "google"
+      }{% else %}
       {
         "action": "evaluate",
         "server": "ali",
@@ -74,16 +80,16 @@
         "match_response": "ts-probe",
         "ip_accept_any": true,
         "action": "respond"
-      }
+      }{% endif %}
     ],
     "strategy": "ipv4_only"
-  },
+  }{% if not sing_box_on_openwrt %},
   "http_clients": [
     {
       "tag": "rule-set",
       "detour": "select"
     }
-  ],
+  ]{% endif %},
   "route": {
     "rules": [
       {
@@ -102,6 +108,7 @@
         ],
         "action": "hijack-dns"
       },
+{% if not sing_box_on_openwrt %}
       {
         "type": "logical",
         "mode": "or",
@@ -115,6 +122,7 @@
         ],
         "outbound": "ts-ep"
       },
+{% endif %}
       {
         "type": "logical",
         "mode": "or",
@@ -224,18 +232,32 @@
     ],
     "final": "select",
     "default_domain_resolver": "ali",
+{% if not sing_box_on_openwrt %}
     "default_http_client": "rule-set",
+{% endif %}
     "auto_detect_interface": true
   },
   "inbounds": [
     {
       "type": "tun",
       "tag": "tun-in",
+{% if sing_box_on_openwrt %}
+      "interface_name": "singtun0",
+      "address": ["172.19.0.1/30"],
+      "auto_route": true,
+      "auto_redirect": true,
+      "strict_route": true,
+      "stack": "system",
+      "include_interface": ["br-lan"],
+      "route_exclude_address": ["192.168.0.0/16"],
+      "route_exclude_address_set": ["geoip-cn"]
+{% else %}
       "address": ["172.18.0.1/30"],
       "auto_route": true,
       "route_exclude_address": ["192.168.0.0/16"],
       "stack": "gvisor",
       "strict_route": true
+{% endif %}
     }
   ],
   "outbounds": [
@@ -298,7 +320,7 @@
       "type": "direct",
       "tag": "direct"
     }
-  ],
+  ]{% if not sing_box_on_openwrt %},
   "endpoints": [
     {
       "type": "tailscale",
@@ -308,14 +330,14 @@
       "exit_node_allow_lan_access": true,
       "advertise_exit_node": true
     }
-  ],
+  ]{% endif %},
   "experimental": {
     "cache_file": {
-      "enabled": true,
-      "store_dns": true
+      "enabled": true{% if not sing_box_on_openwrt %},
+      "store_dns": true{% endif %}
     }
-  }{{ "," if not sing_box_icloud_profile else "" }}
-{% if not sing_box_icloud_profile %}
+  }{{ "," if not sing_box_icloud_profile and not sing_box_on_openwrt else "" }}
+{% if not sing_box_icloud_profile and not sing_box_on_openwrt %}
   "services": [
     {
       "type": "api",

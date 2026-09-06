@@ -22,5 +22,4 @@
   gather_facts: false
   roles:
     - openwrt
-    - xray_client
     - sing-box_client

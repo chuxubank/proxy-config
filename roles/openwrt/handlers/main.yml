@@ -1,0 +1,20 @@
+---
+- name: Reload OpenWrt network
+  ansible.builtin.command:
+    argv:
+      - ubus
+      - call
+      - network
+      - reload
+
+- name: Reload OpenWrt firewall
+  ansible.builtin.command:
+    argv:
+      - /etc/init.d/firewall
+      - reload
+
+- name: Restart OpenWrt dnsmasq
+  ansible.builtin.command:
+    argv:
+      - /etc/init.d/dnsmasq
+      - restart

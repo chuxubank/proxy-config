@@ -104,9 +104,14 @@ in extra-vars or =pass=, not in the manifest. Probe with:
 The =openwrt= base role bootstraps Python, gathers facts, preserves the
 image-provided feed list, and replaces only the official download host with
 =openwrt_package_mirror=. OpenWrt 25.12 or newer with =apk= is required.
+The Proxmox VM uses the x86_64 =ext4-combined= image grown to 1G so client
+packages fit; squashfs-combined leaves under 100MB of overlay and fills up.
 Snapshot builds retain the official source by default to avoid mirror
 synchronization gaps. Client roles such as =xray_client= and =sing-box_client=
-can run after this base role. Run the VM and guest stages separately so the
+can run after this base role. The OpenWrt guest is a same-LAN side gateway
+(旁路由): it does not run DHCP, and sing-box TUN =auto_redirect= intercepts
+forwarded traffic. Point clients at the OpenWrt address as gateway and DNS;
+the main router stays =.1=. Run the VM and guest stages separately so the
 guest has time to boot and become reachable:
 
 #+begin_src sh :results output silent :async

@@ -60,3 +60,7 @@
   community.general.apk:
     update_cache: true
   changed_when: false
+
+- name: Configure OpenWrt as a same-LAN side gateway
+  ansible.builtin.include_tasks: side_router.yml
+  when: openwrt_side_router | bool

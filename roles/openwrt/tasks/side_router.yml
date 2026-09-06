@@ -1,0 +1,77 @@
+---
+- name: Apply OpenWrt side-router UCI
+  ansible.builtin.shell: |
+    set -euo pipefail
+    uci batch <<EOF
+    set network.lan.proto='static'
+    set network.lan.ipaddr='{{ openwrt_lan_ipaddr }}'
+    set network.lan.gateway='{{ openwrt_lan_gateway }}'
+    set network.wan.proto='none'
+    set network.wan6.proto='none'
+    set dhcp.lan.ignore='1'
+    set dhcp.lan.dhcpv4='disabled'
+    set dhcp.lan.dhcpv6='disabled'
+    set dhcp.lan.ra='disabled'
+    set dhcp.@dnsmasq[0].noresolv='1'
+    set firewall.@defaults[0].forward='ACCEPT'
+    set firewall.@zone[0].input='ACCEPT'
+    set firewall.@zone[0].output='ACCEPT'
+    set firewall.@zone[0].forward='ACCEPT'
+    EOF
+    if [ "$(uci -q get network.lan.dns || true)" != '{{ openwrt_lan_dns }}' ]; then
+      uci -q delete network.lan.dns || true
+      uci add_list network.lan.dns='{{ openwrt_lan_dns }}'
+    fi
+    if [ "$(uci -q get dhcp.@dnsmasq[0].server || true)" != '{{ openwrt_lan_dns }}' ]; then
+      uci -q delete dhcp.@dnsmasq[0].server || true
+      uci add_list dhcp.@dnsmasq[0].server='{{ openwrt_lan_dns }}'
+    fi
+    if [ -n "$(uci changes network; uci changes dhcp; uci changes firewall)" ]; then
+      uci commit network
+      uci commit dhcp
+      uci commit firewall
+      echo CHANGED
+    fi
+  register: openwrt_side_router_uci
+  changed_when: "'CHANGED' in openwrt_side_router_uci.stdout"
+  notify:
+    - Reload OpenWrt network
+    - Reload OpenWrt firewall
+    - Restart OpenWrt dnsmasq
+
+- name: Install OpenWrt side-router sysctl
+  ansible.builtin.template:
+    src: sysctl-forward.conf.j2
+    dest: /etc/sysctl.d/12-side-router.conf
+    mode: "0644"
+  register: openwrt_side_router_sysctl
+
+- name: Apply OpenWrt side-router sysctl
+  ansible.builtin.command:
+    argv:
+      - sysctl
+      - -p
+      - /etc/sysctl.d/12-side-router.conf
+  when: openwrt_side_router_sysctl.changed | bool
+
+- name: Install OpenWrt side-router masquerade
+  ansible.builtin.template:
+    src: side-router-masq.nft.j2
+    dest: /etc/nftables.d/10-side-router-masq.nft
+    mode: "0644"
+  notify:
+    - Reload OpenWrt firewall
+
+- name: Apply OpenWrt LAN address if it is not live
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if ip -4 addr show {{ openwrt_lan_device }} | grep -q '{{ ansible_host }}'; then
+      exit 0
+    fi
+    ifup lan
+    echo CHANGED
+  register: openwrt_lan_ifup
+  changed_when: "'CHANGED' in openwrt_lan_ifup.stdout"
+
+- name: Flush OpenWrt side-router handlers
+  ansible.builtin.meta: flush_handlers
