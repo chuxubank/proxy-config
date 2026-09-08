@@ -121,6 +121,7 @@ guest has time to boot and become reachable:
 #+begin_src sh :results output silent :async
   make pve
   make openwrt
+  make openwrt-upgrade            # sysupgrade then re-apply the guest play
 #+end_src
 
 *** Local

@@ -16,7 +16,7 @@ CHECK_FLAGS      = $(LIMIT_FLAG) $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
-.PHONY: help deps syntax check diff local local-install server pve openwrt pull mcp lint test ci
+.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull mcp lint test ci
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -49,6 +49,9 @@ pve: ## Apply the Proxmox play
 
 openwrt: ## Apply the OpenWrt play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt $(EXTRA)
+
+openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
+	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_sysupgrade=true $(EXTRA)
 
 pull: ## Pull Docker Compose images on the server
 	$(ANSIBLE_PLAYBOOK) --limit vps_group --tags pull $(EXTRA)

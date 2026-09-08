@@ -1,0 +1,54 @@
+---
+- name: Skip OpenWrt sysupgrade when already current
+  ansible.builtin.debug:
+    msg: >-
+      OpenWrt {{ ansible_facts['distribution_version'] }} is already
+      {{ openwrt_version }}; sysupgrade is not needed.
+  when: ansible_facts['distribution_version'] is version(openwrt_version, '>=')
+
+- name: Flash OpenWrt {{ openwrt_version }}
+  when:
+    - ansible_facts['distribution_version'] is version(openwrt_version, '<')
+    - not ansible_check_mode
+  block:
+    - name: Download OpenWrt sysupgrade image
+      ansible.builtin.get_url:
+        url: "{{ openwrt_sysupgrade_image_url }}"
+        dest: "{{ openwrt_sysupgrade_image_path }}"
+        mode: "0644"
+        checksum: "sha256:{{ openwrt_sysupgrade_checksum_url }}"
+
+    - name: Verify OpenWrt sysupgrade image
+      ansible.builtin.command:
+        argv:
+          - sysupgrade
+          - -T
+          - "{{ openwrt_sysupgrade_image_path }}"
+      changed_when: false
+
+    - name: Flash OpenWrt sysupgrade image
+      ansible.builtin.command:
+        argv:
+          - sysupgrade
+          - -c
+          - -k
+          - -v
+          - "{{ openwrt_sysupgrade_image_path }}"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      ignore_unreachable: true
+
+    - name: Wait for OpenWrt to reboot after sysupgrade
+      ansible.builtin.wait_for_connection:
+        delay: 45
+        timeout: 360
+
+    - name: Bootstrap Python after OpenWrt sysupgrade
+      ansible.builtin.raw: apk update && apk add python3
+      register: openwrt_sysupgrade_python
+      changed_when: true
+      failed_when: openwrt_sysupgrade_python.rc != 0
+
+    - name: Gather OpenWrt facts after sysupgrade
+      ansible.builtin.setup:

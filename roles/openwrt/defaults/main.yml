@@ -3,6 +3,26 @@ openwrt_official_package_source: https://downloads.openwrt.org
 openwrt_package_mirror: https://downloads.openwrt.org
 openwrt_mirror_snapshots: false
 
+openwrt_version: "25.12.5"
+openwrt_sysupgrade: false
+openwrt_sysupgrade_target: x86/64
+openwrt_sysupgrade_image_type: ext4-combined
+openwrt_sysupgrade_image_url: >-
+  {{
+    openwrt_package_mirror | regex_replace('/$', '') ~
+    '/releases/' ~ openwrt_version ~
+    '/targets/' ~ openwrt_sysupgrade_target ~
+    '/openwrt-' ~ openwrt_version ~ '-x86-64-generic-' ~
+    openwrt_sysupgrade_image_type ~ '.img.gz'
+  }}
+openwrt_sysupgrade_checksum_url: >-
+  {{
+    openwrt_package_mirror | regex_replace('/$', '') ~
+    '/releases/' ~ openwrt_version ~
+    '/targets/' ~ openwrt_sysupgrade_target ~ '/sha256sums'
+  }}
+openwrt_sysupgrade_image_path: /tmp/openwrt-sysupgrade.img.gz
+
 # Same-LAN side gateway (旁路由): no DHCP, default route via the main router.
 openwrt_side_router: true
 openwrt_lan_ipaddr: "{{ ansible_host }}/24"

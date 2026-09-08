@@ -73,5 +73,17 @@
   register: openwrt_lan_ifup
   changed_when: "'CHANGED' in openwrt_lan_ifup.stdout"
 
+- name: Preserve side-router files across sysupgrade
+  ansible.builtin.blockinfile:
+    path: /etc/sysupgrade.conf
+    create: true
+    mode: "0644"
+    marker: "# {mark} ANSIBLE MANAGED side-router keep files"
+    block: |
+      /etc/sing-box/
+      /etc/sysctl.d/12-side-router.conf
+      /etc/nftables.d/10-side-router-masq.nft
+      /etc/init.d/sing-box
+
 - name: Flush OpenWrt side-router handlers
   ansible.builtin.meta: flush_handlers
