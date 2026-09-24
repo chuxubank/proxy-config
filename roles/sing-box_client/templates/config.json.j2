@@ -87,6 +87,7 @@
     "strategy": "ipv4_only"
   },
 {% if not sing_box_on_openwrt %}
+  {# OpenWrt 25.12 ships sing-box 1.13.x; unified HTTP clients require 1.14. #}
   "http_clients": [
     {
       "tag": "rule-set",

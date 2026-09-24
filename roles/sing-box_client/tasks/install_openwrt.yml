@@ -2,4 +2,4 @@
 - name: Install sing-box packages with apk
   community.general.apk:
     name: "{{ sing_box_openwrt_packages }}"
-    state: present
+    state: latest
