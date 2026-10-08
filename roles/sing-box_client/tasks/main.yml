@@ -3,9 +3,9 @@
   ansible.builtin.include_tasks:
     file: gateway_macos.yml
     apply:
-      tags: gateway
+      tags: [never, gateway]
   when: ansible_facts['system'] == 'Darwin'
-  tags: gateway
+  tags: [never, gateway]
 
 - name: Include sing-box install tasks
   ansible.builtin.include_tasks: install.yml
