@@ -1,4 +1,12 @@
 ---
+- name: Configure optional macOS IPv4 gateway
+  ansible.builtin.include_tasks:
+    file: gateway_macos.yml
+    apply:
+      tags: gateway
+  when: ansible_facts['system'] == 'Darwin'
+  tags: gateway
+
 - name: Include sing-box install tasks
   ansible.builtin.include_tasks: install.yml
   tags: install

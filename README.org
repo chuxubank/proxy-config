@@ -21,6 +21,45 @@ points it at =/etc/sing-box=; the init uses =-C= when that path is a directory.
   # OpenWrt: sing-box check -C /etc/sing-box
 #+end_src
 
+*** macOS IPv4 gateway (旁路由)
+Opt-in forwarding for same-LAN clients using the existing workstation TUN.
+Reserve the Mac LAN address in the main router first. Start with one client;
+keep its IP/subnet mask and set its IPv4 gateway to the Mac LAN address.
+Use a public IPv4 DNS address such as =223.5.5.5=: the existing TUN DNS
+hijack handles that traffic. DNS addressed to the same-LAN main router
+bypasses the Mac. The Mac itself does not listen on LAN port 53.
+
+Disable IPv6 on the test client: this feature does not configure an IPv6
+gateway or suppress router advertisements. Keep the Mac awake and sing-box
+running. The current sing-box LaunchAgent still requires a GUI login; this
+is not an unattended, boot-to-router setup. When sing-box is down, forwarding
+may fall back to the main router rather than fail closed. No PF/NAT or DHCP
+configuration is installed. Local-network isolation can prevent clients from
+reaching the Mac, and traffic still needs end-to-end validation.
+
+The =gateway= tag only sets the two runtime kernel parameters; it does not
+render secret profiles or restart sing-box. It is intentionally not a service:
+the settings reset after reboot and must be applied again when needed. A normal
+local run does nothing; explicitly selecting =gateway= enables it.
+#+begin_src sh :results output silent
+  # Preview (does not alter networking or require sudo).
+  make diff LIMIT=localhost TAGS=gateway EXTRA="--inventory inventory.yml"
+  # Apply; sudo is required for sysctl.
+  make local TAGS=gateway EXTRA="--inventory inventory.yml -K"
+#+end_src
+
+To stop using the Mac as a gateway, restore the client gateway/DNS. The
+forwarding settings will disappear at the next reboot; no rollback service or
+state file is installed. If immediate rollback is needed, run:
+#+begin_src sh :results output silent
+  sudo sysctl -w net.inet.ip.forwarding=0 net.inet.ip.redirect=1
+#+end_src
+
+Verify from the test client: normal domestic access, proxied-site access,
+and the expected exit IP with its own VPN/proxy disabled. The Ansible tests
+validate sing-box profiles only; they cannot prove forwarded traffic on a
+particular macOS/network combination.
+
 *** Invalley routing
 The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads its UUID (main password),
 =ws_path= and =url= (bare hostname) from =Work/IV/Proxy= via =invalley_pass_path=.

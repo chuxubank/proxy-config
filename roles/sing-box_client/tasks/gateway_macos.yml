@@ -1,0 +1,24 @@
+---
+- name: Read current macOS IPv4 gateway settings
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/sysctl
+      - -n
+      - net.inet.ip.redirect
+      - net.inet.ip.forwarding
+  register: sing_box_macos_gateway_sysctl
+  changed_when: false
+  check_mode: false
+
+- name: Disable ICMP redirects and enable IPv4 forwarding
+  become: true
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/sysctl
+      - -w
+      - net.inet.ip.redirect=0
+      - net.inet.ip.forwarding=1
+  changed_when: true
+  when:
+    - sing_box_macos_gateway_sysctl.stdout_lines != ['0', '1']
+    - not ansible_check_mode
