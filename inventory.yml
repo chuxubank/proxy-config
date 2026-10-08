@@ -1,4 +1,6 @@
 all:
+  vars:
+    invalley_pass_path: "Work/IV/Proxy"
   hosts:
     bwg-cn2-gia:
 
@@ -32,8 +34,6 @@ all:
     local_group:
       hosts:
         localhost:
-      vars:
-        invalley_pass_path: "Work/IV/Proxy"
 
     pve_group:
       hosts:

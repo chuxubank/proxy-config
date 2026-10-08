@@ -10,8 +10,10 @@ sing_box_invalley_ws_path: >-
   {{ lookup('community.general.passwordstore', invalley_pass_path, subkey='ws_path') }}
 
 # Portable profiles drop the host-local log path and the site-local outbounds
-# gated on host_env. Tailscale is kept, so the rendered file carries
-# sing_box_tailscale_auth_token — see the export tasks for file mode.
+# gated on host_env. The remote IV outbound and Tailscale are kept, so
+# exports carry the IV credentials and sing_box_tailscale_auth_token.
+# Portable profiles route invalley.co remotely even when exported from IV.
+# See the export tasks for file mode.
 sing_box_icloud_profile: false
 # File name inside iCloud Drive/sing-box; used as the Path when adding an
 # iCloud profile in SFI/SFM.

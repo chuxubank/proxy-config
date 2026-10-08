@@ -21,6 +21,14 @@ points it at =/etc/sing-box=; the init uses =-C= when that path is a directory.
   # OpenWrt: sing-box check -C /etc/sing-box
 #+end_src
 
+*** Invalley routing
+The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads its UUID (main password),
+=ws_path= and =url= (bare hostname) from =Work/IV/Proxy= via =invalley_pass_path=.
+Outside =HOST_ENV=iv=, =invalley.co= and its subdomains use this outbound before
+Tailscale and general direct-routing rules. IV workstation profiles do not force
+this route. Portable Windows/iCloud profiles always include the remote route,
+even when exported from an IV workstation; the site-local =proxy-iv= stays omitted.
+
 *** API and Dashboard
 The native sing-box gRPC/gRPC-Web API and dashboard listen on loopback only.
 Open [[http://127.0.0.1:9090/dashboard/]] and connect to =127.0.0.1:9090=
@@ -35,8 +43,8 @@ type =iCloud= and set =Path= to =sing-box.json=.
 
 Dropped from this profile: the host-local log path, the loopback API/dashboard,
 and the site-local outbounds gated on =host_env=. Everything else, Tailscale
-included, matches the workstation config, so the file carries the Tailscale
-auth key and is written =0600=.
+included, matches the workstation config. The file carries the Tailscale
+auth key and IV remote credentials and is written =0600=.
 #+begin_src sh :results output silent
   make local TAGS=icloud
 #+end_src
@@ -54,8 +62,8 @@ the winget/scoop package. From an elevated prompt:
 
 Dropped from this profile: the host-local log path and the site-local
 outbounds gated on =host_env=. The loopback API/dashboard stays, unlike the
-iCloud export. Tailscale is kept, so the file carries the Tailscale auth key
-and is written =0600=. Process rules include the Windows =.exe= names.
+iCloud export. Tailscale and the IV remote outbound are kept, so the file carries
+their credentials and is written =0600=. Process rules include the Windows =.exe= names.
 #+begin_src sh :results output silent
   make local TAGS=windows
 #+end_src

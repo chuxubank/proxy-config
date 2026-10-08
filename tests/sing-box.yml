@@ -58,6 +58,7 @@
         mode: "0600"
         validate: sing-box check -c %s
       vars:
+        host_env: iv
         sing_box_windows_profile: true
 
     - name: Render iCloud profile
@@ -67,6 +68,7 @@
         mode: "0600"
         validate: sing-box check -c %s
       vars:
+        host_env: iv
         sing_box_icloud_profile: true
 
     # auto_redirect can only be initialized and validated on its target Linux host.
@@ -137,6 +139,41 @@
           - >-
             'proxy-iv-remote' in
             (sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'proxy') | first).outbounds
+        quiet: true
+
+    - name: Assert non-IV and portable profiles route Invalley before other outbound rules
+      vars:
+        invalley_route:
+          domain_suffix: [invalley.co]
+          outbound: proxy-iv-remote
+      ansible.builtin.assert:
+        that:
+          - item.route.rules[2] == invalley_route
+          - item.outbounds | selectattr('tag', 'equalto', 'proxy-iv-remote') | list | length == 1
+          - item.outbounds | selectattr('tag', 'equalto', 'proxy-iv') | list | length == 0
+          - >-
+            'proxy-iv-remote' in
+            (item.outbounds | selectattr('tag', 'equalto', 'select') | first).outbounds
+          - >-
+            'proxy-iv-remote' in
+            (item.outbounds | selectattr('tag', 'equalto', 'proxy') | first).outbounds
+          - item.route.final == 'select'
+        quiet: true
+      loop:
+        - "{{ sing_box_ci_workstation }}"
+        - "{{ sing_box_ci_windows }}"
+        - "{{ sing_box_ci_icloud }}"
+        - "{{ sing_box_ci_openwrt }}"
+      loop_control:
+        label: "{{ item.inbounds[0].stack }}"
+
+    - name: Assert IV workstation does not force Invalley through the remote outbound
+      ansible.builtin.assert:
+        that:
+          - >-
+            sing_box_ci_iv.route.rules | selectattr('outbound', 'defined') |
+            selectattr('outbound', 'equalto', 'proxy-iv-remote') | list | length == 0
+          - sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'proxy-iv') | list | length == 1
         quiet: true
 
     - name: Assert workstation profile keeps logs and API
