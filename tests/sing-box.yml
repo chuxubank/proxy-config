@@ -13,6 +13,9 @@
     sing_box_template: "{{ playbook_dir }}/../roles/sing-box_client/templates/config.json.j2"
     sing_box_ci_render_dir: "{{ playbook_dir }}/.render"
     sing_box_tailscale_auth_token: tskey-auth-ci000000000000000000000000
+    sing_box_invalley_server: proxy.example.test
+    sing_box_invalley_uuid: 00000000-0000-4000-8000-000000000001
+    sing_box_invalley_ws_path: /ray/ci-test
     xray_env:
       ADDRESS: 203.0.113.10
       DOMAIN: example.test
@@ -38,6 +41,15 @@
         dest: "{{ sing_box_ci_render_dir }}/workstation.json"
         mode: "0600"
         validate: sing-box check -c %s
+
+    - name: Render IV workstation profile
+      ansible.builtin.template:
+        src: "{{ sing_box_template }}"
+        dest: "{{ sing_box_ci_render_dir }}/iv.json"
+        mode: "0600"
+        validate: sing-box check -c %s
+      vars:
+        host_env: iv
 
     - name: Render Windows profile
       ansible.builtin.template:
@@ -77,6 +89,11 @@
         src: "{{ sing_box_ci_render_dir }}/workstation.json"
       register: sing_box_ci_workstation_file
 
+    - name: Load IV workstation profile
+      ansible.builtin.slurp:
+        src: "{{ sing_box_ci_render_dir }}/iv.json"
+      register: sing_box_ci_iv_file
+
     - name: Load Windows profile
       ansible.builtin.slurp:
         src: "{{ sing_box_ci_render_dir }}/windows.json"
@@ -95,9 +112,32 @@
     - name: Decode rendered profiles
       ansible.builtin.set_fact:
         sing_box_ci_workstation: "{{ sing_box_ci_workstation_file.content | b64decode | from_json }}"
+        sing_box_ci_iv: "{{ sing_box_ci_iv_file.content | b64decode | from_json }}"
         sing_box_ci_windows: "{{ sing_box_ci_windows_file.content | b64decode | from_json }}"
         sing_box_ci_icloud: "{{ sing_box_ci_icloud_file.content | b64decode | from_json }}"
         sing_box_ci_openwrt: "{{ sing_box_ci_openwrt_file.content | b64decode | from_json }}"
+
+    - name: Assert IV profile includes the Invalley VMess outbound
+      vars:
+        invalley_outbound: >-
+          {{ sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'proxy-iv-remote') | first }}
+      ansible.builtin.assert:
+        that:
+          - sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'proxy-iv-remote') | list | length == 1
+          - invalley_outbound.type == "vmess"
+          - invalley_outbound.server == sing_box_invalley_server
+          - invalley_outbound.tls.server_name == sing_box_invalley_server
+          - invalley_outbound.uuid == sing_box_invalley_uuid
+          - invalley_outbound.transport.type == "ws"
+          - invalley_outbound.transport.path == sing_box_invalley_ws_path
+          - invalley_outbound.tls.enabled
+          - >-
+            'proxy-iv-remote' in
+            (sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'select') | first).outbounds
+          - >-
+            'proxy-iv-remote' in
+            (sing_box_ci_iv.outbounds | selectattr('tag', 'equalto', 'proxy') | first).outbounds
+        quiet: true
 
     - name: Assert workstation profile keeps logs and API
       ansible.builtin.assert:

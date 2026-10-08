@@ -270,6 +270,23 @@
       "server": "proxy.invalley.co",
       "server_port": 8123
     },
+    {
+      "type": "vmess",
+      "tag": "proxy-iv-remote",
+      "server": {{ sing_box_invalley_server | to_json }},
+      "server_port": 443,
+      "uuid": {{ sing_box_invalley_uuid | to_json }},
+      "security": "auto",
+      "alter_id": 0,
+      "tls": {
+        "enabled": true,
+        "server_name": {{ sing_box_invalley_server | to_json }}
+      },
+      "transport": {
+        "type": "ws",
+        "path": {{ sing_box_invalley_ws_path | to_json }}
+      }
+    },
     {% endif %}
     {
       "type": "vless",
@@ -297,6 +314,7 @@
       "outbounds": [
         {% if host_env | default('') == "iv" and not portable %}
         "proxy-iv",
+        "proxy-iv-remote",
         {% endif %}
         "proxy-self"
       ],
@@ -309,6 +327,7 @@
       "outbounds": [
         {% if host_env | default('') == "iv" and not portable %}
         "proxy-iv",
+        "proxy-iv-remote",
         {% endif %}
         "proxy-self"
       ],

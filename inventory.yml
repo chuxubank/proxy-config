@@ -32,6 +32,8 @@ all:
     local_group:
       hosts:
         localhost:
+      vars:
+        invalley_pass_path: "Work/IV/Proxy"
 
     pve_group:
       hosts:
