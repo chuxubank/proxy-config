@@ -113,12 +113,10 @@
         ],
         "action": "hijack-dns"
       },
-{% if host_env | default('') != "iv" or portable %}
       {
         "domain_suffix": ["invalley.co"],
         "outbound": "proxy-iv-remote"
       },
-{% endif %}
 {% if not sing_box_on_openwrt %}
       {
         "type": "logical",
@@ -264,7 +262,6 @@
       "stack": "gvisor",
 {% endif %}
       "auto_route": true,
-      "route_exclude_address": ["192.168.0.0/16"],
       "strict_route": true
     }
   ],

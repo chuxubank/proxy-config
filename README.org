@@ -63,10 +63,10 @@ particular macOS/network combination.
 *** Invalley routing
 The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads its UUID (main password),
 =ws_path= and =url= (bare hostname) from =Work/IV/Proxy= via =invalley_pass_path=.
-Outside =HOST_ENV=iv=, =invalley.co= and its subdomains use this outbound before
-Tailscale and general direct-routing rules. IV workstation profiles do not force
-this route. Portable Windows/iCloud profiles always include the remote route,
-even when exported from an IV workstation; the site-local =proxy-iv= stays omitted.
+In every environment, including =HOST_ENV=iv=, =invalley.co= and its subdomains
+use this outbound before Tailscale and general direct-routing rules.
+Portable Windows/iCloud profiles also include the remote route; the site-local
+=proxy-iv= stays omitted.
 
 *** API and Dashboard
 The native sing-box gRPC/gRPC-Web API and dashboard listen on loopback only.
