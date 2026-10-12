@@ -68,6 +68,27 @@ use this outbound before Tailscale and general direct-routing rules.
 Portable Windows/iCloud profiles also include the remote route; the site-local
 =proxy-iv= stays omitted.
 
+Non-IV macOS workstation profiles also include =192.168.1.102/32= and
+=192.168.1.112/32= in the TUN routes to override a conflicting local
+=192.168.1.0/24= Wi-Fi route. Since =route_address= replaces the defaults,
+the profile preserves Darwin's eight default IPv4 routes before these host routes.
+IV, Linux, Windows/iCloud portable and OpenWrt profiles keep platform-default routes.
+These addresses are static; update the template if the service DNS addresses change.
+The host routes capture these IPs regardless of hostname; remote outbound selection
+still depends on the Invalley domain rule (DNS mapping or sniffing).
+
+On the affected non-IV Mac, deploy without overriding =host_env=, then check both
+host routes and a normal public destination. Both service IPs should use the TUN;
+requests must also show =route(proxy-iv-remote)= in the sing-box log.
+#+begin_src sh :results output silent
+  make local EXTRA="--inventory inventory.yml"
+  route -n get 192.168.1.102
+  route -n get 192.168.1.112
+  route -n get 1.1.1.1
+  curl -4 --noproxy '*' --http1.1 --connect-timeout 10 --max-time 30 \
+    -o /dev/null -w 'HTTP=%{http_code}\n' https://llm.invalley.co/pricing
+#+end_src
+
 *** API and Dashboard
 The native sing-box gRPC/gRPC-Web API and dashboard listen on loopback only.
 Open [[http://127.0.0.1:9090/dashboard/]] and connect to =127.0.0.1:9090=

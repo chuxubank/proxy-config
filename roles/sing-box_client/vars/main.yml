@@ -1,5 +1,6 @@
 sing_box_on_openwrt: "{{ ansible_facts['distribution'] | lower == 'openwrt' }}"
 sing_box_on_windows: "{{ ansible_facts['os_family'] | default('') == 'Windows' }}"
+sing_box_on_macos: "{{ ansible_facts['system'] == 'Darwin' }}"
 sing_box_config_dir: >-
   {{
     sing_box_on_openwrt
