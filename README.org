@@ -21,6 +21,20 @@ points it at =/etc/sing-box=; the init uses =-C= when that path is a directory.
   # OpenWrt: sing-box check -C /etc/sing-box
 #+end_src
 
+*** sing-geosite rule sets
+The sing-box profile loads remote binary rule sets from
+[[https://github.com/SagerNet/sing-geosite/tree/rule-set][SagerNet/sing-geosite/rule-set]].
+The configured rule-set URLs use the corresponding files from that directory,
+for example =geosite-google.srs= and =geosite-geolocation-cn.srs=.
+
+When adding routing for a single website, first check whether its domain is
+already covered by one of the sing-geosite rule sets. Prefer adding the
+applicable rule set to the route over adding a one-off =domain= or
+=domain_suffix= entry. Add a site-specific domain rule only when no suitable
+rule set exists (or when an intentional local override is required). Keep the
+rule-set tag and its route together in
+=roles/sing-box_client/templates/config.json.j2=.
+
 *** macOS IPv4 gateway (旁路由)
 Opt-in forwarding for same-LAN clients using the existing workstation TUN.
 Reserve the Mac LAN address in the main router first. Start with one client;
