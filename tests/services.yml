@@ -47,6 +47,25 @@
       ansible.builtin.assert:
         that: rejected_typo | default(false)
 
+    - name: Check cleanup stays separate from deployment and preserves data
+      vars:
+        cleanup_tasks: "{{ lookup('file', playbook_dir ~ '/../roles/server/tasks/cleanup.yml') | from_yaml }}"
+        prune: "{{ cleanup_tasks[1]['community.docker.docker_prune'] }}"
+        apt_cleanup: "{{ cleanup_tasks[2]['ansible.builtin.apt'] }}"
+        server_tasks: "{{ lookup('file', playbook_dir ~ '/../roles/server/tasks/main.yml') }}"
+      ansible.builtin.assert:
+        that:
+          - prune.images
+          - not prune.images_filters.dangling
+          - not prune.containers
+          - not prune.volumes
+          - not prune.networks
+          - not prune.builder_cache
+          - "apt_cleanup == {'clean': true}"
+          - cleanup_tasks[1].when == 'not ansible_check_mode'
+          - "'not ansible_check_mode' in cleanup_tasks[2].when"
+          - "'cleanup.yml' not in server_tasks"
+
     - name: Stage unchanged native Compose files
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../roles/server/files/"

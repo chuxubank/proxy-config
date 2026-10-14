@@ -1,0 +1,10 @@
+---
+# Separate maintenance entrypoint: never deploys, stops containers, or prunes data.
+- name: Reclaim unused VPS images and APT downloads
+  hosts: vps_group
+  become: true
+  tasks:
+    - name: Run disk cleanup only
+      ansible.builtin.include_role:
+        name: server
+        tasks_from: cleanup

@@ -1,0 +1,40 @@
+---
+- name: Show filesystem usage before cleanup
+  ansible.builtin.command: df -h /
+  register: server_cleanup_before
+  changed_when: false
+  check_mode: false
+
+- name: Remove images not referenced by any container
+  community.docker.docker_prune:
+    images: true
+    images_filters:
+      dangling: false
+    containers: false
+    volumes: false
+    networks: false
+    builder_cache: false
+  register: server_cleanup_images
+  when: not ansible_check_mode
+
+- name: Clear APT package downloads
+  ansible.builtin.apt:
+    clean: true
+  # Guard explicitly: some apt module versions execute clean even in check mode.
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - not ansible_check_mode
+
+- name: Show filesystem usage after cleanup
+  ansible.builtin.command: df -h /
+  register: server_cleanup_after
+  changed_when: false
+  check_mode: false
+
+- name: Report cleanup results
+  ansible.builtin.debug:
+    msg:
+      before: "{{ server_cleanup_before.stdout_lines }}"
+      after: "{{ server_cleanup_after.stdout_lines }}"
+      image_bytes_reclaimed: "{{ server_cleanup_images.images_space_reclaimed | default('not measured (check mode)') }}"
+      preserved: Containers, all volumes, application files, build cache, networks and journal logs

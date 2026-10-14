@@ -39,6 +39,7 @@ in the repository.
 | =make local-install= | Apply workstation changes including binary installs |
 | =make server= | Deploy the VPS play |
 | =make pull= | Pull selected VPS images without stopping services |
+| =make cleanup= | Explicitly clean unused VPS images and APT downloads; preserve data |
 | =make pve= | Apply Proxmox workload management |
 | =make openwrt= | Apply the OpenWrt client play |
 | =make check= | Run the complete playbook in check mode |

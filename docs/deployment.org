@@ -22,6 +22,7 @@ certificates, generated profiles, or runtime logs.
   make local-install # apply localhost, including binary installation
   make server        # apply the VPS play
   make pull          # pull VPS images without changing container state
+  make cleanup       # explicitly remove unused images and APT downloads
   make pve           # apply the Proxmox play
   make openwrt       # apply the OpenWrt play
   make test          # run all local validation
@@ -55,6 +56,26 @@ Run the following before applying changes:
 CI validates Ansible syntax, service selection/templates, sing-box profiles, and
 rendered profiles with the Linux, macOS, and Windows sing-box binaries where
 available.
+
+* Disk cleanup
+
+Cleanup is an explicit maintenance operation, not part of =make server=.
+It removes all Docker images unreferenced by any existing container, including
+unused tagged images, and clears APT package downloads on Debian-family hosts.
+It is host-wide, not limited to this Compose project. Stopped containers also
+protect their images. Re-enabling a disabled service may require downloading its
+image again.
+
+#+begin_src sh :results output silent
+  make cleanup LIMIT=bwg-cn2-gia EXTRA="--check"
+  make cleanup LIMIT=bwg-cn2-gia
+#+end_src
+
+=cleanup.yml= uses only the static inventory and cleanup tasks. It does not deploy,
+restart or remove containers, and preserves all volumes, bind-mounted data,
+networks, build cache, and journal logs. In check mode, only filesystem usage is
+read; both image pruning and APT cleanup are explicitly skipped. The output is
+not an image-deletion preview. No package autoremove is performed.
 
 * Proxmox and OpenWrt
 

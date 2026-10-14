@@ -17,7 +17,7 @@ ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
 .PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull \
-        mcp lint test-services test ci
+        mcp lint cleanup test-services test ci
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -30,6 +30,7 @@ syntax: ## Fast parse validation without querying dynamic inventory
 	$(ANSIBLE_PLAYBOOK) --inventory inventory.yml --syntax-check $(EXTRA)
 	ansible-playbook mcp.yml --inventory inventory.yml --syntax-check $(EXTRA)
 	ansible-playbook server.yml --inventory inventory.yml --syntax-check $(EXTRA)
+	ansible-playbook cleanup.yml --inventory inventory.yml --syntax-check $(EXTRA)
 
 check: ## Dry-run against the inventory (no changes)
 	$(ANSIBLE_PLAYBOOK) --check $(CHECK_FLAGS)
@@ -57,6 +58,9 @@ openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 
 pull: ## Pull Docker Compose images on the server
 	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull $(EXTRA)
+
+cleanup: ## Explicit VPS image/APT cleanup; preserve containers, volumes and logs
+	ansible-playbook cleanup.yml --inventory inventory.yml $(LIMIT_FLAG) $(EXTRA)
 
 mcp: ## Probe MCP servers through ansible.mcp
 	ansible-playbook mcp.yml --inventory inventory.yml $(EXTRA)
