@@ -9,7 +9,7 @@ The inventory currently contains one Docker VPS:
 
 | Host | Group | Managed services |
 |---+---+---|
-| =bwg-cn2-gia= | =vps_group= | Caddy, Xray, WARP, Prometheus, Grafana, FreshRSS, RSSHub, Redis, Browserless, asspp |
+| =bwg-cn2-gia= | =vps_group= | Caddy, Xray, WARP (monitoring/RSS/asspp disabled) |
 | =mcp-fetch= | =mcp_group= | MCP fetch server |
 | =localhost= | =local_group= | Native sing-box client |
 | =pve= | =pve_group= | Proxmox/OpenWrt workload management |

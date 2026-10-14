@@ -7,7 +7,9 @@ Each VPS declares one complete =proxy_services= list in
 normal deployment. An empty list disables the managed Compose project.
 
 The current inventory has one VPS, =bwg-cn2-gia=. Its complete list is maintained
-in =host_vars/bwg-cn2-gia.yml=.
+in =host_vars/bwg-cn2-gia.yml=. Only the proxy path is selected in inventory;
+monitoring, RSS, and asspp services are configured as disabled. This table describes
+the desired state; apply the deployment to update the running VPS.
 
 * Current service table
 
@@ -16,16 +18,21 @@ in =host_vars/bwg-cn2-gia.yml=.
 | =caddy= | HTTPS/TLS entrypoint, reverse proxy, static files, and metrics | — | =bwg-cn2-gia= |
 | =xray= | Xray proxy server | =caddy= | =bwg-cn2-gia= |
 | =warp= | WARP SOCKS5 outbound | — | =bwg-cn2-gia= |
-| =prometheus= | Metrics collection and time-series storage | — | =bwg-cn2-gia= |
-| =grafana= | Monitoring dashboards | — | =bwg-cn2-gia= |
-| =freshrss= | RSS reader | — | =bwg-cn2-gia= |
-| =rsshub= | RSS content aggregation | =redis=, =browserless= | =bwg-cn2-gia= |
-| =redis= | RSSHub cache | — | =bwg-cn2-gia= |
-| =browserless= | Headless Chrome used by RSSHub | — | =bwg-cn2-gia= |
-| =asspp= | assppweb application | — | =bwg-cn2-gia= |
+| =prometheus= | Metrics collection and time-series storage | — | Disabled |
+| =grafana= | Monitoring dashboards | — | Disabled |
+| =freshrss= | RSS reader | — | Disabled |
+| =rsshub= | RSS content aggregation | =redis=, =browserless= | Disabled |
+| =redis= | RSSHub cache | — | Disabled |
+| =browserless= | Headless Chrome used by RSSHub | — | Disabled |
+| =asspp= | assppweb application | — | Disabled |
 
-All services currently run on the same VPS. Docker-internal service names and
-Caddy routes are local to that Compose project.
+The proxy services are selected for =bwg-cn2-gia=. The other Compose services
+remain defined in the native files but are not selected. Docker-internal service
+names and Caddy routes are local to the Compose project.
+
+Service definitions, environment variables, and secret paths are retained.
+To re-enable a service, add it and its dependencies back to the host's
+=proxy_services= list and deploy that host.
 
 * Service configuration
 
@@ -35,13 +42,6 @@ proxy_services:
   - caddy
   - xray
   - warp
-  - prometheus
-  - grafana
-  - freshrss
-  - rsshub
-  - redis
-  - browserless
-  - asspp
 #+end_src
 
 Compose files remain native. Every service has a matching Compose profile, and

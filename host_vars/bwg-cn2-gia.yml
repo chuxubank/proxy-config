@@ -1,11 +1,5 @@
+# Keep only the proxy path on this VPS. Monitoring, RSS, and asspp are disabled.
 proxy_services:
   - caddy
   - xray
   - warp
-  - prometheus
-  - grafana
-  - freshrss
-  - rsshub
-  - redis
-  - browserless
-  - asspp
