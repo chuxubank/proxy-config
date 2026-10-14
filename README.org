@@ -187,6 +187,32 @@ Set one complete list in =host_vars/<inventory_hostname>.yml=. Hosts must be in
 proxy_services: [caddy, xray, rsshub, redis, browserless]
 #+end_src
 
+当前 inventory 中只有一个 VPS（=bwg-cn2-gia=）。该主机当前启用的
+Docker Compose 服务如下；表中的“依赖”是运行时依赖，也必须一起放在
+=proxy_services= 中。
+
+| 服务 | 作用 | 依赖 | 当前 VPS |
+|---+---+---+---|
+| =caddy= | HTTPS/TLS 入口、反向代理、静态文件和指标入口 | — | =bwg-cn2-gia= |
+| =xray= | Xray 服务端代理 | =caddy= | =bwg-cn2-gia= |
+| =warp= | WARP SOCKS5 出站 | — | =bwg-cn2-gia= |
+| =prometheus= | 指标采集和时序数据存储 | — | =bwg-cn2-gia= |
+| =grafana= | 监控仪表盘 | — | =bwg-cn2-gia= |
+| =freshrss= | FreshRSS 阅读器 | — | =bwg-cn2-gia= |
+| =rsshub= | RSSHub 内容订阅服务 | =redis=, =browserless= | =bwg-cn2-gia= |
+| =redis= | RSSHub 缓存 | — | =bwg-cn2-gia= |
+| =browserless= | RSSHub 使用的无头 Chrome | — | =bwg-cn2-gia= |
+| =asspp= | assppweb 应用 | — | =bwg-cn2-gia= |
+
+当前 VPS 的完整配置见 =host_vars/bwg-cn2-gia.yml=。如果增加 VPS，先在
+=inventory.yml= 的 =vps_group= 中加入主机，再为该主机添加对应的
+=host_vars/<hostname>.yml= 和 =proxy_services= 列表。
+
+本地/客户端服务另行管理：=sing-box= 由 =local_group= 中的 =localhost=
+管理；=openwrt_group= 当前为空。虽然 =xray_group= 包含 =bwg-cn2-gia=
+和 =localhost=，它目前只提供 Xray 相关变量，=xray_client= role 尚未被
+主 playbook 调用，因此不要把它误认为一项正在运行的本地服务。
+
 Dependencies must be listed: Xray needs Caddy; RSSHub needs Redis and browserless.
 Compose validates these requirements before containers are stopped. Remove a
 service from the list to disable it; =proxy_services: []= disables the whole
