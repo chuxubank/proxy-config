@@ -1,0 +1,77 @@
+#+title: Deployment
+
+* Inventory and playbooks
+
+- =playbook.yml= runs the local, VPS, Proxmox, and OpenWrt plays.
+- =server.yml= runs only the =vps_group= play.
+- =inventory.yml= contains static hosts and groups.
+- =host_vars/= contains host-specific service placement and connection settings.
+- =group_vars/= contains group-level settings and secret paths.
+
+The VPS play uses secret lookups from =pass=. Do not commit passwords, tokens,
+certificates, generated profiles, or runtime logs.
+
+* Make targets
+
+#+begin_src sh :results output silent
+  make deps          # install Galaxy roles and collections
+  make syntax        # parse playbooks without dynamic inventory
+  make check         # dry-run the complete playbook
+  make diff          # dry-run with diffs
+  make local         # apply localhost, skip binary installation
+  make local-install # apply localhost, including binary installation
+  make server        # apply the VPS play
+  make pull          # pull VPS images without changing container state
+  make pve           # apply the Proxmox play
+  make openwrt       # apply the OpenWrt play
+  make test          # run all local validation
+  make ci            # syntax plus tests
+#+end_src
+
+All targets accept =LIMIT=, =TAGS=, =SKIP_TAGS=, and =EXTRA= where applicable.
+For example:
+
+#+begin_src sh :results output silent
+  make server LIMIT=bwg-cn2-gia
+  make diff LIMIT=localhost TAGS=gateway
+  make local TAGS=icloud
+  make diff EXTRA="--ask-vault-pass"
+#+end_src
+
+The =server= and =pull= targets invoke =server.yml= directly. Their =LIMIT=
+patterns therefore apply only to VPS hosts and cannot accidentally run local or
+Proxmox plays.
+
+* Validation workflow
+
+Run the following before applying changes:
+
+#+begin_src sh :results output silent
+  make syntax
+  make test
+  make diff LIMIT=<host>
+#+end_src
+
+CI validates Ansible syntax, service selection/templates, sing-box profiles, and
+rendered profiles with the Linux, macOS, and Windows sing-box binaries where
+available.
+
+* Proxmox and OpenWrt
+
+The Proxmox play creates and configures the OpenWrt VM. The OpenWrt play applies
+the guest configuration and client roles. Run the stages separately so the guest
+has time to boot and become reachable:
+
+#+begin_src sh :results output silent
+  make pve
+  make openwrt
+  make openwrt-upgrade
+#+end_src
+
+The OpenWrt guest is a same-LAN side gateway. It does not run DHCP; clients use
+its address as gateway and DNS while the main router remains the primary router.
+
+* MCP
+
+=mcp.yml= probes the MCP servers listed in =mcp/manifest.json=. Keep MCP tokens
+in extra-vars or =pass=, not in the manifest.

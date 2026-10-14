@@ -1,0 +1,79 @@
+#+title: Services and VPS Placement
+
+* Placement model
+
+Each VPS declares one complete =proxy_services= list in
+=host_vars/<hostname>.yml=. Removing a service disables its container on the next
+normal deployment. An empty list disables the managed Compose project.
+
+The current inventory has one VPS, =bwg-cn2-gia=. Its complete list is maintained
+in =host_vars/bwg-cn2-gia.yml=.
+
+* Current service table
+
+| Service | Purpose | Runtime dependencies | Current VPS |
+|---+---+---+---|
+| =caddy= | HTTPS/TLS entrypoint, reverse proxy, static files, and metrics | — | =bwg-cn2-gia= |
+| =xray= | Xray proxy server | =caddy= | =bwg-cn2-gia= |
+| =warp= | WARP SOCKS5 outbound | — | =bwg-cn2-gia= |
+| =prometheus= | Metrics collection and time-series storage | — | =bwg-cn2-gia= |
+| =grafana= | Monitoring dashboards | — | =bwg-cn2-gia= |
+| =freshrss= | RSS reader | — | =bwg-cn2-gia= |
+| =rsshub= | RSS content aggregation | =redis=, =browserless= | =bwg-cn2-gia= |
+| =redis= | RSSHub cache | — | =bwg-cn2-gia= |
+| =browserless= | Headless Chrome used by RSSHub | — | =bwg-cn2-gia= |
+| =asspp= | assppweb application | — | =bwg-cn2-gia= |
+
+All services currently run on the same VPS. Docker-internal service names and
+Caddy routes are local to that Compose project.
+
+* Service configuration
+
+#+begin_src yaml
+# host_vars/bwg-cn2-gia.yml
+proxy_services:
+  - caddy
+  - xray
+  - warp
+  - prometheus
+  - grafana
+  - freshrss
+  - rsshub
+  - redis
+  - browserless
+  - asspp
+#+end_src
+
+Compose files remain native. Every service has a matching Compose profile, and
+Compose validates the dependency graph before containers are stopped. The old
+=proxy_profile=, allowlist, and denylist variables are no longer used.
+
+Caddy routes are rendered only for selected local services. If =warp= is omitted,
+Xray's clean-IP routes use =direct= instead of a WARP outbound.
+
+* Applying changes
+
+A normal deployment pulls selected images, then runs =down/up=. This removes
+containers for disabled services and reloads bind-mounted configuration even
+after a failed previous attempt. There is brief whole-project downtime. Named
+volumes and bind-mounted application data are retained.
+
+#+begin_src sh :results output silent
+  make diff LIMIT=bwg-cn2-gia
+  make server LIMIT=bwg-cn2-gia
+#+end_src
+
+=make pull= only pulls selected images and never stops or starts containers. Run
+a normal deployment first after changing =proxy_services= so that the Compose
+files and environment are synchronized.
+
+* Adding or moving a VPS
+
+1. Add the host to =vps_group= in =inventory.yml=.
+2. Add its connection and secret-path variables.
+3. Add =host_vars/<hostname>.yml= with a complete =proxy_services= list.
+4. Run =make diff LIMIT=<hostname>=.
+5. Deploy the new host and explicitly migrate any application data.
+
+Changing a service list is not a data migration. DNS, published ports, remote
+reverse-proxy targets, and persistent data must be handled separately.

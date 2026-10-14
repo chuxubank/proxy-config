@@ -1,0 +1,76 @@
+#+title: Troubleshooting
+
+* Configuration checks
+
+#+begin_src sh :results output silent
+  make syntax
+  make test
+  make diff LIMIT=<host>
+  xray run -confdir=$HOME/.config/xray/ -dump
+  sing-box check -C $HOME/.config/sing-box
+#+end_src
+
+The Ansible tests validate rendered templates and profile syntax. They do not
+prove end-to-end traffic through a particular network, macOS gateway, or VPS.
+
+* Logs
+
+| Component | Log location |
+|---+---|
+| Xray on macOS | =~/Library/Logs/xray/= |
+| sing-box on macOS | =~/Library/Logs/sing-box/sing-box.log= |
+| Docker services | =docker compose logs <service>= from =proxy-config/= |
+
+* DNS cache
+
+On macOS, flush the system resolver and sing-box cache when DNS appears stale:
+
+#+begin_src sh :results output silent
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder
+  rm /opt/homebrew/var/lib/sing-box/cache.db
+#+end_src
+
+To inspect the address returned by DNS:
+
+#+begin_src sh :results output silent
+  curl ipinfo.io/$(dig +short example.com | head -n1)
+#+end_src
+
+* Ports and routing
+
+The VPS publishes HTTP/HTTPS through Caddy. Xray's server ports and the local
+API port are configured through the secret-backed environment templates. Check
+published ports on the VPS with:
+
+#+begin_src sh :results output silent
+  docker compose ps
+  docker compose logs --tail=100 caddy xray
+#+end_src
+
+The sing-box API/dashboard is intentionally bound to loopback:
+
+[[http://127.0.0.1:9090/dashboard/]]
+
+When debugging Invalley routing, verify the host routes and inspect the sing-box
+log for =route(proxy-iv-remote)=.
+
+#+begin_src sh :results output silent
+  route -n get 192.168.1.102
+  route -n get 192.168.1.112
+  route -n get 1.1.1.1
+  curl -4 --noproxy '*' --http1.1 --connect-timeout 10 --max-time 30 \
+    -o /dev/null -w 'HTTP=%{http_code}\n' https://llm.invalley.co/pricing
+#+end_src
+
+* Service placement issues
+
+If a service does not start after changing =proxy_services=:
+
+1. Confirm the service and all of its dependencies are listed.
+2. Run =make diff LIMIT=<host>=.
+3. Run =make server LIMIT=<host>= to synchronize the Compose files.
+4. Check =docker compose config --services= and container logs.
+
+Moving a service between VPS hosts does not move its named volumes or bind-mounted
+data. Migrate the data explicitly and update DNS and reverse-proxy targets.

@@ -1,337 +1,80 @@
-* Proxy
-** Xray
+#+title: Proxy Configuration
 
-*** Config
+An Ansible repository for managing proxy clients, a Docker Compose proxy server,
+Proxmox/OpenWrt workloads, and portable sing-box profiles.
+
+* Current topology
+
+The inventory currently contains one Docker VPS:
+
+| Host | Group | Managed services |
+|---+---+---|
+| =bwg-cn2-gia= | =vps_group= | Caddy, Xray, WARP, Prometheus, Grafana, FreshRSS, RSSHub, Redis, Browserless, asspp |
+| =mcp-fetch= | =mcp_group= | MCP fetch server |
+| =localhost= | =local_group= | Native sing-box client |
+| =pve= | =pve_group= | Proxmox/OpenWrt workload management |
+
+The VPS service list is defined in =host_vars/bwg-cn2-gia.yml=. See
+[[file:docs/services.org][docs/services.org]] for the service table, dependencies, and placement rules.
+
+* Quick start
+
 #+begin_src sh :results output silent
-  xray run -confdir=$HOME/.config/xray/ -dump
+  make deps
+  make syntax
+  make test
+  make check
+  make diff
 #+end_src
 
-*** Log
-[[file:~/Library/Logs/xray/xray-access.log]]
-[[file:~/Library/Logs/xray/xray-error.log]]
+Do not run an apply target until the check/diff output has been reviewed. Runtime
+secrets are read from =pass=; their paths are stored in inventory variables, not
+in the repository.
 
-** sing-box
+* Common commands
 
-*** Config
-Workstation and OpenWrt both load a config directory (=-C=). The rendered
-profile is =50-config.json=. OpenWrt keeps the stock UCI =conffile= key and
-points it at =/etc/sing-box=; the init uses =-C= when that path is a directory.
+| Command | Purpose |
+|---+---|
+| =make local= | Apply workstation changes, skipping binary installs |
+| =make local-install= | Apply workstation changes including binary installs |
+| =make server= | Deploy the VPS play |
+| =make pull= | Pull selected VPS images without stopping services |
+| =make pve= | Apply Proxmox workload management |
+| =make openwrt= | Apply the OpenWrt client play |
+| =make check= | Run the complete playbook in check mode |
+| =make diff= | Run check mode with diffs |
+| =make test= | Run service/template tests and sing-box profile validation |
+| =make ci= | Run syntax checks and the complete test suite |
+
+Use =LIMIT=, =TAGS=, =SKIP_TAGS=, and =EXTRA= to refine a command. VPS commands
+use the dedicated =server.yml= playbook, so native Ansible limit patterns cannot
+select local or Proxmox plays:
+
 #+begin_src sh :results output silent
-  sing-box check -C $HOME/.config/sing-box
-  # OpenWrt: sing-box check -C /etc/sing-box
+  make server LIMIT=bwg-cn2-gia
+  make pull LIMIT=bwg-cn2-gia
+  make diff LIMIT=localhost TAGS=gateway
 #+end_src
 
-*** sing-geosite rule sets
-The sing-box profile loads remote binary rule sets from
-[[https://github.com/SagerNet/sing-geosite/tree/rule-set][SagerNet/sing-geosite/rule-set]].
-The configured rule-set URLs use the corresponding files from that directory,
-for example =geosite-google.srs= and =geosite-geolocation-cn.srs=.
+* Documentation
 
-When adding routing for a single website, first check whether its domain is
-already covered by one of the sing-geosite rule sets. Prefer adding the
-applicable rule set to the route over adding a one-off =domain= or
-=domain_suffix= entry. Add a site-specific domain rule only when no suitable
-rule set exists (or when an intentional local override is required). Keep the
-rule-set tag and its route together in
-=roles/sing-box_client/templates/config.json.j2=.
+- [[file:docs/services.org][Services and VPS placement]] — Compose services, dependencies, profiles, disabling services, and migration notes.
+- [[file:docs/deployment.org][Deployment]] — Inventory, Make targets, validation, secrets, and Proxmox/OpenWrt deployment.
+- [[file:docs/clients.org][Clients]] — Xray, sing-box, macOS gateway, iCloud, Windows, and native service switches.
+- [[file:docs/troubleshooting.org][Troubleshooting]] — Logs, DNS, ports, and configuration checks.
 
-*** macOS IPv4 gateway (旁路由)
-Opt-in forwarding for same-LAN clients using the existing workstation TUN.
-Reserve the Mac LAN address in the main router first. Start with one client;
-keep its IP/subnet mask and set its IPv4 gateway to the Mac LAN address.
-Use a public IPv4 DNS address such as =223.5.5.5=: the existing TUN DNS
-hijack handles that traffic. DNS addressed to the same-LAN main router
-bypasses the Mac. The Mac itself does not listen on LAN port 53.
-
-Disable IPv6 on the test client: this feature does not configure an IPv6
-gateway or suppress router advertisements. Keep the Mac awake and sing-box
-running. The current sing-box LaunchAgent still requires a GUI login; this
-is not an unattended, boot-to-router setup. When sing-box is down, forwarding
-may fall back to the main router rather than fail closed. No PF/NAT or DHCP
-configuration is installed. Local-network isolation can prevent clients from
-reaching the Mac, and traffic still needs end-to-end validation.
-
-The =gateway= tag only sets the two runtime kernel parameters; it does not
-render secret profiles or restart sing-box. It is intentionally not a service:
-the settings reset after reboot and must be applied again when needed. A normal
-local run does nothing; explicitly selecting =gateway= enables it.
-#+begin_src sh :results output silent
-  # Preview (does not alter networking or require sudo).
-  make diff LIMIT=localhost TAGS=gateway EXTRA="--inventory inventory.yml"
-  # Apply; sudo is required for sysctl.
-  make local TAGS=gateway EXTRA="--inventory inventory.yml -K"
-#+end_src
-
-To stop using the Mac as a gateway, restore the client gateway/DNS. The
-forwarding settings will disappear at the next reboot; no rollback service or
-state file is installed. If immediate rollback is needed, run:
-#+begin_src sh :results output silent
-  sudo sysctl -w net.inet.ip.forwarding=0 net.inet.ip.redirect=1
-#+end_src
-
-Verify from the test client: normal domestic access, proxied-site access,
-and the expected exit IP with its own VPN/proxy disabled. The Ansible tests
-validate sing-box profiles only; they cannot prove forwarded traffic on a
-particular macOS/network combination.
-
-*** Invalley routing
-The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads its UUID (main password),
-=ws_path= and =url= (bare hostname) from =Work/IV/Proxy= via =invalley_pass_path=.
-In every environment, including =HOST_ENV=iv=, =invalley.co= and its subdomains
-use this outbound before Tailscale and general direct-routing rules.
-Portable Windows/iCloud profiles also include the remote route; the site-local
-=proxy-iv= stays omitted.
-
-Non-IV macOS workstation profiles also include =192.168.1.102/32= and
-=192.168.1.112/32= in the TUN routes to override a conflicting local
-=192.168.1.0/24= Wi-Fi route. Since =route_address= replaces the defaults,
-the profile preserves Darwin's eight default IPv4 routes before these host routes.
-IV, Linux, Windows/iCloud portable and OpenWrt profiles keep platform-default routes.
-These addresses are static; update the template if the service DNS addresses change.
-The host routes capture these IPs regardless of hostname; remote outbound selection
-still depends on the Invalley domain rule (DNS mapping or sniffing).
-
-On the affected non-IV Mac, deploy without overriding =host_env=, then check both
-host routes and a normal public destination. Both service IPs should use the TUN;
-requests must also show =route(proxy-iv-remote)= in the sing-box log.
-#+begin_src sh :results output silent
-  make local EXTRA="--inventory inventory.yml"
-  route -n get 192.168.1.102
-  route -n get 192.168.1.112
-  route -n get 1.1.1.1
-  curl -4 --noproxy '*' --http1.1 --connect-timeout 10 --max-time 30 \
-    -o /dev/null -w 'HTTP=%{http_code}\n' https://llm.invalley.co/pricing
-#+end_src
-
-*** API and Dashboard
-The native sing-box gRPC/gRPC-Web API and dashboard listen on loopback only.
-Open [[http://127.0.0.1:9090/dashboard/]] and connect to =127.0.0.1:9090=
-without a secret. The listener is intentionally unavailable from LAN and
-Tailscale; change the listen address and configure =services[].secret= before
-enabling remote access.
-
-*** iCloud profile
-Exports a portable profile to the sing-box Apple client iCloud containers,
-landing at =iCloud Drive/sing-box/sing-box.json=. In the app, add a profile of
-type =iCloud= and set =Path= to =sing-box.json=.
-
-Dropped from this profile: the host-local log path, the loopback API/dashboard,
-and the site-local outbounds gated on =host_env=. Everything else, Tailscale
-included, matches the workstation config. The file carries the Tailscale
-auth key and IV remote credentials and is written =0600=.
-#+begin_src sh :results output silent
-  make local TAGS=icloud
-#+end_src
-
-*** Windows profile
-Exports a portable profile for the official Windows sing-box client
-(=winget install sing-box=), landing at
-=~/.config/sing-box/windows/sing-box.json=. Copy that file to the Windows
-machine. TUN needs an elevated process and the =wintun= DLL that ships with
-the winget/scoop package. From an elevated prompt:
+* Repository layout
 
 #+begin_example
-  sing-box.exe run -c sing-box.json --directory %LOCALAPPDATA%\sing-box
+inventory.yml             Static hosts and groups
+host_vars/                Host-specific placement and connection settings
+group_vars/               Group settings and secret paths
+playbook.yml              Main playbook for all environments
+server.yml                VPS-only playbook
+roles/server/             Docker Compose proxy server
+roles/sing-box_client/    Native sing-box client and profile exports
+roles/xray_client/        Native Xray client
+roles/openwrt/            OpenWrt base configuration
+roles/pve_openwrt/        Proxmox/OpenWrt workload management
+tests/                    Template and profile validation
 #+end_example
-
-Dropped from this profile: the host-local log path and the site-local
-outbounds gated on =host_env=. The loopback API/dashboard stays, unlike the
-iCloud export. Tailscale and the IV remote outbound are kept, so the file carries
-their credentials and is written =0600=. Process rules include the Windows =.exe= names.
-#+begin_src sh :results output silent
-  make local TAGS=windows
-#+end_src
-
-*** Log
-[[file:~/Library/Logs/sing-box/sing-box.log]]
-
-** Ansible
-
-Common workflows are wrapped in the =Makefile=. Run =make= (or =make help=) to
-list every target. =check= and =diff= accept =LIMIT=, =TAGS=, =SKIP_TAGS=, and
-=EXTRA=. Role deployment targets accept =TAGS=, =SKIP_TAGS=, and =EXTRA= where
-applicable. =server= and =pull= use the VPS-only =server.yml= and accept native
-Ansible =LIMIT= patterns. =PLAYBOOK= overrides the main/check/local workflows.
-
-#+begin_src sh :results output silent
-  make deps                       # install Galaxy requirements
-  make syntax                     # fast parse validation
-  make test-services              # native service/template checks and client check-mode smoke tests
-  make test                       # service checks + rendered sing-box profiles
-  make ci                         # syntax + service/profile checks (GHA: Linux/macOS/Windows)
-  make check                      # dry-run against the inventory
-  make diff                       # dry-run with a diff of changes
-  make local                      # apply to localhost, skip binary installs
-  make local-install              # apply to localhost, incl. binary installs
-  make server                     # deploy to the vps_group
-  make pve                        # apply the roles in the Proxmox play
-  make openwrt                    # apply the roles in the OpenWrt play
-  make pull                       # pull Docker Compose images on the server
-  make mcp                        # probe MCP servers via ansible.mcp
-  make lint                       # ansible-lint (if installed)
-
-  make check LIMIT=bwg-cn2-gia    # override: limit to one host
-  make server LIMIT=bwg-cn2-gia  # deploy just this VPS
-  make pull LIMIT=bwg-cn2-gia    # pull deployed images without stopping/starting services
-  make local TAGS=icloud          # override: re-export the iCloud profile only
-  make local TAGS=windows         # override: re-export the Windows profile only
-  make diff EXTRA="--ask-vault-pass"
-#+end_src
-
-*** Service assignment and disable switches
-
-Set one complete list in =host_vars/<inventory_hostname>.yml=. Hosts must be in
-=vps_group= with their usual connection and secret-path variables. For example:
-
-#+begin_src yaml
-proxy_services: [caddy, xray, rsshub, redis, browserless]
-#+end_src
-
-当前 inventory 中只有一个 VPS（=bwg-cn2-gia=）。该主机当前启用的
-Docker Compose 服务如下；表中的“依赖”是运行时依赖，也必须一起放在
-=proxy_services= 中。
-
-| 服务 | 作用 | 依赖 | 当前 VPS |
-|---+---+---+---|
-| =caddy= | HTTPS/TLS 入口、反向代理、静态文件和指标入口 | — | =bwg-cn2-gia= |
-| =xray= | Xray 服务端代理 | =caddy= | =bwg-cn2-gia= |
-| =warp= | WARP SOCKS5 出站 | — | =bwg-cn2-gia= |
-| =prometheus= | 指标采集和时序数据存储 | — | =bwg-cn2-gia= |
-| =grafana= | 监控仪表盘 | — | =bwg-cn2-gia= |
-| =freshrss= | FreshRSS 阅读器 | — | =bwg-cn2-gia= |
-| =rsshub= | RSSHub 内容订阅服务 | =redis=, =browserless= | =bwg-cn2-gia= |
-| =redis= | RSSHub 缓存 | — | =bwg-cn2-gia= |
-| =browserless= | RSSHub 使用的无头 Chrome | — | =bwg-cn2-gia= |
-| =asspp= | assppweb 应用 | — | =bwg-cn2-gia= |
-
-当前 VPS 的完整配置见 =host_vars/bwg-cn2-gia.yml=。如果增加 VPS，先在
-=inventory.yml= 的 =vps_group= 中加入主机，再为该主机添加对应的
-=host_vars/<hostname>.yml= 和 =proxy_services= 列表。
-
-本地/客户端服务另行管理：=sing-box= 由 =local_group= 中的 =localhost=
-管理；=openwrt_group= 当前为空。虽然 =xray_group= 包含 =bwg-cn2-gia=
-和 =localhost=，它目前只提供 Xray 相关变量，=xray_client= role 尚未被
-主 playbook 调用，因此不要把它误认为一项正在运行的本地服务。
-
-Dependencies must be listed: Xray needs Caddy; RSSHub needs Redis and browserless.
-Compose validates these requirements before containers are stopped. Remove a
-service from the list to disable it; =proxy_services: []= disables the whole
-project. Defaults are =[caddy, xray, warp, prometheus, grafana]=. The existing
-VPS explicitly lists all ten services to preserve its previous RSS/asspp setup.
-The old =proxy_profile=, allowlist and denylist variables are no longer used.
-
-Compose files stay native; each service has its own profile. Caddy routes
-follow the list; without WARP, Xray's "Clean IP" routes use =direct=.
-This repository exclusively manages the Compose project: a normal deployment
-pulls selected images, then runs =down/up= to remove disabled containers and
-reload bind-mounted configuration even after a failed attempt. There is brief
-whole-project downtime. Named volumes and bind-mounted data are retained.
-=make pull= only pulls selected images and never stops or starts containers;
-run a normal deployment first to sync updated Compose files to a new host.
-
-#+begin_src sh :results output silent
-  make server LIMIT=bwg-cn2-gia EXTRA="--inventory inventory.yml"
-  make pull LIMIT=bwg-cn2-gia EXTRA="--inventory inventory.yml"
-  # Host limits use native Ansible syntax; only the VPS play can run here.
-  make server LIMIT='bwg-cn2-gia,another-vps' EXTRA="--inventory inventory.yml --list-hosts"
-#+end_src
-
-Moving a list to another host is not a data migration: also deploy the old host,
-migrate data explicitly, and update DNS/ports/remote reverse-proxy targets.
-Docker-internal names and the generated Caddy routes cover local services only.
-
-Native clients use =sing_box_service_enabled= and =xray_service_enabled=, both
-true by default. Set either to the YAML boolean =false= to stop/disable its
-installed service and skip install/config/export tasks, while keeping packages
-and files. Restart handlers respect the switch. =xray_client= must be included
-in a play to manage native Xray; =xray_group= alone only supplies variables.
-
-#+begin_src sh :results output silent
-  make diff LIMIT=localhost TAGS=service EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
-  make local TAGS=service EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
-#+end_src
-
-To re-enable, restore =true= and run the normal local/install workflow. The
-=service= tag is stop-only, not a separate configuration or enable workflow.
-=make test-services= runs local template/selection checks and client check-mode
-smoke tests. Optionally check native dependency validation without a daemon:
-=COMPOSE_BINARY=/path/to/docker-compose make test-services=.
-
-*** MCP
-=mcp.yml= uses the =ansible.mcp= collection to talk to MCP servers listed in
-=mcp/manifest.json=. Inventory group =mcp_group= currently has =mcp-fetch=
-(=uvx mcp-server-fetch=). Add servers to the manifest and group; keep tokens
-in extra-vars or =pass=, not in the manifest. Probe with:
-
-#+begin_src sh :results output silent
-  make mcp
-#+end_src
-
-*** OpenWrt
-
-The =openwrt= base role bootstraps Python, gathers facts, preserves the
-image-provided feed list, and replaces only the official download host with
-=openwrt_package_mirror=. OpenWrt 25.12 or newer with =apk= is required.
-The Proxmox VM uses the x86_64 =ext4-combined= image grown to 1G so client
-packages fit; squashfs-combined leaves under 100MB of overlay and fills up.
-Snapshot builds retain the official source by default to avoid mirror
-synchronization gaps. Client roles such as =xray_client= and =sing-box_client=
-can run after this base role. The OpenWrt guest is a same-LAN side gateway
-(旁路由): it does not run DHCP, and sing-box TUN =auto_redirect= intercepts
-forwarded traffic. Point clients at the OpenWrt address as gateway and DNS;
-the main router stays =.1=. Run the VM and guest stages separately so the
-guest has time to boot and become reachable:
-
-#+begin_src sh :results output silent :async
-  make pve
-  make openwrt
-  make openwrt-upgrade            # sysupgrade then re-apply the guest play
-#+end_src
-
-*** Local
-
-Removes the generated client configs first so a fresh copy is rendered.
-
-#+begin_src sh :results output silent :async
-  rm ~/.config/xray/50-config.json || true
-  rm ~/.config/sing-box/50-config.json || true
-  make local
-#+end_src
-
-*** All
-#+begin_src sh :results output silent :async
-  ansible-playbook playbook.yml
-#+end_src
-
-** Flash DNS
-
-*** macOS
-#+begin_src sh :dir /sudo:root@localhost: :results output silent
-  sudo dscacheutil -flushcache
-  sudo killall -HUP mDNSResponder
-  rm /opt/homebrew/var/lib/sing-box/cache.db
-#+end_src
-
-** Debug DNS
-#+begin_src sh :results raw :wrap src js
-  curl ipinfo.io/$(dig +short example.com | head -n1)
-#+end_src
-
-#+RESULTS:
-#+begin_src js
-{
-  "ip": "104.20.23.154",
-  "city": "San Francisco",
-  "region": "California",
-  "country": "US",
-  "loc": "37.7621,-122.3971",
-  "org": "AS13335 Cloudflare, Inc.",
-  "postal": "94107",
-  "timezone": "America/Los_Angeles",
-  "readme": "https://ipinfo.io/missingauth",
-  "anycast": true
-}
-#+end_src
-
-** Debug Port
-https://port.ping.pe/

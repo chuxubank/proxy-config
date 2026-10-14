@@ -1,0 +1,115 @@
+#+title: Clients
+
+* Xray client
+
+The Xray client configuration is rendered to:
+
+#+begin_src sh :results output silent
+  $HOME/.config/xray/50-config.json
+#+end_src
+
+Validate it with:
+
+#+begin_src sh :results output silent
+  xray run -confdir=$HOME/.config/xray/ -dump
+#+end_src
+
+Logs are stored under =~/Library/Logs/xray/= on macOS.
+
+* sing-box
+
+Workstation and OpenWrt use a configuration directory. The rendered profile is
+=50-config.json=.
+
+#+begin_src sh :results output silent
+  sing-box check -C $HOME/.config/sing-box
+  # OpenWrt:
+  sing-box check -C /etc/sing-box
+#+end_src
+
+The profile uses binary rule sets from
+[[https://github.com/SagerNet/sing-geosite/tree/rule-set][SagerNet/sing-geosite/rule-set]].
+When adding a route for one website, check the existing rule sets first and
+prefer a suitable rule set over a one-off domain rule.
+
+* Native service switches
+
+Both switches default to =true=. Set one to the YAML boolean =false= to stop and
+disable the installed service, skip install/config/export tasks, and retain the
+package and files:
+
+#+begin_src yaml
+sing_box_service_enabled: false
+xray_service_enabled: false
+#+end_src
+
+The switches support macOS, Linux, and OpenWrt. Restart handlers respect the
+switch. The =service= tag is stop-only; to re-enable a service, restore =true=
+and run the normal local workflow.
+
+#+begin_src sh :results output silent
+  make diff LIMIT=localhost TAGS=service \
+    EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
+  make local TAGS=service \
+    EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
+#+end_src
+
+Although =xray_group= includes the VPS and localhost, it currently supplies
+Xray variables only. The main playbook does not include =xray_client= for the
+VPS.
+
+* macOS gateway
+
+The optional =gateway= tag enables IPv4 forwarding for same-LAN clients using
+the workstation TUN. Reserve the Mac LAN address in the main router, configure
+one test client to use it as gateway, use a public IPv4 DNS address, and disable
+IPv6 on the test client.
+
+This does not configure PF/NAT, DHCP, or an IPv6 gateway. The Mac must remain
+awake and logged in. If sing-box stops, traffic may fall back to the main router.
+
+#+begin_src sh :results output silent
+  make diff LIMIT=localhost TAGS=gateway
+  make local TAGS=gateway EXTRA="-K"
+#+end_src
+
+To disable forwarding immediately:
+
+#+begin_src sh :results output silent
+  sudo sysctl -w net.inet.ip.forwarding=0 net.inet.ip.redirect=1
+#+end_src
+
+* Routing notes
+
+The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads credentials and
+connection settings from =Work/IV/Proxy= via =invalley_pass_path=. Invalley
+traffic uses this outbound before Tailscale and general direct-routing rules.
+Portable Windows and iCloud profiles keep the remote outbound and omit local
+site-specific outbounds.
+
+* iCloud profile
+
+#+begin_src sh :results output silent
+  make local TAGS=icloud
+#+end_src
+
+The profile is exported to the sing-box iCloud container at
+=iCloud Drive/sing-box/sing-box.json=. The iCloud profile omits host-local logs,
+the loopback API/dashboard, and site-local outbounds.
+
+* Windows profile
+
+#+begin_src sh :results output silent
+  make local TAGS=windows
+#+end_src
+
+The profile is exported to
+=~/.config/sing-box/windows/sing-box.json=. Copy it to Windows. TUN requires
+an elevated process and the =wintun= DLL supplied by the sing-box package.
+
+#+begin_example
+sing-box.exe run -c sing-box.json --directory %LOCALAPPDATA%\sing-box
+#+end_example
+
+The Windows profile keeps the loopback API/dashboard, Tailscale, and the remote
+Invalley outbound, but omits host-local logs and site-local outbounds.
