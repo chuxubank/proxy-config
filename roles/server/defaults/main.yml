@@ -1,8 +1,11 @@
 ---
 # Base directory for generated Compose files and templates.
 proxy_config_dir: proxy-config
-# Docker Compose profiles to enable; empty list runs only unprofiled services.
-proxy_profile: []
+# Keep the historical Compose project identity (directory basename) for cleanup.
+proxy_compose_project_name: "{{ proxy_config_dir | regex_replace('/+$', '') | basename | lower }}"
+# Complete per-host selection, including dependencies; [] disables the project.
+# Each native Compose profile has the same name as its service.
+proxy_services: [caddy, xray, warp, prometheus, grafana]
 
 # Grafana dashboards fetched from grafana.com at deploy time (not committed).
 # id/revision map to https://grafana.com/api/dashboards/<id>/revisions/<revision>/download

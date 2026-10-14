@@ -1,9 +1,6 @@
 ---
 - name: Setup VPS Proxy
-  hosts: vps_group
-  roles:
-    - common
-    - server
+  ansible.builtin.import_playbook: server.yml
 
 - name: Setup Local Proxy
   hosts: local_group

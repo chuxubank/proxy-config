@@ -150,13 +150,15 @@ their credentials and is written =0600=. Process rules include the Windows =.exe
 Common workflows are wrapped in the =Makefile=. Run =make= (or =make help=) to
 list every target. =check= and =diff= accept =LIMIT=, =TAGS=, =SKIP_TAGS=, and
 =EXTRA=. Role deployment targets accept =TAGS=, =SKIP_TAGS=, and =EXTRA= where
-applicable. =PLAYBOOK= can override the playbook path globally.
+applicable. =server= and =pull= use the VPS-only =server.yml= and accept native
+Ansible =LIMIT= patterns. =PLAYBOOK= overrides the main/check/local workflows.
 
 #+begin_src sh :results output silent
   make deps                       # install Galaxy requirements
   make syntax                     # fast parse validation
-  make test                       # render and check sing-box profiles
-  make ci                         # syntax + sing-box profile checks (GHA: Linux/macOS/Windows)
+  make test-services              # native service/template checks and client check-mode smoke tests
+  make test                       # service checks + rendered sing-box profiles
+  make ci                         # syntax + service/profile checks (GHA: Linux/macOS/Windows)
   make check                      # dry-run against the inventory
   make diff                       # dry-run with a diff of changes
   make local                      # apply to localhost, skip binary installs
@@ -169,11 +171,65 @@ applicable. =PLAYBOOK= can override the playbook path globally.
   make lint                       # ansible-lint (if installed)
 
   make check LIMIT=bwg-cn2-gia    # override: limit to one host
-  make server TAGS=pull           # override: run only tagged tasks
+  make server LIMIT=bwg-cn2-gia  # deploy just this VPS
+  make pull LIMIT=bwg-cn2-gia    # pull deployed images without stopping/starting services
   make local TAGS=icloud          # override: re-export the iCloud profile only
   make local TAGS=windows         # override: re-export the Windows profile only
   make diff EXTRA="--ask-vault-pass"
 #+end_src
+
+*** Service assignment and disable switches
+
+Set one complete list in =host_vars/<inventory_hostname>.yml=. Hosts must be in
+=vps_group= with their usual connection and secret-path variables. For example:
+
+#+begin_src yaml
+proxy_services: [caddy, xray, rsshub, redis, browserless]
+#+end_src
+
+Dependencies must be listed: Xray needs Caddy; RSSHub needs Redis and browserless.
+Compose validates these requirements before containers are stopped. Remove a
+service from the list to disable it; =proxy_services: []= disables the whole
+project. Defaults are =[caddy, xray, warp, prometheus, grafana]=. The existing
+VPS explicitly lists all ten services to preserve its previous RSS/asspp setup.
+The old =proxy_profile=, allowlist and denylist variables are no longer used.
+
+Compose files stay native; each service has its own profile. Caddy routes
+follow the list; without WARP, Xray's "Clean IP" routes use =direct=.
+This repository exclusively manages the Compose project: a normal deployment
+pulls selected images, then runs =down/up= to remove disabled containers and
+reload bind-mounted configuration even after a failed attempt. There is brief
+whole-project downtime. Named volumes and bind-mounted data are retained.
+=make pull= only pulls selected images and never stops or starts containers;
+run a normal deployment first to sync updated Compose files to a new host.
+
+#+begin_src sh :results output silent
+  make server LIMIT=bwg-cn2-gia EXTRA="--inventory inventory.yml"
+  make pull LIMIT=bwg-cn2-gia EXTRA="--inventory inventory.yml"
+  # Host limits use native Ansible syntax; only the VPS play can run here.
+  make server LIMIT='bwg-cn2-gia,another-vps' EXTRA="--inventory inventory.yml --list-hosts"
+#+end_src
+
+Moving a list to another host is not a data migration: also deploy the old host,
+migrate data explicitly, and update DNS/ports/remote reverse-proxy targets.
+Docker-internal names and the generated Caddy routes cover local services only.
+
+Native clients use =sing_box_service_enabled= and =xray_service_enabled=, both
+true by default. Set either to the YAML boolean =false= to stop/disable its
+installed service and skip install/config/export tasks, while keeping packages
+and files. Restart handlers respect the switch. =xray_client= must be included
+in a play to manage native Xray; =xray_group= alone only supplies variables.
+
+#+begin_src sh :results output silent
+  make diff LIMIT=localhost TAGS=service EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
+  make local TAGS=service EXTRA="--inventory inventory.yml -e '{sing_box_service_enabled: false}'"
+#+end_src
+
+To re-enable, restore =true= and run the normal local/install workflow. The
+=service= tag is stop-only, not a separate configuration or enable workflow.
+=make test-services= runs local template/selection checks and client check-mode
+smoke tests. Optionally check native dependency validation without a daemon:
+=COMPOSE_BINARY=/path/to/docker-compose make test-services=.
 
 *** MCP
 =mcp.yml= uses the =ansible.mcp= collection to talk to MCP servers listed in

@@ -12,10 +12,12 @@
     name: "{{ sing_box_openwrt_service_name }}"
     state: restarted
   listen: Restart sing-box service
-  when: sing_box_on_openwrt
+  when:
+    - sing_box_on_openwrt
+    - sing_box_service_enabled
 
 - name: Restart sing-box service (default)
-  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/restart_service.yml"
+  ansible.builtin.include_tasks: "{{ role_path }}/../common/tasks/restart_service.yml"
   vars:
     service_name: sing-box
     service_template_content: "{{ lookup('template', sing_box_service_template) }}"
@@ -23,3 +25,4 @@
   when:
     - not sing_box_on_openwrt
     - not sing_box_on_windows
+    - sing_box_service_enabled

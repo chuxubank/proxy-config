@@ -1,98 +1,121 @@
 ---
+- name: Validate and show service selection
+  ansible.builtin.import_tasks: selection.yml
+  tags: [always]
+
 - name: Ensure proxy-config directory exists
   ansible.builtin.file:
     path: "{{ proxy_config_dir }}"
     state: directory
     mode: "0755"
 
-- name: Sync Docker Compose directory to remote server
+- name: Sync native Compose files and static configuration
   ansible.posix.synchronize:
     src: files/
     delete: true
-    # Grafana dashboards are fetched on the remote (see below); keep them so
-    # delete=true does not wipe downloaded JSON and force a re-download.
     rsync_opts:
       - "--exclude=grafana/dashboards/*.json"
+      - "--exclude=.env"
+      - "--exclude=xray/config.json"
+      - "--exclude=caddy/Caddyfile"
+      - "--exclude=asspp/mnt/"
+      - "--exclude=rss/extensions/"
     dest: "{{ proxy_config_dir }}"
     dest_port: "{{ ansible_port | int }}"
   when: not ansible_check_mode
 
-- name: Download Grafana dashboards from grafana.com
+- name: Download Grafana dashboards
   ansible.builtin.get_url:
     url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/{{ item.revision }}/download"
     dest: "{{ proxy_config_dir }}/grafana/dashboards/{{ item.filename }}"
     mode: "0644"
   loop: "{{ grafana_dashboards }}"
-  loop_control:
-    label: "{{ item.filename }}"
-  when: not ansible_check_mode
+  when:
+    - not ansible_check_mode
+    - "'grafana' in proxy_services"
 
-- name: Bind provisioned dashboards to the Prometheus data source
+- name: Bind dashboards to the provisioned Prometheus data source
   ansible.builtin.replace:
     path: "{{ proxy_config_dir }}/grafana/dashboards/{{ item.filename }}"
-    # Dashboards exported for UI import reference the data source via the
-    # ${DS_PROMETHEUS} input placeholder; provisioning skips that prompt, so
-    # rewrite it to the fixed uid declared in provisioning/datasources.
     regexp: '\$\{DS_PROMETHEUS\}'
-    replace: "prometheus"
+    replace: prometheus
   loop: "{{ grafana_dashboards }}"
-  loop_control:
-    label: "{{ item.filename }}"
-  when: not ansible_check_mode
+  when:
+    - not ansible_check_mode
+    - "'grafana' in proxy_services"
 
-- name: Setup env
+- name: Render Caddy routes for selected services
   ansible.builtin.template:
-    src: templates/env.j2
+    src: Caddyfile.j2
+    dest: "{{ proxy_config_dir }}/caddy/Caddyfile"
+    mode: "0644"
+  when: "'caddy' in proxy_services"
+
+- name: Render Compose environment
+  ansible.builtin.template:
+    src: env.j2
     dest: "{{ proxy_config_dir }}/.env"
     mode: "0600"
+  diff: false
 
-- name: Setup xray config
+- name: Render Xray config
   ansible.builtin.template:
-    src: templates/xray/config_server.json.j2
+    src: xray/config_server.json.j2
     dest: "{{ proxy_config_dir }}/xray/config.json"
-    # Bind-mounted into the xray container and read by its non-root process,
-    # so it must stay world-readable; 0600 causes "permission denied".
+    # Bind-mounted and read by the container's non-root process.
     mode: "0644"
+  diff: false
+  when: "'xray' in proxy_services"
 
-- name: Setup rss env
+- name: Render FreshRSS environment
   ansible.builtin.template:
-    src: templates/rss_env.j2
+    src: rss_env.j2
     dest: "{{ proxy_config_dir }}/rss/.env"
     mode: "0600"
-  when: rss_pass_path is defined
+  diff: false
+  when: "'freshrss' in proxy_services"
 
-- name: Setup rsshub env
+- name: Render RSSHub environment
   ansible.builtin.template:
-    src: templates/rsshub_env.j2
+    src: rsshub_env.j2
     dest: "{{ proxy_config_dir }}/rsshub/.env"
     mode: "0600"
-  when: rss_pass_path is defined
+  diff: false
+  when: "'rsshub' in proxy_services"
 
-- name: Stop Docker Compose
-  community.docker.docker_compose_v2:
-    project_src: "{{ proxy_config_dir }}"
-    profiles: "{{ proxy_profile }}"
-    state: stopped
-  register: compose_stop
-  # Tolerate "nothing to stop" on first run; surface any other failure.
-  failed_when:
-    - compose_stop is failed
-    - "'no container found' not in (compose_stop.msg | default(''))"
-    - "'not found' not in (compose_stop.msg | default(''))"
-  tags: always
-  when: not ansible_check_mode
-
-- name: Pull Docker Compose
+# Validate and pull before stopping anything. Pull-only selects just this task
+# (plus local validation) and operates on the last deployed native Compose files.
+- name: Pull selected Compose images
   community.docker.docker_compose_v2_pull:
     project_src: "{{ proxy_config_dir }}"
-    profiles: "{{ proxy_profile }}"
-  tags: pull
-  when: not ansible_check_mode
+    project_name: "{{ proxy_compose_project_name }}"
+    files: [compose.yml]
+    profiles: "{{ proxy_services }}"
+  tags: [pull]
+  when:
+    - not ansible_check_mode
+    - proxy_services | length > 0
 
-- name: Run Docker Compose
+# The project is exclusively managed here. down removes all its containers,
+# including old profiles/orphans, but keeps named volumes and bind-mounted data.
+- name: Stop the managed Compose project without deleting volumes
   community.docker.docker_compose_v2:
     project_src: "{{ proxy_config_dir }}"
-    profiles: "{{ proxy_profile }}"
+    project_name: "{{ proxy_compose_project_name }}"
+    files: [compose.yml]
+    profiles: ['*']
+    state: absent
     remove_orphans: true
-  tags: always
+    remove_volumes: false
   when: not ansible_check_mode
+
+# Recreate every deployment so bind-mounted configs are also reloaded on retry.
+- name: Start selected Compose services
+  community.docker.docker_compose_v2:
+    project_src: "{{ proxy_config_dir }}"
+    project_name: "{{ proxy_compose_project_name }}"
+    files: [compose.yml]
+    profiles: "{{ proxy_services }}"
+  when:
+    - not ansible_check_mode
+    - proxy_services | length > 0

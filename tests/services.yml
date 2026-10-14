@@ -1,0 +1,113 @@
+---
+- name: Check native service selection and templates without a Docker daemon
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    proxy_services: [caddy, xray, rsshub, redis, browserless]
+    render_dir: "{{ playbook_dir }}/.render/services"
+    compose_binary: "{{ lookup('env', 'COMPOSE_BINARY') }}"
+    proxy_env: {DOMAIN: example.test, EMAIL: admin@example.test, CF_API_TOKEN: ci-stub}
+    xray_env:
+      API_PORT: 10085
+      CLIENT_ID: 00000000-0000-4000-8000-000000000000
+      REALITY_PORT: 4433
+      REALITY_TARGET: www.example.test
+      REALITY_PRIVATE_KEY: ci-stub
+      REALITY_SHORT_ID: abcd1234
+      XHTTP_PORT: 2022
+      XHTTP_PATH: /ci-test
+  tasks:
+    - name: Validate service selection locally
+      ansible.builtin.include_role:
+        name: "{{ playbook_dir }}/../roles/server"
+        tasks_from: selection
+
+    - name: Validate empty selection
+      ansible.builtin.include_role:
+        name: "{{ playbook_dir }}/../roles/server"
+        tasks_from: selection
+      vars:
+        proxy_services: []
+
+    - name: Reject unknown service names
+      block:
+        - name: Validate bad selection
+          ansible.builtin.include_role:
+            name: "{{ playbook_dir }}/../roles/server"
+            tasks_from: selection
+          vars:
+            proxy_services: [typo]
+      rescue:
+        - name: Record expected rejection
+          ansible.builtin.set_fact:
+            rejected_typo: true
+
+    - name: Assert validation ran
+      ansible.builtin.assert:
+        that: rejected_typo | default(false)
+
+    - name: Stage unchanged native Compose files
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../roles/server/files/"
+        dest: "{{ render_dir }}/"
+        mode: preserve
+
+    - name: Check every service is individually profiled
+      vars:
+        document: "{{ lookup('file', render_dir ~ '/' ~ item) | from_yaml }}"
+      ansible.builtin.assert:
+        that: >-
+          document.services | dict2items | map(attribute='key') | list ==
+          document.services.values() | map(attribute='profiles') | flatten | list
+      loop: [compose.yml, rss/compose.yml, rsshub/compose.yml, asspp/compose.yml]
+
+    - name: Render stub environment and routing
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../roles/server/templates/{{ item.src }}"
+        dest: "{{ render_dir }}/{{ item.dest }}"
+        mode: "0600"
+      loop:
+        - {src: env.j2, dest: .env}
+        - {src: Caddyfile.j2, dest: caddy/Caddyfile}
+        - {src: xray/config_server.json.j2, dest: xray.json}
+
+    - name: Assert Caddy selection and WARP fallback
+      vars:
+        caddy: "{{ lookup('file', render_dir ~ '/caddy/Caddyfile') }}"
+        xray: "{{ lookup('file', render_dir ~ '/xray.json') | from_json }}"
+      ansible.builtin.assert:
+        that:
+          - "'http://rsshub:1200' in caddy"
+          - "'http://grafana:3000' not in caddy"
+          - xray.outbounds | selectattr('tag', 'equalto', 'warp') | list | length == 0
+          - xray.routing.rules[1].outboundTag == 'direct'
+
+    - name: Validate selected services with native Compose (optional, no daemon)
+      ansible.builtin.command:
+        argv: >-
+          {{ [compose_binary, '--file', 'compose.yml'] +
+             proxy_services | map('regex_replace', '^', '--profile=') | list + ['config', '--services'] }}
+        chdir: "{{ render_dir }}"
+      register: native_selection
+      changed_when: false
+      failed_when: native_selection.rc != 0 or native_selection.stdout_lines | sort != proxy_services | sort
+      when: compose_binary | length > 0
+
+    - name: Verify Compose rejects omitted required dependencies
+      ansible.builtin.command:
+        argv: ["{{ compose_binary }}", --file, compose.yml, --profile, xray, config, --quiet]
+        chdir: "{{ render_dir }}"
+      register: missing_dependency
+      changed_when: false
+      failed_when: missing_dependency.rc == 0 or 'caddy' not in missing_dependency.stderr
+      when: compose_binary | length > 0
+
+    - name: Check the native empty selection starts no services
+      ansible.builtin.command:
+        argv: ["{{ compose_binary }}", --file, compose.yml, config, --services]
+        chdir: "{{ render_dir }}"
+      register: empty_selection
+      changed_when: false
+      failed_when: empty_selection.rc != 0 or empty_selection.stdout | trim | length > 0
+      when: compose_binary | length > 0

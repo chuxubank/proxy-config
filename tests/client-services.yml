@@ -1,0 +1,17 @@
+---
+# Read-only smoke test of the disabled branch on the current OS. No runtime
+# secrets, installs, config rendering, or service mutations are allowed.
+- name: Check disabled native client roles
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  check_mode: true
+  vars:
+    sing_box_service_enabled: false
+    xray_service_enabled: false
+  roles:
+    - role: "{{ playbook_dir }}/../roles/sing-box_client"
+    - role: "{{ playbook_dir }}/../roles/xray_client"
+  post_tasks:
+    - name: Verify disabled roles did not queue restart handlers
+      ansible.builtin.meta: flush_handlers

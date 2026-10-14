@@ -1,0 +1,98 @@
+---
+- name: Include xray install tasks
+  ansible.builtin.include_tasks: install.yml
+  tags: install
+
+- name: Ensure xray config directory exists
+  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
+  ansible.builtin.file:
+    path: "{{ xray_config_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
+
+- name: Ensure xray log directory exists
+  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
+  ansible.builtin.file:
+    path: "{{ xray_log_dir }}"
+    state: directory
+    mode: "0755"
+    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
+  when: not xray_on_openwrt
+
+- name: Ensure logrotate config directory exists
+  become: "{{ use_become | default(false) }}"
+  ansible.builtin.file:
+    path: "{{ logrotate_config_dir }}"
+    state: directory
+    mode: "0755"
+  when: not xray_on_openwrt
+
+- name: Setup logrotate
+  become: "{{ use_become | default(false) }}"
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: "{{ xray_logrotate_config }}"
+    mode: "0644"
+  notify:
+    - Force xray log rotation
+  when: not xray_on_openwrt
+
+- name: Setup xray config
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ xray_config_file }}"
+    mode: "0600"
+    validate: "{{ xray_binary }} run -test -c %s"
+  notify:
+    - Force xray log rotation
+    - Restart xray service
+
+- name: Show xray share details
+  when: not xray_on_openwrt
+  block:
+    - name: Render share text
+      ansible.builtin.set_fact:
+        xray_share_text: "{{ lookup('template', 'share.txt.j2') | trim }}"
+
+    - name: Display share links
+      ansible.builtin.debug:
+        msg: "{{ xray_share_text }}"
+      when: xray_share_text != ""
+
+    - name: Print share QR code
+      ansible.builtin.command:
+        cmd: qrencode -t UTF8 "{{ xray_share_text }}"
+      register: qrencode_output
+      changed_when: false
+      when: xray_share_text != ""
+
+    - name: Show QR code
+      ansible.builtin.debug:
+        msg: "{{ qrencode_output.stdout }}"
+      when: qrencode_output.stdout is defined
+
+- name: Configure xray service on OpenWrt
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: configure_openwrt_service
+  vars:
+    common_openwrt_service_name: "{{ xray_openwrt_service_name }}"
+    common_openwrt_uci_package: xray
+    common_openwrt_uci_options:
+      xray.enabled.enabled: "1"
+  when: xray_on_openwrt
+
+- name: Configure xray service on Linux
+  ansible.builtin.include_tasks: service_linux.yml
+  when:
+    - not xray_on_openwrt
+    - ansible_facts['system'] == 'Linux'
+
+# Reuse the existing custom-plist handler; normal runs also re-enable a stopped job.
+- name: Request xray macOS service reconciliation
+  ansible.builtin.debug:
+    msg: Reconcile the configured Homebrew service
+  changed_when: true
+  notify: Restart xray service
+  when: ansible_facts['system'] == 'Darwin'

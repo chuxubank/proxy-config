@@ -8,8 +8,7 @@ services:
   rsshub:
     image: diygod/rsshub
     container_name: rsshub
-    profiles:
-      - rss
+    profiles: [rsshub]
     restart: always
     logging: *default-logging
     environment:
@@ -29,8 +28,7 @@ services:
   browserless:
     image: browserless/chrome
     container_name: browserless
-    profiles:
-      - rss
+    profiles: [browserless]
     restart: always
     logging: *default-logging
     ulimits:
@@ -46,8 +44,7 @@ services:
   redis:
     image: redis:alpine
     container_name: redis
-    profiles:
-      - rss
+    profiles: [redis]
     restart: always
     logging: *default-logging
     volumes:

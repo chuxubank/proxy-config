@@ -1,0 +1,6 @@
+---
+- name: Setup VPS Proxy
+  hosts: vps_group
+  roles:
+    - common
+    - server

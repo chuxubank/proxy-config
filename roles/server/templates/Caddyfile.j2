@@ -20,29 +20,40 @@
 
 {$DOMAIN:localhost} {
 	log
+{% if 'xray' in proxy_services %}
 	handle {$XHTTP_PATH}/* {
 		reverse_proxy h2c://xray:{$XHTTP_PORT}
 	}
+{% endif %}
 	handle {
 		file_server
 	}
 }
+{% if 'freshrss' in proxy_services %}
 
 {$RSS_SUB_DOMAIN:rss}.{$DOMAIN:localhost} {
 	reverse_proxy http://freshrss
 }
+{% endif %}
+{% if 'rsshub' in proxy_services %}
 
 {$RSSHUB_SUB_DOMAIN:rsshub}.{$DOMAIN:localhost} {
 	reverse_proxy http://rsshub:1200
 }
+{% endif %}
+{% if 'asspp' in proxy_services %}
 
 {$ASSPP_SUB_DOMAIN:asspp}.{$DOMAIN:localhost} {
 	reverse_proxy asspp:8080
 }
+{% endif %}
+{% if 'grafana' in proxy_services %}
 
 {$GRAFANA_SUB_DOMAIN:grafana}.{$DOMAIN:localhost} {
 	reverse_proxy http://grafana:3000
 }
+{% endif %}
+{% if 'prometheus' in proxy_services %}
 
 {$PROM_SUB_DOMAIN:prometheus}.{$DOMAIN:localhost} {
 	basic_auth {
@@ -50,3 +61,4 @@
 	}
 	reverse_proxy http://prometheus:9090
 }
+{% endif %}

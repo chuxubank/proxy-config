@@ -11,6 +11,7 @@ x-logging: &default-logging
 
 services:
   caddy:
+    profiles: [caddy]
     container_name: caddy
     image: iarekylew00t/caddy-cloudflare
     restart: unless-stopped
@@ -38,6 +39,7 @@ services:
     logging: *default-logging
 
   prometheus:
+    profiles: [prometheus]
     image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
@@ -54,6 +56,7 @@ services:
       - "9090"
 
   grafana:
+    profiles: [grafana]
     image: grafana/grafana-oss:latest
     container_name: grafana
     restart: unless-stopped
@@ -70,16 +73,17 @@ services:
       - "3000"
 
   xray:
+    profiles: [xray]
     container_name: xray
     image: ghcr.io/xtls/xray-core
     depends_on:
       - caddy
     restart: always
     ports:
-      - "${REALITY_PORT}:${REALITY_PORT}"
-      - "${API_PORT}:${API_PORT}"
+      - "${REALITY_PORT:-4433}:${REALITY_PORT:-4433}"
+      - "${API_PORT:-10085}:${API_PORT:-10085}"
     expose:
-      - "${XHTTP_PORT}"
+      - "${XHTTP_PORT:-2022}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -88,6 +92,7 @@ services:
     logging: *default-logging
 
   warp:
+    profiles: [warp]
     container_name: warp
     image: monius/docker-warp-socks:v5
     restart: unless-stopped

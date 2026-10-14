@@ -9,14 +9,15 @@ SKIP_TAGS   ?=
 EXTRA       ?=
 
 # Assemble optional flags only when the matching variable is set.
-LIMIT_FLAG       = $(if $(LIMIT),--limit $(LIMIT),)
+LIMIT_FLAG       = $(if $(LIMIT),--limit '$(LIMIT)',)
 TAGS_FLAG        = $(if $(TAGS),--tags $(TAGS),)
 SKIP_TAGS_FLAG   = $(if $(SKIP_TAGS),--skip-tags $(SKIP_TAGS),)
 CHECK_FLAGS      = $(LIMIT_FLAG) $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
-.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull mcp lint test ci
+.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull \
+        mcp lint test-services test ci
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -28,6 +29,7 @@ deps: ## Install Galaxy role/collection requirements
 syntax: ## Fast parse validation without querying dynamic inventory
 	$(ANSIBLE_PLAYBOOK) --inventory inventory.yml --syntax-check $(EXTRA)
 	ansible-playbook mcp.yml --inventory inventory.yml --syntax-check $(EXTRA)
+	ansible-playbook server.yml --inventory inventory.yml --syntax-check $(EXTRA)
 
 check: ## Dry-run against the inventory (no changes)
 	$(ANSIBLE_PLAYBOOK) --check $(CHECK_FLAGS)
@@ -42,7 +44,7 @@ local-install: ## Apply workstation changes including binary installs
 	$(ANSIBLE_PLAYBOOK) --limit localhost $(ROLE_FLAGS)
 
 server: ## Deploy to the VPS group
-	$(ANSIBLE_PLAYBOOK) --limit vps_group $(ROLE_FLAGS)
+	ansible-playbook server.yml $(LIMIT_FLAG) $(ROLE_FLAGS)
 
 pve: ## Apply the Proxmox play
 	$(ANSIBLE_PLAYBOOK) --inventory inventory.yml --limit pve_group $(EXTRA)
@@ -54,7 +56,7 @@ openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_sysupgrade=true $(EXTRA)
 
 pull: ## Pull Docker Compose images on the server
-	$(ANSIBLE_PLAYBOOK) --limit vps_group --tags pull $(EXTRA)
+	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull $(EXTRA)
 
 mcp: ## Probe MCP servers through ansible.mcp
 	ansible-playbook mcp.yml --inventory inventory.yml $(EXTRA)
@@ -69,7 +71,11 @@ lint: ## Run ansible-lint if available
 	  echo "ansible-lint not installed; skipping"; \
 	fi
 
-test: ## Render and validate sing-box client profiles
+test-services: ## Validate service lists, templates and client disable paths locally
+	ansible-playbook tests/services.yml --inventory tests/inventory.yml $(EXTRA)
+	ansible-playbook tests/client-services.yml --inventory tests/inventory.yml $(EXTRA)
+
+test: test-services ## Render and validate sing-box client profiles
 	@command -v sing-box >/dev/null 2>&1 \
 	  || { echo "sing-box not installed; needed for profile checks" >&2; exit 1; }
 	ansible-playbook tests/sing-box.yml --inventory tests/inventory.yml $(EXTRA)

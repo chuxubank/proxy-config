@@ -1,0 +1,3 @@
+---
+# false stops/disables the host service and skips install/config tasks.
+xray_service_enabled: true

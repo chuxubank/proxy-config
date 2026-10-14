@@ -1,3 +1,11 @@
-proxy_profile:
+proxy_services:
+  - caddy
+  - xray
+  - warp
+  - prometheus
+  - grafana
+  - freshrss
+  - rsshub
+  - redis
+  - browserless
   - asspp
-  - rss

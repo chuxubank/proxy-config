@@ -1,92 +1,23 @@
 ---
-- name: Include xray install tasks
-  ansible.builtin.include_tasks: install.yml
-  tags: install
+- name: Validate client service switch
+  ansible.builtin.assert:
+    that: xray_service_enabled is boolean
+    fail_msg: xray_service_enabled must be a YAML boolean.
+  tags: [always]
 
-- name: Ensure xray config directory exists
-  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
-  ansible.builtin.file:
-    path: "{{ xray_config_dir }}"
-    state: directory
-    mode: "0755"
-    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
+- name: Configure enabled client
+  ansible.builtin.import_tasks: configure.yml
+  when: xray_service_enabled
 
-- name: Ensure xray log directory exists
-  become: "{{ (not xray_on_openwrt) and (use_become | default(false)) }}"
-  ansible.builtin.file:
-    path: "{{ xray_log_dir }}"
-    state: directory
-    mode: "0755"
-    owner: "{{ xray_on_openwrt | ternary('root', ansible_facts['user_id']) }}"
-  when: not xray_on_openwrt
-
-- name: Ensure logrotate config directory exists
-  become: "{{ use_become | default(false) }}"
-  ansible.builtin.file:
-    path: "{{ logrotate_config_dir }}"
-    state: directory
-    mode: "0755"
-  when: not xray_on_openwrt
-
-- name: Setup logrotate
-  become: "{{ use_become | default(false) }}"
-  ansible.builtin.template:
-    src: logrotate.j2
-    dest: "{{ xray_logrotate_config }}"
-    mode: "0644"
-  notify:
-    - Force xray log rotation
-  when: not xray_on_openwrt
-
-- name: Setup xray config
-  ansible.builtin.template:
-    src: config.json.j2
-    dest: "{{ xray_config_file }}"
-    mode: "0600"
-    validate: "{{ xray_binary }} run -test -c %s"
-  notify:
-    - Force xray log rotation
-    - Restart xray service
-
-- name: Configure xray service on OpenWrt
-  ansible.builtin.include_role:
-    name: common
-    tasks_from: configure_openwrt_service
+- name: Stop disabled client without installing or rendering secrets
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/../common/tasks/stop_service.yml"
+    apply:
+      tags: [service]
   vars:
-    common_openwrt_service_name: "{{ xray_openwrt_service_name }}"
-    common_openwrt_uci_package: xray
-    common_openwrt_uci_options:
-      xray.enabled.enabled: "1"
-  when: xray_on_openwrt
-  tags: install
-
-- name: Configure xray service on Linux
-  ansible.builtin.include_tasks: service_linux.yml
-  when:
-    - not xray_on_openwrt
-    - ansible_facts['system'] == 'Linux'
-  tags: install
-
-- name: Show xray share details
-  when: not xray_on_openwrt
-  block:
-    - name: Render share text
-      ansible.builtin.set_fact:
-        xray_share_text: "{{ lookup('template', 'share.txt.j2') | trim }}"
-
-    - name: Display share links
-      ansible.builtin.debug:
-        msg: "{{ xray_share_text }}"
-      when: xray_share_text != ""
-
-    - name: Print share QR code
-      ansible.builtin.command:
-        cmd: qrencode -t UTF8 "{{ xray_share_text }}"
-      register: qrencode_output
-      changed_when: false
-      when: xray_share_text != ""
-
-    - name: Show QR code
-      ansible.builtin.debug:
-        msg: "{{ qrencode_output.stdout }}"
-      when: qrencode_output.stdout is defined
+    service_name: xray
+    service_on_openwrt: "{{ xray_on_openwrt }}"
+    service_openwrt_uci_key: xray.enabled.enabled
+    service_openwrt_uci_package: xray
+  when: not xray_service_enabled
+  tags: [service]

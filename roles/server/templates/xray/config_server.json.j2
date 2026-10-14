@@ -39,7 +39,7 @@
           "geosite:google-scholar",
           "geosite:netflix"
         ],
-        "outboundTag": "warp",
+        "outboundTag": "{{ 'warp' if 'warp' in proxy_services else 'direct' }}",
         "ruleTag": "Clean IP"
       },
       {
@@ -145,6 +145,7 @@
       "protocol": "freedom",
       "settings": {}
     },
+{% if 'warp' in proxy_services %}
     {
       "tag": "warp",
       "protocol": "socks",
@@ -157,6 +158,7 @@
         ]
       }
     },
+{% endif %}
     {
       "tag": "blocked",
       "protocol": "blackhole",

@@ -24,5 +24,3 @@ rss_env:
   ADMIN_API_PASSWORD: "{{ lookup('community.general.passwordstore', rss_api_pass_path) }}"
   DB_TYPE: sqlite
   RSSHUB_SUB_DOMAIN: rsshub
-
-proxy_profile: []
