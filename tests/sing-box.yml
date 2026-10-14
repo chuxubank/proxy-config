@@ -202,6 +202,29 @@
       loop_control:
         label: "{{ item.inbounds[0].stack }}"
 
+    - name: Assert every profile routes Roborock domains directly
+      vars:
+        direct_route: >-
+          {{ item.route.rules | selectattr('outbound', 'defined') |
+             selectattr('outbound', 'equalto', 'direct') | first }}
+        direct_domains: >-
+          {{ direct_route.rules | selectattr('domain_suffix', 'defined') | map(attribute='domain_suffix') | flatten }}
+      ansible.builtin.assert:
+        that:
+          - "'roborock.com' in direct_domains"
+          - "'rockrobo.com' in direct_domains"
+        quiet: true
+      loop:
+        - "{{ sing_box_ci_workstation }}"
+        - "{{ sing_box_ci_macos }}"
+        - "{{ sing_box_ci_linux }}"
+        - "{{ sing_box_ci_iv }}"
+        - "{{ sing_box_ci_windows }}"
+        - "{{ sing_box_ci_icloud }}"
+        - "{{ sing_box_ci_openwrt }}"
+      loop_control:
+        label: "{{ item.inbounds[0].stack }}"
+
     - name: Assert non-IV macOS preserves default routes and captures the conflicting hosts
       ansible.builtin.assert:
         that:
