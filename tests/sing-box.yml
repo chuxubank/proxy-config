@@ -202,7 +202,7 @@
       loop_control:
         label: "{{ item.inbounds[0].stack }}"
 
-    - name: Assert every profile routes Roborock domains directly
+    - name: Assert every profile routes selected suffix domains directly
       vars:
         direct_route: >-
           {{ item.route.rules | selectattr('outbound', 'defined') |
@@ -211,6 +211,7 @@
           {{ direct_route.rules | selectattr('domain_suffix', 'defined') | map(attribute='domain_suffix') | flatten }}
       ansible.builtin.assert:
         that:
+          - "'b2clogin.com' in direct_domains"
           - "'roborock.com' in direct_domains"
           - "'rockrobo.com' in direct_domains"
         quiet: true
