@@ -82,10 +82,10 @@ To disable forwarding immediately:
 * Routing notes
 
 The =proxy-iv-remote= VMess/WebSocket/TLS outbound reads credentials and
-connection settings from =Work/IV/Proxy= via =invalley_pass_path=. Invalley
-traffic uses this outbound before Tailscale and general direct-routing rules.
-Portable Windows and iCloud profiles keep the remote outbound and omit local
-site-specific outbounds.
+connection settings from =Work/IV/Proxy= via =invalley_pass_path=. Every
+profile, IV or not, routes =invalley.co= through this outbound before Tailscale
+and general direct-routing rules. TUN routes stay at the platform defaults.
+Portable Windows and iCloud profiles omit local site-specific outbounds.
 
 * iCloud profile
 

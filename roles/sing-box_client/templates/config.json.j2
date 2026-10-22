@@ -276,21 +276,6 @@
       "stack": "gvisor",
 {% endif %}
       "auto_route": true,
-{% if sing_box_on_macos and not sing_box_on_openwrt and not portable and host_env | default('') != "iv" %}
-      {# route_address replaces Darwin defaults; preserve all eight routes before adding host routes. #}
-      "route_address": [
-        "1.0.0.0/8",
-        "2.0.0.0/7",
-        "4.0.0.0/6",
-        "8.0.0.0/5",
-        "16.0.0.0/4",
-        "32.0.0.0/3",
-        "64.0.0.0/2",
-        "128.0.0.0/1",
-        "192.168.1.102/32",
-        "192.168.1.112/32"
-      ],
-{% endif %}
       "strict_route": true
     }
   ],
