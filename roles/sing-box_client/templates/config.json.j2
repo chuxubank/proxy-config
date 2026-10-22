@@ -65,17 +65,20 @@
       {
         "action": "evaluate",
         "server": "ali",
-        "tag": "cn-probe"
+        "tag": "cn-probe",
+        "timeout": "2s"
       },
       {
         "match_response": "cn-probe",
         "rule_set": "geoip-cn",
-        "action": "respond"
+        "action": "respond",
+        "race": true
       },
       {
         "action": "evaluate",
         "server": "ts",
-        "tag": "ts-probe"
+        "tag": "ts-probe",
+        "speculative": true
       },
       {
         "match_response": "ts-probe",
@@ -84,6 +87,9 @@
       }
 {% endif %}
     ],
+{% if not sing_box_on_openwrt %}
+    "optimistic": true,
+{% endif %}
     "strategy": "ipv4_only"
   },
 {% if not sing_box_on_openwrt %}

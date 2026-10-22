@@ -229,11 +229,48 @@
           - sing_box_ci_icloud.services is not defined
         quiet: true
 
+    - name: Assert non-OpenWrt DNS races the CN probe and keeps a stale cache
+      vars:
+        cn_probe: >-
+          {{ item.dns.rules | selectattr('tag', 'defined')
+             | selectattr('tag', 'equalto', 'cn-probe') | first }}
+        cn_respond: >-
+          {{ item.dns.rules | selectattr('match_response', 'defined')
+             | selectattr('match_response', 'equalto', 'cn-probe') | first }}
+        ts_probe: >-
+          {{ item.dns.rules | selectattr('tag', 'defined')
+             | selectattr('tag', 'equalto', 'ts-probe') | first }}
+        ts_respond: >-
+          {{ item.dns.rules | selectattr('match_response', 'defined')
+             | selectattr('match_response', 'equalto', 'ts-probe') | first }}
+      ansible.builtin.assert:
+        that:
+          - item.dns.optimistic | bool
+          - cn_probe.server == "ali"
+          - cn_probe.timeout == "2s"
+          - cn_respond.race | bool
+          - cn_respond.rule_set == "geoip-cn"
+          - ts_probe.server == "ts"
+          - ts_probe.speculative | bool
+          - ts_respond.race is not defined
+          - ts_respond.ip_accept_any | bool
+        quiet: true
+      loop:
+        - "{{ sing_box_ci_workstation }}"
+        - "{{ sing_box_ci_iv }}"
+        - "{{ sing_box_ci_windows }}"
+        - "{{ sing_box_ci_icloud }}"
+      loop_control:
+        label: "{{ item.inbounds[0].stack }}"
+
     - name: Assert OpenWrt profile stays compatible with the 1.13 release package
       ansible.builtin.assert:
         that:
           - sing_box_ci_openwrt.http_clients is not defined
           - sing_box_ci_openwrt.route.default_http_client is not defined
+          - sing_box_ci_openwrt.dns.optimistic is not defined
+          - "'\"race\"' not in (sing_box_ci_openwrt | to_json)"
+          - "'\"speculative\"' not in (sing_box_ci_openwrt | to_json)"
           - sing_box_ci_openwrt.inbounds[0].auto_redirect
           - sing_box_ci_openwrt.endpoints is not defined
         quiet: true
