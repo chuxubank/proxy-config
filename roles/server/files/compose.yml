@@ -75,7 +75,9 @@ services:
   xray:
     profiles: [xray]
     container_name: xray
-    image: ghcr.io/xtls/xray-core
+    # 26.10.21 breaks REALITY when the camouflage site sends an empty
+    # EncryptedExtensions (XTLS/Xray-core#7243).
+    image: ghcr.io/xtls/xray-core:26.3.27
     depends_on:
       - caddy
     restart: always
