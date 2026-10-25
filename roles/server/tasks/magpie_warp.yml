@@ -1,0 +1,63 @@
+---
+# providers.json holds the upstream keys, so this only writes the proxy field
+# on Anthropic and Claude Code. A provider added later is updated on the next
+# deploy. Warp has to be selected; otherwise the hostname would not resolve.
+
+- name: Check for a magpie provider catalog
+  ansible.builtin.command:
+    argv: [docker, exec, magpie, test, -f, /config/magpie/providers.json]
+  register: magpie_providers_file
+  changed_when: false
+  failed_when: magpie_providers_file.rc not in [0, 1]
+  when:
+    - not ansible_check_mode
+    - "'magpie' in proxy_services"
+    - "'warp' in proxy_services"
+
+- name: Point Anthropic providers at WARP
+  when:
+    - not ansible_check_mode
+    - "'magpie' in proxy_services"
+    - "'warp' in proxy_services"
+    - magpie_providers_file.rc | default(1) == 0
+  block:
+    - name: Copy the magpie provider catalog out of the volume
+      ansible.builtin.command:
+        argv:
+          - docker
+          - cp
+          - magpie:/config/magpie/providers.json
+          - /tmp/magpie-providers.json
+      changed_when: false
+
+    - name: Keep the copied catalog private
+      ansible.builtin.file:
+        path: /tmp/magpie-providers.json
+        mode: "0600"
+
+    - name: Set the Anthropic proxy in the copied catalog
+      ansible.builtin.script:
+        cmd: "magpie-anthropic-proxy.py /tmp/magpie-providers.json {{ magpie_anthropic_proxy }}"
+      register: magpie_anthropic_proxy_set
+      changed_when: "'updated' in magpie_anthropic_proxy_set.stdout"
+
+    - name: Copy the Anthropic proxy back into the volume
+      ansible.builtin.command:
+        argv:
+          - docker
+          - cp
+          - /tmp/magpie-providers.json
+          - magpie:/config/magpie/providers.json
+      when: magpie_anthropic_proxy_set is changed
+      notify: Restart magpie
+
+    - name: Restore magpie ownership of the provider catalog
+      ansible.builtin.command:
+        argv: [docker, exec, --user, "0", magpie, chown, "65532:65532", /config/magpie/providers.json]
+      when: magpie_anthropic_proxy_set is changed
+      changed_when: false
+  always:
+    - name: Remove the copied provider catalog
+      ansible.builtin.file:
+        path: /tmp/magpie-providers.json
+        state: absent

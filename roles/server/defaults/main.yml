@@ -9,6 +9,8 @@ proxy_services: [caddy, xray, warp, prometheus, grafana]
 
 # Set true on a host to refuse subscription sign-in.
 magpie_no_accounts: false
+# Anthropic and Claude Code providers use this when warp is selected.
+magpie_anthropic_proxy: socks5h://warp:9091
 
 # Grafana dashboards fetched from grafana.com at deploy time (not committed).
 # id/revision map to https://grafana.com/api/dashboards/<id>/revisions/<revision>/download

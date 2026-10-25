@@ -125,6 +125,10 @@ services:
     image: ghcr.io/yetone/magpie:latest
     restart: unless-stopped
     command: ["web", "--addr", "0.0.0.0:3430", "--no-open"]
+    depends_on:
+      warp:
+        condition: service_started
+        required: false
     expose:
       - "3425"
       - "3430"

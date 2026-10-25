@@ -40,8 +40,9 @@ rendered. =MAGPIE_NO_ACCOUNTS= defaults off (=magpie_no_accounts: false=); set i
 to =true= on a host to refuse subscription sign-in. A former host directory
 =/root/.config/magpie= is copied into the
 volume once, and only when the volume has no =providers.json= yet. An
-Anthropic provider can use =socks5h://warp:9091=; that proxy belongs on the
-provider, not in a global environment variable.
+When =warp= is selected, deploy sets the =proxy= of each Anthropic and Claude
+Code provider to =socks5h://warp:9091=. Other providers stay direct. A provider
+added later is updated on the next deploy.
 
 The proxy services are selected for =bwg-cn2-gia=. The other Compose services
 remain defined in the native files but are not selected. Docker-internal service
