@@ -16,9 +16,11 @@ monitoring_env:
   # bcrypt hash generated via: caddy hash-password
   PROM_PASSWORD_HASH: "{{ lookup('community.general.passwordstore', prom_pass_path, subkey='password_hash') }}"
 
-# Same pass entry chezmoi renders into client configs. The value is the
-# gateway key, not an upstream vendor key.
+# Same pass entry chezmoi renders into client configs. The first line is the
+# management page login. gateway-key is the gateway credential. Neither is an
+# upstream vendor key.
 magpie_pass_path: Personal/Tech/AI/Magpie
+magpie_web_key: "{{ lookup('community.general.passwordstore', magpie_pass_path) }}"
 
 rss_env:
   RSS_SUB_DOMAIN: rss

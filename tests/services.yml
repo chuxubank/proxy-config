@@ -8,6 +8,7 @@
     render_dir: "{{ playbook_dir }}/.render/services"
     compose_binary: "{{ lookup('env', 'COMPOSE_BINARY') }}"
     proxy_env: {DOMAIN: example.test, EMAIL: admin@example.test, CF_API_TOKEN: ci-stub}
+    magpie_web_key: ci-stub-web-key
     xray_env:
       API_PORT: 10085
       CLIENT_ID: 00000000-0000-4000-8000-000000000000
@@ -99,14 +100,18 @@
       ansible.builtin.assert:
         that:
           - "'MAGPIE_NO_ACCOUNTS=0' in envfile"
+          - "'MAGPIE_WEB_KEY=ci-stub-web-key' in envfile"
           - "'http://rsshub:1200' in caddy"
           - "'http://grafana:3000' not in caddy"
           - "'{$MAGPIE_SUB_DOMAIN:magpie}.{$DOMAIN:localhost}' in caddy"
+          - "'path /v1 /v1/* /v1beta /v1beta/*' in caddy"
           - "'reverse_proxy http://magpie:3425' in caddy"
+          - "'reverse_proxy http://magpie:3430' in caddy"
+          - "'basic_auth' not in caddy"
           - "'host.docker.internal:3425' not in caddy"
-          - "'3430' not in caddy"
           - "'3425:3425' not in lookup('file', render_dir ~ '/compose.yml')"
-          - "'3430' not in lookup('file', render_dir ~ '/compose.yml')"
+          - "'3430:3430' not in lookup('file', render_dir ~ '/compose.yml')"
+          - "'0.0.0.0:3430' in lookup('file', render_dir ~ '/compose.yml')"
           - xray.outbounds | selectattr('tag', 'equalto', 'warp') | list | length == 0
           - xray.routing.rules[1].outboundTag == 'direct'
 

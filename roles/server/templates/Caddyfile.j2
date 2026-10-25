@@ -64,9 +64,15 @@
 {% endif %}
 {% if 'magpie' in proxy_services %}
 
-# Gateway only. Bearer carries the gateway key; basic_auth would replace it.
-# This site does not serve the web UI.
+# /v1 and /v1beta stay on the gateway so Bearer is left alone. The page is
+# the rest of this host, and its login is MAGPIE_WEB_KEY.
 {$MAGPIE_SUB_DOMAIN:magpie}.{$DOMAIN:localhost} {
-	reverse_proxy http://magpie:3425
+	@gateway path /v1 /v1/* /v1beta /v1beta/*
+	handle @gateway {
+		reverse_proxy http://magpie:3425
+	}
+	handle {
+		reverse_proxy http://magpie:3430
+	}
 }
 {% endif %}

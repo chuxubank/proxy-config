@@ -28,11 +28,13 @@ the desired state; apply the deployment to update the running VPS.
 | =asspp= | assppweb application | — | Disabled |
 
 Magpie is the =magpie= Compose service (=ghcr.io/yetone/magpie:latest=). It listens
-on port 3425 inside the Compose network and publishes no host port. Caddy
-proxies =magpie.$DOMAIN= to =http://magpie:3425= with no =basic_auth= and no
-=MAGPIE_TRUST_PROXY=. Port 3430 is not served. Callers are off loopback, so
-they must send the gateway key from =Personal/Tech/AI/Magpie=; the role
-installs that key under the name =clients=. Upstream provider keys stay in
+on ports 3425 and 3430 inside the Compose network and publishes neither on the
+host. Caddy serves =magpie.$DOMAIN= with no =basic_auth= and no
+=MAGPIE_TRUST_PROXY=. =/v1= and =/v1beta= go to the gateway on 3425; every
+other path goes to the web UI on 3430. Callers of the gateway send the gateway
+key from =Personal/Tech/AI/Magpie=; the role installs that key under the name
+=clients=. The page login is the first line of the same pass entry, passed as
+=MAGPIE_WEB_KEY=. Upstream provider keys stay in
 the =magpie_config= volume at =/config/magpie/providers.json= and are not
 rendered. =MAGPIE_NO_ACCOUNTS= defaults off (=magpie_no_accounts: false=); set it
 to =true= on a host to refuse subscription sign-in. A former host directory

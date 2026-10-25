@@ -117,19 +117,23 @@ services:
       timeout: 10s
       retries: 5
 
-  # Compose network only. No host ports: Caddy is the public entry, and the
-  # web UI stays unpublished.
+  # No host ports. Caddy sends /v1 and /v1beta to the gateway and the rest
+  # to the web UI. MAGPIE_WEB_KEY is the page login.
   magpie:
     profiles: [magpie]
     container_name: magpie
     image: ghcr.io/yetone/magpie:latest
     restart: unless-stopped
+    command: ["web", "--addr", "0.0.0.0:3430", "--no-open"]
     expose:
       - "3425"
+      - "3430"
     environment:
       MAGPIE_ADDR: 0.0.0.0:3425
       MAGPIE_NO_ACCOUNTS: "${MAGPIE_NO_ACCOUNTS:-0}"
       MAGPIE_PUBLIC_URL: https://magpie.${DOMAIN:-localhost}
+      MAGPIE_WEB_URL: https://magpie.${DOMAIN:-localhost}
+      MAGPIE_WEB_KEY: "${MAGPIE_WEB_KEY}"
     volumes:
       - magpie_config:/config
     logging: *default-logging
