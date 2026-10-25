@@ -6,7 +6,8 @@
       - proxy_services is sequence and proxy_services is not string and proxy_services is not mapping
       - >-
         proxy_services | difference(['caddy', 'xray', 'warp', 'prometheus', 'grafana',
-                                     'freshrss', 'rsshub', 'redis', 'browserless', 'asspp']) | length == 0
+                                     'freshrss', 'rsshub', 'redis', 'browserless', 'asspp',
+                                     'magpie']) | length == 0
     fail_msg: proxy_services must be a list of known Compose service names, including dependencies.
 
 - name: Show host service selection

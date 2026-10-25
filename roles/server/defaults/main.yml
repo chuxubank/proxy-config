@@ -7,6 +7,9 @@ proxy_compose_project_name: "{{ proxy_config_dir | regex_replace('/+$', '') | ba
 # Each native Compose profile has the same name as its service.
 proxy_services: [caddy, xray, warp, prometheus, grafana]
 
+# Set true on a host to refuse subscription sign-in.
+magpie_no_accounts: false
+
 # Grafana dashboards fetched from grafana.com at deploy time (not committed).
 # id/revision map to https://grafana.com/api/dashboards/<id>/revisions/<revision>/download
 grafana_dashboards:

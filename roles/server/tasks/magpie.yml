@@ -1,0 +1,78 @@
+---
+# The gateway used to be a host systemd unit. Remove it so it cannot keep
+# listening beside the Compose service. Leave /root/.config/magpie in place
+# until its provider keys have been copied into the volume.
+
+- name: Check for the former host magpie unit
+  ansible.builtin.stat:
+    path: /etc/systemd/system/magpie.service
+  register: magpie_unit
+
+- name: Stop and disable the former host magpie unit
+  ansible.builtin.systemd:
+    name: magpie
+    enabled: false
+    state: stopped
+  when: magpie_unit.stat.exists
+
+- name: Remove the former host magpie unit and binary
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/magpie.service
+    - /usr/local/bin/magpie
+  register: magpie_host_removed
+
+- name: Reload systemd after removing the magpie unit
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: magpie_host_removed is changed
+
+- name: Check for provider keys left by the host install
+  ansible.builtin.stat:
+    path: /root/.config/magpie/providers.json
+  register: magpie_host_providers
+
+# Runs before the project is recreated. A later providers.json in the volume
+# wins; this never overwrites keys already stored there.
+- name: Seed the magpie volume from the former host config
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --project-directory
+      - "{{ proxy_config_dir }}"
+      - --project-name
+      - "{{ proxy_compose_project_name }}"
+      - --profile
+      - magpie
+      - run
+      - --rm
+      - --no-deps
+      - -T
+      - --name
+      - magpie-config-seed
+      - --user
+      - "0"
+      - --entrypoint
+      - /bin/bash
+      - --volume
+      - /root/.config/magpie:/from:ro
+      - magpie
+      - -c
+      - |
+        set -eu
+        if [ -f /config/magpie/providers.json ] || [ ! -f /from/providers.json ]; then
+          exit 0
+        fi
+        mkdir -p /config/magpie
+        cp -a /from/. /config/magpie/
+        chown -R 65532:65532 /config/magpie
+        echo seeded
+  register: magpie_seed
+  changed_when: "'seeded' in magpie_seed.stdout"
+  when:
+    - not ansible_check_mode
+    - "'magpie' in proxy_services"
+    - magpie_host_providers.stat.exists

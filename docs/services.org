@@ -18,6 +18,7 @@ the desired state; apply the deployment to update the running VPS.
 | =caddy= | HTTPS/TLS entrypoint, reverse proxy, static files, and metrics | — | =bwg-cn2-gia= |
 | =xray= | Xray proxy server | =caddy= | =bwg-cn2-gia= |
 | =warp= | WARP SOCKS5 outbound | — | =bwg-cn2-gia= |
+| =magpie= | Model gateway for OpenAI, Anthropic, and Gemini | — | =bwg-cn2-gia= |
 | =prometheus= | Metrics collection and time-series storage | — | Disabled |
 | =grafana= | Monitoring dashboards | — | Disabled |
 | =freshrss= | RSS reader | — | Disabled |
@@ -25,6 +26,20 @@ the desired state; apply the deployment to update the running VPS.
 | =redis= | RSSHub cache | — | Disabled |
 | =browserless= | Headless Chrome used by RSSHub | — | Disabled |
 | =asspp= | assppweb application | — | Disabled |
+
+Magpie is the =magpie= Compose service (=ghcr.io/yetone/magpie:latest=). It listens
+on port 3425 inside the Compose network and publishes no host port. Caddy
+proxies =magpie.$DOMAIN= to =http://magpie:3425= with no =basic_auth= and no
+=MAGPIE_TRUST_PROXY=. Port 3430 is not served. Callers are off loopback, so
+they must send the gateway key from =Personal/Tech/AI/Magpie=; the role
+installs that key under the name =clients=. Upstream provider keys stay in
+the =magpie_config= volume at =/config/magpie/providers.json= and are not
+rendered. =MAGPIE_NO_ACCOUNTS= defaults off (=magpie_no_accounts: false=); set it
+to =true= on a host to refuse subscription sign-in. A former host directory
+=/root/.config/magpie= is copied into the
+volume once, and only when the volume has no =providers.json= yet. An
+Anthropic provider can use =socks5h://warp:9091=; that proxy belongs on the
+provider, not in a global environment variable.
 
 The proxy services are selected for =bwg-cn2-gia=. The other Compose services
 remain defined in the native files but are not selected. Docker-internal service
@@ -42,6 +57,7 @@ proxy_services:
   - caddy
   - xray
   - warp
+  - magpie
 #+end_src
 
 Compose files remain native. Every service has a matching Compose profile, and

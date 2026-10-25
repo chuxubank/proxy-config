@@ -62,3 +62,11 @@
 	reverse_proxy http://prometheus:9090
 }
 {% endif %}
+{% if 'magpie' in proxy_services %}
+
+# Gateway only. Bearer carries the gateway key; basic_auth would replace it.
+# This site does not serve the web UI.
+{$MAGPIE_SUB_DOMAIN:magpie}.{$DOMAIN:localhost} {
+	reverse_proxy http://magpie:3425
+}
+{% endif %}

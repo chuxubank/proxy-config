@@ -117,8 +117,26 @@ services:
       timeout: 10s
       retries: 5
 
+  # Compose network only. No host ports: Caddy is the public entry, and the
+  # web UI stays unpublished.
+  magpie:
+    profiles: [magpie]
+    container_name: magpie
+    image: ghcr.io/yetone/magpie:latest
+    restart: unless-stopped
+    expose:
+      - "3425"
+    environment:
+      MAGPIE_ADDR: 0.0.0.0:3425
+      MAGPIE_NO_ACCOUNTS: "${MAGPIE_NO_ACCOUNTS:-0}"
+      MAGPIE_PUBLIC_URL: https://magpie.${DOMAIN:-localhost}
+    volumes:
+      - magpie_config:/config
+    logging: *default-logging
+
 volumes:
   caddy_data:
   caddy_config:
   prometheus_data:
   grafana_data:
+  magpie_config:

@@ -3,3 +3,4 @@ proxy_services:
   - caddy
   - xray
   - warp
+  - magpie

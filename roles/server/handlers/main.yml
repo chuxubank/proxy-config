@@ -1,0 +1,6 @@
+---
+- name: Restart magpie
+  ansible.builtin.command:
+    argv: [docker, restart, magpie]
+  when: not ansible_check_mode
+  changed_when: true

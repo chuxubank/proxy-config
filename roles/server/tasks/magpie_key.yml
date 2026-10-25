@@ -1,0 +1,34 @@
+---
+- name: Read the shared gateway key
+  ansible.builtin.set_fact:
+    magpie_gateway_key: >-
+      {{ lookup('community.general.passwordstore', magpie_pass_path, subkey='gateway-key') }}
+  no_log: true
+  when: "'magpie' in proxy_services"
+
+- name: Install the shared gateway key when its name is absent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - -e
+      - MAGPIE_GATEWAY_KEY
+      - magpie
+      - /bin/bash
+      - -c
+      - |
+        set -eu
+        if magpie gateway-key list | awk 'NR > 1 { print $2 }' | grep -qx clients; then
+          exit 0
+        fi
+        printf '%s' "$MAGPIE_GATEWAY_KEY" | magpie gateway-key add clients --key - >/dev/null
+        echo added
+  environment:
+    MAGPIE_GATEWAY_KEY: "{{ magpie_gateway_key }}"
+  register: magpie_gateway_key_install
+  no_log: true
+  changed_when: "'added' in magpie_gateway_key_install.stdout"
+  when:
+    - not ansible_check_mode
+    - "'magpie' in proxy_services"
+  notify: Restart magpie

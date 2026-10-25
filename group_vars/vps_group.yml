@@ -16,6 +16,10 @@ monitoring_env:
   # bcrypt hash generated via: caddy hash-password
   PROM_PASSWORD_HASH: "{{ lookup('community.general.passwordstore', prom_pass_path, subkey='password_hash') }}"
 
+# Same pass entry chezmoi renders into client configs. The value is the
+# gateway key, not an upstream vendor key.
+magpie_pass_path: Personal/Tech/AI/Magpie
+
 rss_env:
   RSS_SUB_DOMAIN: rss
   DEFAULT_USER: "{{ lookup('community.general.passwordstore', rss_pass_path, subkey='username') }}"
