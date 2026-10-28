@@ -63,6 +63,8 @@ jobs:
         run: make deps
 
       - name: Install sing-box
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tmp="${{ runner.temp }}/sing-box-dl"
@@ -71,7 +73,10 @@ jobs:
           import json, os, urllib.request
           req = urllib.request.Request(
               "https://api.github.com/repos/SagerNet/sing-box/releases/latest",
-              headers={"User-Agent": "proxy-config-ci"},
+              headers={
+                  "User-Agent": "proxy-config-ci",
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+              },
           )
           with urllib.request.urlopen(req) as resp:
               rel = json.load(resp)
@@ -100,9 +105,12 @@ jobs:
 
       - name: Install sing-box
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $ProgressPreference = 'SilentlyContinue'
-          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/SagerNet/sing-box/releases/latest'
+          $headers = @{ Authorization = "Bearer $env:GH_TOKEN" }
+          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/SagerNet/sing-box/releases/latest' -Headers $headers
           $asset = $rel.assets |
             Where-Object { $_.name -match 'windows-amd64\.zip$' } |
             Select-Object -First 1
