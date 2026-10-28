@@ -96,9 +96,6 @@
     - not ansible_check_mode
     - proxy_services | length > 0
 
-- name: Retire the host magpie install
-  ansible.builtin.import_tasks: magpie.yml
-
 # The project is exclusively managed here. down removes all its containers,
 # including old profiles/orphans, but keeps named volumes and bind-mounted data.
 - name: Stop the managed Compose project without deleting volumes
