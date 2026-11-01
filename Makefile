@@ -17,7 +17,7 @@ ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
 .PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull \
-        mcp lint cleanup test-services test ci
+        reload mcp lint cleanup test-services test ci
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -58,6 +58,9 @@ openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 
 pull: ## Pull Docker Compose images on the server
 	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull $(EXTRA)
+
+reload: ## Pull images and recreate the deployed Compose project
+	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull,reload $(EXTRA)
 
 cleanup: ## Explicit VPS image/APT cleanup; preserve containers, volumes and logs
 	ansible-playbook cleanup.yml --inventory inventory.yml $(LIMIT_FLAG) $(EXTRA)

@@ -85,6 +85,7 @@
 
 # Validate and pull before stopping anything. Pull-only selects just this task
 # (plus local validation) and operates on the last deployed native Compose files.
+# reload adds the down/up below without syncing or rendering configuration.
 - name: Pull selected Compose images
   community.docker.docker_compose_v2_pull:
     project_src: "{{ proxy_config_dir }}"
@@ -107,6 +108,7 @@
     state: absent
     remove_orphans: true
     remove_volumes: false
+  tags: [reload]
   when: not ansible_check_mode
 
 # Recreate every deployment so bind-mounted configs are also reloaded on retry.
@@ -116,6 +118,7 @@
     project_name: "{{ proxy_compose_project_name }}"
     files: [compose.yml]
     profiles: "{{ proxy_services }}"
+  tags: [reload]
   when:
     - not ansible_check_mode
     - proxy_services | length > 0

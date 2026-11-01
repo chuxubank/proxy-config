@@ -39,6 +39,7 @@ in the repository.
 | =make local-install= | Apply workstation changes including binary installs |
 | =make server= | Deploy the VPS play |
 | =make pull= | Pull selected VPS images without stopping services |
+| =make reload= | Pull images and recreate the deployed Compose project |
 | =make cleanup= | Explicitly clean unused VPS images and APT downloads; preserve data |
 | =make pve= | Apply Proxmox workload management |
 | =make openwrt= | Apply the OpenWrt client play |
@@ -54,6 +55,7 @@ select local or Proxmox plays:
 #+begin_src sh :results output silent
   make server LIMIT=bwg-cn2-gia
   make pull LIMIT=bwg-cn2-gia
+  make reload LIMIT=bwg-cn2-gia
   make diff LIMIT=localhost TAGS=gateway
 #+end_src
 

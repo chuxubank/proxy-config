@@ -11,7 +11,7 @@ Common workflows are wrapped in the `Makefile` (run `make help` to list targets)
 - `make deps` (or `ansible-galaxy install -r requirements.yml`) installs required
   roles and collections into the gitignored `.ansible/` cache before any run.
 - `make local` — applies workstation changes to `localhost`, skipping the `install` tag; `make local-install` includes binary installs.
-- `make server` / `make pull` — deploy to `vps_group` / pull Docker Compose images on the server.
+- `make server` / `make pull` / `make reload` — deploy to `vps_group` / pull Docker Compose images / pull and recreate the deployed project.
 - `make check` / `make diff` — dry-run (with diff) against the inventory to validate proposed edits.
 - `make mcp` — probe `mcp_group` servers with `ansible.mcp.server_info` / `tools_info`.
 - `make syntax` — fast parse validation of `playbook.yml` and `mcp.yml` without the dynamic Proxmox inventory.
