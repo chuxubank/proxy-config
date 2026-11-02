@@ -68,7 +68,7 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
       - GF_SERVER_ROOT_URL=https://${GRAFANA_SUB_DOMAIN:-grafana}.${DOMAIN}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-}
     expose:
       - "3000"
 
