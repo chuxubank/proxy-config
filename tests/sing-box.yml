@@ -263,6 +263,22 @@
       loop_control:
         label: "{{ item.inbounds[0].stack }}"
 
+    - name: Assert non-OpenWrt profiles enable Tailscale SSH
+      vars:
+        tailscale_endpoint: >-
+          {{ item.endpoints | selectattr('tag', 'equalto', 'ts-ep') | first }}
+      ansible.builtin.assert:
+        that:
+          - tailscale_endpoint.ssh_server | bool
+        quiet: true
+      loop:
+        - "{{ sing_box_ci_workstation }}"
+        - "{{ sing_box_ci_iv }}"
+        - "{{ sing_box_ci_windows }}"
+        - "{{ sing_box_ci_icloud }}"
+      loop_control:
+        label: "{{ item.inbounds[0].stack }}"
+
     - name: Assert OpenWrt profile stays compatible with the 1.13 release package
       ansible.builtin.assert:
         that:
@@ -271,6 +287,7 @@
           - sing_box_ci_openwrt.dns.optimistic is not defined
           - "'\"race\"' not in (sing_box_ci_openwrt | to_json)"
           - "'\"speculative\"' not in (sing_box_ci_openwrt | to_json)"
+          - "'\"ssh_server\"' not in (sing_box_ci_openwrt | to_json)"
           - sing_box_ci_openwrt.inbounds[0].auto_redirect
           - sing_box_ci_openwrt.endpoints is not defined
         quiet: true

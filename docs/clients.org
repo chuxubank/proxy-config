@@ -32,6 +32,12 @@ The profile uses binary rule sets from
 When adding a route for one website, check the existing rule sets first and
 prefer a suitable rule set over a one-off domain rule.
 
+Non-OpenWrt profiles enable Tailscale SSH on the =ts-ep= endpoint. The tailnet
+SSH ACL still decides who can connect and which local user the session uses.
+OpenWrt stays on sing-box 1.13 and does not render this endpoint. On iOS App
+Store, TestFlight, tvOS, and the macOS App Store build, sing-box ignores the
+server instead of failing the profile.
+
 * Native service switches
 
 Both switches default to =true=. Set one to the YAML boolean =false= to stop and
