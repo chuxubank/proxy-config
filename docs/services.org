@@ -27,7 +27,7 @@ the desired state; apply the deployment to update the running VPS.
 | =browserless= | Headless Chrome used by RSSHub | — | Disabled |
 | =asspp= | assppweb application | — | Disabled |
 
-Magpie is the =magpie= Compose service (=ghcr.io/yetone/magpie:latest=). It listens
+Magpie is the =magpie= Compose service (=ghcr.io/yetone/magpie:stable=). It listens
 on ports 3425 and 3430 inside the Compose network and publishes neither on the
 host. Caddy serves =magpie.$DOMAIN= with no =basic_auth= and no
 =MAGPIE_TRUST_PROXY=. =/v1= and =/v1beta= go to the gateway on 3425; every

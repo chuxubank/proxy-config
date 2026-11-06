@@ -124,7 +124,7 @@ services:
   magpie:
     profiles: [magpie]
     container_name: magpie
-    image: ghcr.io/yetone/magpie:latest
+    image: ghcr.io/yetone/magpie:stable
     restart: unless-stopped
     command: ["web", "--addr", "0.0.0.0:3430", "--no-open"]
     depends_on:
