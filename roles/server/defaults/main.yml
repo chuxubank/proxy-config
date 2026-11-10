@@ -9,6 +9,8 @@ proxy_services: [caddy, xray, warp, prometheus, grafana]
 
 # Set true on a host to refuse subscription sign-in.
 magpie_no_accounts: false
+# stable follows the weekly channel; every follows each release.
+magpie_update_channel: stable
 # Anthropic and Claude Code providers use this when warp is selected.
 magpie_anthropic_proxy: socks5h://warp:9091
 

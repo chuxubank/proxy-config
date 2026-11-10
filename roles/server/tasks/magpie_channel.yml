@@ -1,0 +1,38 @@
+---
+# The image tag only selects the pulled build. The process follows the update
+# channel in its settings, which otherwise defaults to every version.
+
+- name: Validate the magpie update channel
+  ansible.builtin.assert:
+    that: magpie_update_channel in ['stable', 'every']
+    fail_msg: magpie_update_channel must be stable or every
+  when: "'magpie' in proxy_services"
+
+- name: Set the magpie update channel
+  when:
+    - not ansible_check_mode
+    - "'magpie' in proxy_services"
+  block:
+    - name: Read the magpie update channel
+      ansible.builtin.command:
+        argv: [docker, exec, magpie, magpie, update, channel]
+      register: magpie_update_channel_now
+      changed_when: false
+
+    - name: Save the magpie update channel
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - magpie
+          - magpie
+          - update
+          - channel
+          - "{{ magpie_update_channel }}"
+      register: magpie_update_channel_set
+      changed_when: true
+      when: >-
+        magpie_update_channel_now.stdout is not search(
+          '^update channel: ' ~ ('stable' if magpie_update_channel == 'stable' else 'every version')
+        )
+      notify: Restart magpie

@@ -126,5 +126,8 @@
 - name: Install the magpie gateway key
   ansible.builtin.import_tasks: magpie_key.yml
 
+- name: Keep magpie on its update channel
+  ansible.builtin.import_tasks: magpie_channel.yml
+
 - name: Send Anthropic through WARP
   ansible.builtin.import_tasks: magpie_warp.yml
