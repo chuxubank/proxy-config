@@ -20,6 +20,7 @@
       - "--exclude=caddy/Caddyfile"
       - "--exclude=asspp/mnt/"
       - "--exclude=rss/extensions/"
+      - "--exclude=prometheus.yml"
     dest: "{{ proxy_config_dir }}"
     dest_port: "{{ ansible_port | int }}"
   when: not ansible_check_mode
@@ -58,6 +59,13 @@
     mode: "0600"
   diff: false
 
+- name: Render Prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ proxy_config_dir }}/prometheus.yml"
+    mode: "0644"
+  when: "'prometheus' in proxy_services"
+
 - name: Render Xray config
   ansible.builtin.template:
     src: xray/config_server.json.j2
@@ -66,22 +74,6 @@
     mode: "0644"
   diff: false
   when: "'xray' in proxy_services"
-
-- name: Render FreshRSS environment
-  ansible.builtin.template:
-    src: rss_env.j2
-    dest: "{{ proxy_config_dir }}/rss/.env"
-    mode: "0600"
-  diff: false
-  when: "'freshrss' in proxy_services"
-
-- name: Render RSSHub environment
-  ansible.builtin.template:
-    src: rsshub_env.j2
-    dest: "{{ proxy_config_dir }}/rsshub/.env"
-    mode: "0600"
-  diff: false
-  when: "'rsshub' in proxy_services"
 
 # Validate and pull before stopping anything. Pull uses the last deployed
 # Compose files and does not sync or render configuration. Recreate afterwards

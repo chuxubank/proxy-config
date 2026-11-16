@@ -1,5 +1,6 @@
 services:
   asspp:
+    # Upstream only publishes a rolling tag.
     image: ghcr.io/lakr233/assppweb:latest
     profiles:
       - asspp

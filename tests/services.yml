@@ -6,9 +6,23 @@
   vars:
     proxy_services: [caddy, xray, rsshub, redis, browserless, magpie]
     render_dir: "{{ playbook_dir }}/.render/services"
-    compose_binary: "{{ lookup('env', 'COMPOSE_BINARY') }}"
+    compose_binary_env: "{{ lookup('env', 'COMPOSE_BINARY') | trim }}"
     proxy_env: {DOMAIN: example.test, EMAIL: admin@example.test, CF_API_TOKEN: ci-stub}
     magpie_web_key: ci-stub-web-key
+    rss_env:
+      RSS_SUB_DOMAIN: rss
+      DEFAULT_USER: rssuser
+      ADMIN_EMAIL: admin@example.test
+      ADMIN_PASSWORD: rss-password
+      ADMIN_API_PASSWORD: rss-api-password
+      DB_TYPE: sqlite
+      RSSHUB_SUB_DOMAIN: rsshub
+    monitoring_env:
+      GRAFANA_SUB_DOMAIN: grafana
+      GRAFANA_ADMIN_PASSWORD: grafana-password
+      PROM_SUB_DOMAIN: prometheus
+      PROM_USER: prom
+      PROM_PASSWORD_HASH: hash
     xray_env:
       API_PORT: 10085
       CLIENT_ID: 00000000-0000-4000-8000-000000000000
@@ -67,6 +81,25 @@
           - "'not ansible_check_mode' in cleanup_tasks[2].when"
           - "'cleanup.yml' not in server_tasks"
 
+    - name: Check unified env rendering and in-container provider updates
+      vars:
+        server_tasks: "{{ lookup('file', playbook_dir ~ '/../roles/server/tasks/main.yml') }}"
+        warp_tasks: "{{ lookup('file', playbook_dir ~ '/../roles/server/tasks/magpie_warp.yml') }}"
+      ansible.builtin.assert:
+        that:
+          - "'Render FreshRSS environment' not in server_tasks"
+          - "'Render RSSHub environment' not in server_tasks"
+          - "'Render Prometheus configuration' in server_tasks"
+          - "'--exclude=prometheus.yml' in server_tasks"
+          - "'/tmp/magpie-providers.json' not in warp_tasks"
+          - "'docker cp' not in warp_tasks"
+          - "'notify: Restart magpie' in warp_tasks"
+          - not (playbook_dir ~ '/../roles/server/files/example.env') is exists
+          - not (playbook_dir ~ '/../roles/server/files/rss/example.env') is exists
+          - not (playbook_dir ~ '/../roles/server/templates/rss_env.j2') is exists
+          - not (playbook_dir ~ '/../roles/server/templates/rsshub_env.j2') is exists
+          - not (playbook_dir ~ '/../roles/server/files/prometheus.yml') is exists
+
     - name: Stage unchanged native Compose files
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../roles/server/files/"
@@ -91,16 +124,22 @@
         - {src: env.j2, dest: .env}
         - {src: Caddyfile.j2, dest: caddy/Caddyfile}
         - {src: xray/config_server.json.j2, dest: xray.json}
+        - {src: prometheus.yml.j2, dest: prometheus.yml}
 
     - name: Assert Caddy selection and WARP fallback
       vars:
         caddy: "{{ lookup('file', render_dir ~ '/caddy/Caddyfile') }}"
         envfile: "{{ lookup('file', render_dir ~ '/.env') }}"
+        compose: "{{ lookup('file', render_dir ~ '/compose.yml') }}"
         xray: "{{ lookup('file', render_dir ~ '/xray.json') | from_json }}"
+        prometheus: "{{ lookup('file', render_dir ~ '/prometheus.yml') | from_yaml }}"
       ansible.builtin.assert:
         that:
           - "'MAGPIE_NO_ACCOUNTS=0' in envfile"
           - "'MAGPIE_WEB_KEY=ci-stub-web-key' in envfile"
+          - "'RSSHUB_SUB_DOMAIN=rsshub' in envfile"
+          - "'BASE_URL=' not in envfile"
+          - "'127.0.0.1:${API_PORT:-10085}:${API_PORT:-10085}' in compose"
           - "'http://rsshub:1200' in caddy"
           - "'http://grafana:3000' not in caddy"
           - "'{$MAGPIE_SUB_DOMAIN:magpie}.{$DOMAIN:localhost}' in caddy"
@@ -109,37 +148,295 @@
           - "'reverse_proxy http://magpie:3430' in caddy"
           - "'basic_auth' not in caddy"
           - "'host.docker.internal:3425' not in caddy"
-          - "'3425:3425' not in lookup('file', render_dir ~ '/compose.yml')"
-          - "'3430:3430' not in lookup('file', render_dir ~ '/compose.yml')"
-          - "'0.0.0.0:3430' in lookup('file', render_dir ~ '/compose.yml')"
+          - "'3425:3425' not in compose"
+          - "'3430:3430' not in compose"
+          - "'0.0.0.0:3430' in compose"
+          - prometheus.scrape_configs[0].static_configs[0].targets == ['caddy:9180']
           - xray.outbounds | selectattr('tag', 'equalto', 'warp') | list | length == 0
           - xray.routing.rules[1].outboundTag == 'direct'
 
-    - name: Validate selected services with native Compose (optional, no daemon)
+    - name: Detect Docker Compose when COMPOSE_BINARY is unset
+      ansible.builtin.command:
+        argv: [docker, compose, version]
+      register: docker_compose_version
+      changed_when: false
+      failed_when: false
+
+    - name: Choose the Compose command
+      ansible.builtin.set_fact:
+        compose_command: >-
+          {{ compose_binary_env.split() if compose_binary_env | length > 0
+             else (['docker', 'compose'] if docker_compose_version.rc == 0 else []) }}
+
+    - name: Validate selected services with native Compose
       ansible.builtin.command:
         argv: >-
-          {{ [compose_binary, '--file', 'compose.yml'] +
-             proxy_services | map('regex_replace', '^', '--profile=') | list + ['config', '--services'] }}
+          {{ compose_command + ['--file', 'compose.yml'] +
+             proxy_services | map('regex_replace', '^', '--profile=') | list +
+             ['config', '--services'] }}
         chdir: "{{ render_dir }}"
       register: native_selection
       changed_when: false
-      failed_when: native_selection.rc != 0 or native_selection.stdout_lines | sort != proxy_services | sort
-      when: compose_binary | length > 0
+      failed_when: >-
+        native_selection.rc != 0
+        or native_selection.stdout_lines | sort != proxy_services | sort
+        or native_selection.stderr | trim | length > 0
+      when: compose_command | length > 0
 
     - name: Verify Compose rejects omitted required dependencies
       ansible.builtin.command:
-        argv: ["{{ compose_binary }}", --file, compose.yml, --profile, xray, config, --quiet]
+        argv: "{{ compose_command + ['--file', 'compose.yml', '--profile', 'xray', 'config', '--quiet'] }}"
         chdir: "{{ render_dir }}"
       register: missing_dependency
       changed_when: false
       failed_when: missing_dependency.rc == 0 or 'caddy' not in missing_dependency.stderr
-      when: compose_binary | length > 0
+      when: compose_command | length > 0
 
     - name: Check the native empty selection starts no services
       ansible.builtin.command:
-        argv: ["{{ compose_binary }}", --file, compose.yml, config, --services]
+        argv: "{{ compose_command + ['--file', 'compose.yml', 'config', '--services'] }}"
         chdir: "{{ render_dir }}"
       register: empty_selection
       changed_when: false
-      failed_when: empty_selection.rc != 0 or empty_selection.stdout | trim | length > 0
-      when: compose_binary | length > 0
+      failed_when: >-
+        empty_selection.rc != 0
+        or empty_selection.stdout | trim | length > 0
+        or empty_selection.stderr | trim | length > 0
+      when: compose_command | length > 0
+
+    - name: Render FreshRSS env and Prometheus config without Caddy
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../roles/server/templates/{{ item.src }}"
+        dest: "{{ render_dir }}/{{ item.dest }}"
+        mode: "0600"
+      loop:
+        - {src: env.j2, dest: .env}
+        - {src: prometheus.yml.j2, dest: prometheus.yml}
+      vars:
+        proxy_services: [freshrss, prometheus]
+        rss_env:
+          RSS_SUB_DOMAIN: rss
+          DEFAULT_USER: rssuser
+          ADMIN_EMAIL: admin@example.test
+          ADMIN_PASSWORD: rss-password
+          ADMIN_API_PASSWORD: rss-api-password
+          DB_TYPE: sqlite
+          RSSHUB_SUB_DOMAIN: rsshub
+        monitoring_env:
+          GRAFANA_SUB_DOMAIN: grafana
+          GRAFANA_ADMIN_PASSWORD: grafana-password
+          PROM_SUB_DOMAIN: prometheus
+          PROM_USER: prom
+          PROM_PASSWORD_HASH: hash
+
+    - name: Assert loopback API, FreshRSS base URL, and grafana's dependency
+      vars:
+        envfile: "{{ lookup('file', render_dir ~ '/.env') }}"
+        compose: "{{ lookup('file', render_dir ~ '/compose.yml') | from_yaml }}"
+        prometheus: "{{ lookup('file', render_dir ~ '/prometheus.yml') | from_yaml }}"
+      ansible.builtin.assert:
+        that:
+          - "'127.0.0.1:${API_PORT:-10085}:${API_PORT:-10085}' in lookup('file', render_dir ~ '/compose.yml')"
+          - "'BASE_URL=https://rss.example.test' in envfile"
+          - prometheus.scrape_configs == []
+          - compose.services.grafana.depends_on == ['prometheus']
+
+    - name: Validate FreshRSS profile interpolation
+      ansible.builtin.command:
+        argv: "{{ compose_command + ['--file', 'compose.yml', '--profile', 'freshrss', 'config'] }}"
+        chdir: "{{ render_dir }}"
+      register: freshrss_config
+      changed_when: false
+      failed_when: freshrss_config.rc != 0 or freshrss_config.stderr | trim | length > 0
+      when: compose_command | length > 0
+
+    - name: Verify Compose rejects grafana without prometheus
+      ansible.builtin.command:
+        argv: "{{ compose_command + ['--file', 'compose.yml', '--profile', 'grafana', 'config', '--quiet'] }}"
+        chdir: "{{ render_dir }}"
+      register: missing_prometheus
+      changed_when: false
+      failed_when: missing_prometheus.rc == 0 or 'prometheus' not in missing_prometheus.stderr
+      when: compose_command | length > 0
+
+    - name: Update Anthropic providers from stdin
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/../roles/server/files/magpie-anthropic-proxy.py"
+          - "-"
+          - socks5h://warp:9091
+        stdin: |
+          {"providers":[
+            {"id":"anthropic"},
+            {"id":"openai","chat":"https://api.openai.com/v1"},
+            {"preset":"anthropic","proxy":"socks5h://warp:9091"},
+            {"id":"claude"},
+            {"chat":"https://api.anthropic.com/v1/messages"},
+            {"id":"other","gemini":"https://example.test/v1"}
+          ]}
+      register: anthropic_proxy_update
+      changed_when: false
+
+    - name: Assert stdin mode updates only Anthropic providers
+      vars:
+        updated: "{{ anthropic_proxy_update.stdout | from_json }}"
+      ansible.builtin.assert:
+        that:
+          - "'updated' in anthropic_proxy_update.stderr"
+          - updated.providers[0].proxy == 'socks5h://warp:9091'
+          - "'proxy' not in updated.providers[1]"
+          - updated.providers[2].proxy == 'socks5h://warp:9091'
+          - updated.providers[3].proxy == 'socks5h://warp:9091'
+          - updated.providers[4].proxy == 'socks5h://warp:9091'
+          - "'proxy' not in updated.providers[5]"
+
+    - name: Leave an already proxied stdin catalog unchanged
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/../roles/server/files/magpie-anthropic-proxy.py"
+          - "-"
+          - socks5h://warp:9091
+        stdin: "{{ anthropic_proxy_update.stdout }}"
+      register: anthropic_proxy_again
+      changed_when: false
+
+    - name: Assert the stdin update is idempotent
+      ansible.builtin.assert:
+        that:
+          - anthropic_proxy_again.stdout | trim | length == 0
+          - "'updated' not in anthropic_proxy_again.stderr"
+
+    - name: Write a stub provider catalog in the render directory
+      ansible.builtin.copy:
+        dest: "{{ render_dir }}/providers.json"
+        mode: "0600"
+        content: |
+          {"providers":[{"id":"anthropic","chat":"https://api.anthropic.com"}]}
+
+    - name: Update the stub catalog in place
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/../roles/server/files/magpie-anthropic-proxy.py"
+          - "{{ render_dir }}/providers.json"
+          - socks5h://warp:9091
+      register: file_mode_update
+      changed_when: false
+
+    - name: Assert file mode prints updated and rewrites the catalog
+      vars:
+        catalog: "{{ lookup('file', render_dir ~ '/providers.json') | from_json }}"
+      ansible.builtin.assert:
+        that:
+          - "'updated' in file_mode_update.stdout"
+          - catalog.providers[0].proxy == 'socks5h://warp:9091'
+
+    - name: Keep file mode idempotent
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/../roles/server/files/magpie-anthropic-proxy.py"
+          - "{{ render_dir }}/providers.json"
+          - socks5h://warp:9091
+      register: file_mode_again
+      changed_when: false
+
+    - name: Assert file mode does not rewrite an updated catalog
+      ansible.builtin.assert:
+        that: file_mode_again.stdout | trim | length == 0
+
+    - name: Reset the streamed catalog from earlier runs
+      ansible.builtin.file:
+        path: "{{ render_dir }}/{{ item }}"
+        state: absent
+      loop:
+        - streamed-providers.json
+        - streamed-providers.cmd
+
+    - name: Stage a fake docker that only streams the provider catalog
+      ansible.builtin.copy:
+        dest: "{{ render_dir }}/docker"
+        mode: "0755"
+        content: |
+          #!/bin/sh
+          set -eu
+          out="${FAKE_DOCKER_OUT:?}"
+          cmd="${FAKE_DOCKER_CMD:?}"
+          if [ "$1" = "exec" ] && [ "${3:-}" = "cat" ]; then
+            if [ -f "$out" ]; then
+              cat "$out"
+            else
+              printf '%s\n' '{"providers":[{"id":"anthropic"},{"id":"openai","chat":"https://api.openai.com/v1"}]}'
+            fi
+            exit 0
+          fi
+          if [ "$1" = "exec" ] && [ "${2:-}" = "-i" ]; then
+            printf '%s\n' "$8" > "$cmd"
+            cat > "$out"
+            exit 0
+          fi
+          printf 'unexpected docker invocation: %s\n' "$*" >&2
+          exit 1
+
+    - name: Stream the catalog update the way the role invokes Python
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - "{{ lookup('file', playbook_dir ~ '/../roles/server/files/magpie-anthropic-proxy.py') }}"
+          - --docker
+          - socks5h://warp:9091
+      environment:
+        PATH: "{{ render_dir }}:{{ lookup('env', 'PATH') }}"
+        FAKE_DOCKER_OUT: "{{ render_dir }}/streamed-providers.json"
+        FAKE_DOCKER_CMD: "{{ render_dir }}/streamed-providers.cmd"
+      register: docker_mode
+      changed_when: false
+
+    - name: Assert the container write is atomic and stays off the host temp dir
+      vars:
+        streamed: "{{ lookup('file', render_dir ~ '/streamed-providers.json') | from_json }}"
+        write_cmd: "{{ lookup('file', render_dir ~ '/streamed-providers.cmd') | trim }}"
+      ansible.builtin.assert:
+        that:
+          - docker_mode.stdout | trim == 'updated'
+          - streamed.providers[0].proxy == 'socks5h://warp:9091'
+          - "'proxy' not in streamed.providers[1]"
+          - >-
+            write_cmd == 'umask 0077 && cat > /config/magpie/providers.json.tmp && '
+            ~ 'chown 65532:65532 /config/magpie/providers.json.tmp && '
+            ~ 'mv /config/magpie/providers.json.tmp /config/magpie/providers.json'
+          - "'/tmp' not in write_cmd"
+
+    - name: Remove the recorded container write
+      ansible.builtin.file:
+        path: "{{ render_dir }}/streamed-providers.cmd"
+        state: absent
+
+    - name: Leave an updated container catalog untouched
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - "{{ lookup('file', playbook_dir ~ '/../roles/server/files/magpie-anthropic-proxy.py') }}"
+          - --docker
+          - socks5h://warp:9091
+      environment:
+        PATH: "{{ render_dir }}:{{ lookup('env', 'PATH') }}"
+        FAKE_DOCKER_OUT: "{{ render_dir }}/streamed-providers.json"
+        FAKE_DOCKER_CMD: "{{ render_dir }}/streamed-providers.cmd"
+      register: docker_mode_again
+      changed_when: false
+
+    - name: Check that the idempotent run did not write
+      ansible.builtin.stat:
+        path: "{{ render_dir }}/streamed-providers.cmd"
+      register: streamed_cmd
+
+    - name: Assert the container update is idempotent
+      ansible.builtin.assert:
+        that:
+          - docker_mode_again.stdout | trim | length == 0
+          - not streamed_cmd.stat.exists

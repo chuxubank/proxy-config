@@ -6,7 +6,7 @@ x-logging: &default-logging
 
 services:
   freshrss:
-    image: freshrss/freshrss
+    image: freshrss/freshrss:1
     profiles: [freshrss]
     container_name: freshrss
     hostname: freshrss
@@ -20,20 +20,20 @@ services:
       CRON_MIN: "3,33"
       FRESHRSS_INSTALL: |-
         --api-enabled
-        --base-url ${BASE_URL}
-        --db-base ${DB_BASE}
-        --db-host ${DB_HOST}
-        --db-password ${DB_PASSWORD}
-        --db-type ${DB_TYPE}
-        --db-user ${DB_USER}
-        --default_user ${DEFAULT_USER}
+        --base-url ${BASE_URL:-}
+        --db-base ${DB_BASE:-freshrss}
+        --db-host ${DB_HOST:-freshrss-db}
+        --db-password ${DB_PASSWORD:-freshrss}
+        --db-type ${DB_TYPE:-sqlite}
+        --db-user ${DB_USER:-freshrss}
+        --default_user ${DEFAULT_USER:-}
         --language en
       FRESHRSS_USER: |-
-        --api-password ${ADMIN_API_PASSWORD}
-        --email ${ADMIN_EMAIL}
+        --api-password ${ADMIN_API_PASSWORD:-}
+        --email ${ADMIN_EMAIL:-}
         --language en
-        --password ${ADMIN_PASSWORD}
-        --user ${DEFAULT_USER}
+        --password ${ADMIN_PASSWORD:-}
+        --user ${DEFAULT_USER:-}
 
 volumes:
   freshrss_data:

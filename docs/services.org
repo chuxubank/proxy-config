@@ -20,7 +20,7 @@ the desired state; apply the deployment to update the running VPS.
 | =warp= | WARP SOCKS5 outbound | — | =bwg-cn2-gia= |
 | =magpie= | Model gateway for OpenAI, Anthropic, and Gemini | — | =bwg-cn2-gia= |
 | =prometheus= | Metrics collection and time-series storage | — | Disabled |
-| =grafana= | Monitoring dashboards | — | Disabled |
+| =grafana= | Monitoring dashboards | =prometheus= | Disabled |
 | =freshrss= | RSS reader | — | Disabled |
 | =rsshub= | RSS content aggregation | =redis=, =browserless= | Disabled |
 | =redis= | RSSHub cache | — | Disabled |
@@ -43,7 +43,8 @@ to =true= on a host to refuse subscription sign-in. Deploy also runs
 
 When =warp= is selected, deploy sets the =proxy= of each Anthropic and Claude
 Code provider to =socks5h://warp:9091=. Other providers stay direct. A provider
-added later is updated on the next deploy.
+added later is updated on the next deploy. The catalog stays in the container;
+it is not copied onto the host.
 
 The proxy services are selected for =bwg-cn2-gia=. The other Compose services
 remain defined in the native files but are not selected. Docker-internal service
@@ -65,8 +66,13 @@ proxy_services:
 #+end_src
 
 Compose files remain native. Every service has a matching Compose profile, and
-Compose validates the dependency graph before containers are stopped. The old
-=proxy_profile=, allowlist, and denylist variables are no longer used.
+Compose validates the dependency graph before containers are stopped. Selecting
+=grafana= without =prometheus= fails that validation. The old =proxy_profile=,
+allowlist, and denylist variables are no longer used.
+
+Caddy and FreshRSS interpolate their settings (including =RSSHUB_SUB_DOMAIN= for
+Caddy routing) from the single rendered project =.env=. Separate RSS env files
+are not used.
 
 Caddy routes are rendered only for selected local services. If =warp= is omitted,
 Xray's clean-IP routes use =direct= instead of a WARP outbound.

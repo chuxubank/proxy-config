@@ -13,7 +13,7 @@ services:
   caddy:
     profiles: [caddy]
     container_name: caddy
-    image: iarekylew00t/caddy-cloudflare
+    image: iarekylew00t/caddy-cloudflare:2.11
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -30,17 +30,11 @@ services:
       - caddy_config:/config
     env_file:
       - path: .env
-      - path: ./rss/.env
-        required: false
-      - path: ./rsshub/.env
-        required: false
-      - path: ./asspp/.env
-        required: false
     logging: *default-logging
 
   prometheus:
     profiles: [prometheus]
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3
     container_name: prometheus
     restart: unless-stopped
     mem_limit: 256m
@@ -57,8 +51,10 @@ services:
 
   grafana:
     profiles: [grafana]
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana-oss:12.4.3
     container_name: grafana
+    depends_on:
+      - prometheus
     restart: unless-stopped
     mem_limit: 384m
     logging: *default-logging
@@ -67,7 +63,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
-      - GF_SERVER_ROOT_URL=https://${GRAFANA_SUB_DOMAIN:-grafana}.${DOMAIN}
+      - GF_SERVER_ROOT_URL=https://${GRAFANA_SUB_DOMAIN:-grafana}.${DOMAIN:-localhost}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-}
     expose:
       - "3000"
@@ -83,7 +79,7 @@ services:
     restart: always
     ports:
       - "${REALITY_PORT:-4433}:${REALITY_PORT:-4433}"
-      - "${API_PORT:-10085}:${API_PORT:-10085}"
+      - "127.0.0.1:${API_PORT:-10085}:${API_PORT:-10085}"
     expose:
       - "${XHTTP_PORT:-2022}"
     extra_hosts:
@@ -139,7 +135,7 @@ services:
       MAGPIE_NO_ACCOUNTS: "${MAGPIE_NO_ACCOUNTS:-0}"
       MAGPIE_PUBLIC_URL: https://magpie.${DOMAIN:-localhost}
       MAGPIE_WEB_URL: https://magpie.${DOMAIN:-localhost}
-      MAGPIE_WEB_KEY: "${MAGPIE_WEB_KEY}"
+      MAGPIE_WEB_KEY: "${MAGPIE_WEB_KEY:-}"
     volumes:
       - magpie_config:/config
     logging: *default-logging
