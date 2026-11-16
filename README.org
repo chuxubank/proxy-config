@@ -38,7 +38,7 @@ in the repository.
 | =make local= | Apply workstation changes, skipping binary installs |
 | =make local-install= | Apply workstation changes including binary installs |
 | =make server= | Deploy the VPS play |
-| =make pull= | Pull selected VPS images without stopping services |
+| =make pull= | Pull selected VPS images and recreate containers that use a new one |
 | =make reload= | Pull images and recreate the deployed Compose project |
 | =make cleanup= | Explicitly clean unused VPS images and APT downloads; preserve data |
 | =make pve= | Apply Proxmox workload management |

@@ -56,7 +56,7 @@ openwrt: ## Apply the OpenWrt play
 openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_sysupgrade=true $(EXTRA)
 
-pull: ## Pull Docker Compose images on the server
+pull: ## Pull images and recreate containers that use a new one
 	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull $(EXTRA)
 
 reload: ## Pull images and recreate the deployed Compose project

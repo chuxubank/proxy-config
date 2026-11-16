@@ -83,9 +83,10 @@
   diff: false
   when: "'rsshub' in proxy_services"
 
-# Validate and pull before stopping anything. Pull-only selects just this task
-# (plus local validation) and operates on the last deployed native Compose files.
-# reload adds the down/up below without syncing or rendering configuration.
+# Validate and pull before stopping anything. Pull uses the last deployed
+# Compose files and does not sync or render configuration. Recreate afterwards
+# so a moved tag such as magpie:stable replaces the running container. reload
+# removes the whole project first, so it skips this narrower recreate.
 - name: Pull selected Compose images
   community.docker.docker_compose_v2_pull:
     project_src: "{{ proxy_config_dir }}"
@@ -96,6 +97,23 @@
   when:
     - not ansible_check_mode
     - proxy_services | length > 0
+
+- name: Recreate selected containers from pulled images
+  community.docker.docker_compose_v2:
+    project_src: "{{ proxy_config_dir }}"
+    project_name: "{{ proxy_compose_project_name }}"
+    files: [compose.yml]
+    profiles: "{{ proxy_services }}"
+    state: present
+    pull: never
+    recreate: auto
+  tags: [pull]
+  when:
+    - not ansible_check_mode
+    - proxy_services | length > 0
+    - "'pull' in ansible_run_tags"
+    - "'reload' not in ansible_run_tags"
+    - "'all' not in ansible_run_tags"
 
 # The project is exclusively managed here. down removes all its containers,
 # including old profiles/orphans, but keeps named volumes and bind-mounted data.

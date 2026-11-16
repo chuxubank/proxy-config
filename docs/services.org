@@ -83,11 +83,12 @@ volumes and bind-mounted application data are retained.
   make server LIMIT=bwg-cn2-gia
 #+end_src
 
-=make pull= only pulls selected images and never stops or starts containers.
+=make pull= pulls selected images and recreates containers whose image changed.
+It does not sync files, render configuration, or remove the rest of the project.
 =make reload= pulls those images and then recreates the already deployed Compose
-project. Neither syncs files nor renders configuration. Run a normal deployment
-first after changing =proxy_services= so that the Compose files and environment
-are synchronized.
+project, including containers whose image did not change. Neither syncs files nor
+renders configuration. Run a normal deployment first after changing
+=proxy_services= so that the Compose files and environment are synchronized.
 
 * Adding or moving a VPS
 

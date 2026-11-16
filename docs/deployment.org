@@ -21,7 +21,7 @@ certificates, generated profiles, or runtime logs.
   make local         # apply localhost, skip binary installation
   make local-install # apply localhost, including binary installation
   make server        # apply the VPS play
-  make pull          # pull VPS images without changing container state
+  make pull          # pull VPS images and recreate containers that use a new one
   make reload        # pull images and recreate the deployed Compose project
   make cleanup       # explicitly remove unused images and APT downloads
   make pve           # apply the Proxmox play
