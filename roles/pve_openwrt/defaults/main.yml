@@ -16,16 +16,21 @@ openwrt_vm_disk_size: 1G
 openwrt_vm_onboot: true
 openwrt_vm_start: true
 
+# Standalone fallback. Bump the deployed release in group_vars/all.yml.
 openwrt_version: "25.12.5"
 openwrt_image_type: ext4-combined
 openwrt_image_url: >-
   {{
-    'https://downloads.openwrt.org/releases/' ~ openwrt_version ~
+    openwrt_official_package_source | default("https://downloads.openwrt.org") | regex_replace("/$", "") ~
+    '/releases/' ~ openwrt_version ~
     '/targets/x86/64/openwrt-' ~ openwrt_version ~
     '-x86-64-generic-' ~ openwrt_image_type ~ '.img.gz'
   }}
 openwrt_image_checksum_url: >-
-  https://downloads.openwrt.org/releases/{{ openwrt_version }}/targets/x86/64/sha256sums
+  {{
+    openwrt_official_package_source | default("https://downloads.openwrt.org") | regex_replace("/$", "") ~
+    '/releases/' ~ openwrt_version ~ '/targets/x86/64/sha256sums'
+  }}
 openwrt_image_checksum: "sha256:{{ openwrt_image_checksum_url }}"
 openwrt_image_dir: /var/lib/vz/template/qemu
 openwrt_image_archive_path: "{{ openwrt_image_dir }}/{{ openwrt_image_url | basename }}"

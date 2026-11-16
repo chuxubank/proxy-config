@@ -1,0 +1,7 @@
+---
+# Standalone bootstrap entrypoint for Arch Linux / CachyOS hosts.
+# Usage: ansible-playbook arch.yml --inventory <host>, -u <user> --ask-become-pass
+- name: Bootstrap Arch Linux hosts
+  hosts: "{{ arch_bootstrap_hosts | default('ungrouped:local_group') }}"
+  roles:
+    - arch_bootstrap

@@ -6,15 +6,26 @@
       - call
       - network
       - reload
+  changed_when: true
 
 - name: Reload OpenWrt firewall
   ansible.builtin.command:
     argv:
       - /etc/init.d/firewall
       - reload
+  changed_when: true
 
 - name: Restart OpenWrt dnsmasq
   ansible.builtin.command:
     argv:
       - /etc/init.d/dnsmasq
       - restart
+  changed_when: true
+
+- name: Apply OpenWrt side-router sysctl
+  ansible.builtin.command:
+    argv:
+      - sysctl
+      - -p
+      - /etc/sysctl.d/12-side-router.conf
+  changed_when: true

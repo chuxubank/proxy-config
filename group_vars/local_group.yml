@@ -2,43 +2,20 @@
 host_env: "{{ ansible_facts['env'].HOST_ENV | default('') }}"
 host_name: "{{ ansible_facts['hostname'] }}"
 
-use_become: >-
-  {%- if ansible_facts['system'] == 'Linux' -%}
-  true
-  {%- else -%}
-  false
-  {%- endif -%}
+use_become: "{%- if ansible_facts['system'] == 'Linux' -%} true{%- else -%} false{%- endif -%}"
 
-brew_path: >-
-  {%- if ansible_facts['system'] == 'Darwin' and ansible_facts['architecture'] == 'arm64' -%}
-  /opt/homebrew
-  {%- elif ansible_facts['system'] == 'Linux' -%}
-  /home/linuxbrew/.linuxbrew
-  {%- else -%}
-  /usr/local
-  {%- endif -%}
+brew_path: "{%- if ansible_facts['system'] == 'Darwin' and ansible_facts['architecture'] == 'arm64' -%} \
+  /opt/homebrew{%- elif ansible_facts['system'] == 'Linux' -%} \
+  /home/linuxbrew/.linuxbrew{%- else -%} \
+  /usr/local{%- endif -%}"
 
-etc_path: >-
-  {%- if ansible_facts['system'] == 'Linux' -%}
-  /etc
-  {%- else -%}
-  {{ brew_path }}/etc
-  {%- endif -%}
+etc_path: "{%- if ansible_facts['system'] == 'Linux' -%} /etc{%- else -%} {{ brew_path }}/etc{%- endif -%}"
 
-var_path: >-
-  {%- if ansible_facts['system'] == 'Linux' -%}
-  /var
-  {%- else -%}
-  {{ brew_path }}/var
-  {%- endif -%}
+var_path: "{%- if ansible_facts['system'] == 'Linux' -%} /var{%- else -%} {{ brew_path }}/var{%- endif -%}"
 
-log_dir: >-
-  {%- if ansible_facts['system'] == 'Darwin' -%}
-  {{ ansible_facts['env']['HOME'] }}/Library/Logs
-  {%- elif ansible_facts['os_family'] | default('') == 'Windows' -%}
-  {{ ansible_facts['env']['LOCALAPPDATA'] }}
-  {%- else -%}
-  /var/log
-  {%- endif -%}
+log_dir: "{%- if ansible_facts['system'] == 'Darwin' -%} \
+  {{ ansible_facts['env']['HOME'] }}/Library/Logs{%- elif ansible_facts['os_family'] | default('') == 'Windows' -%} \
+  {{ ansible_facts['env']['LOCALAPPDATA'] }}{%- else -%} \
+  /var/log{%- endif -%}"
 
 logrotate_config_dir: "{{ etc_path }}/logrotate.d"

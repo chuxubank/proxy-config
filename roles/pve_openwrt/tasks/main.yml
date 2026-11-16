@@ -106,7 +106,7 @@
       community.proxmox.proxmox_kvm:
         node: "{{ openwrt_proxmox_node }}"
         vmid: "{{ openwrt_vm_id }}"
-        scsi: "{{ { openwrt_vm_disk_interface: openwrt_disk_volume } }}"
+        scsi: "{{ {openwrt_vm_disk_interface: openwrt_disk_volume} }}"
         update: true
         update_unsafe: true
 
@@ -137,6 +137,7 @@
       - "{{ openwrt_vm_id }}"
       - "{{ openwrt_vm_disk_interface }}"
       - "{{ openwrt_vm_disk_size }}"
+  changed_when: true
   when:
     - openwrt_disk_size | human_to_bytes < openwrt_vm_disk_size | human_to_bytes
 

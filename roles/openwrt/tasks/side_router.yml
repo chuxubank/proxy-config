@@ -44,15 +44,7 @@
     src: sysctl-forward.conf.j2
     dest: /etc/sysctl.d/12-side-router.conf
     mode: "0644"
-  register: openwrt_side_router_sysctl
-
-- name: Apply OpenWrt side-router sysctl
-  ansible.builtin.command:
-    argv:
-      - sysctl
-      - -p
-      - /etc/sysctl.d/12-side-router.conf
-  when: openwrt_side_router_sysctl.changed | bool
+  notify: Apply OpenWrt side-router sysctl
 
 - name: Install OpenWrt side-router masquerade
   ansible.builtin.template:

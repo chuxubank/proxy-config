@@ -36,7 +36,7 @@
           - "{{ openwrt_sysupgrade_image_path }}"
       async: 1
       poll: 0
-      ignore_errors: true
+      failed_when: false
       ignore_unreachable: true
 
     - name: Wait for OpenWrt to reboot after sysupgrade

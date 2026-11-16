@@ -3,6 +3,7 @@ openwrt_official_package_source: https://downloads.openwrt.org
 openwrt_package_mirror: https://downloads.openwrt.org
 openwrt_mirror_snapshots: false
 
+# Standalone fallback. Bump the deployed release in group_vars/all.yml.
 openwrt_version: "25.12.5"
 openwrt_sysupgrade: false
 openwrt_sysupgrade_target: x86/64

@@ -1,0 +1,4 @@
+---
+# Single place to bump the OpenWrt release shared by the openwrt and pve_openwrt roles.
+openwrt_version: "25.12.5"
+openwrt_official_package_source: https://downloads.openwrt.org
