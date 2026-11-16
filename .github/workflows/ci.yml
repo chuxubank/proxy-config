@@ -21,8 +21,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Ansible
-        run: pip install ansible-core
+      - name: Cache pip wheels
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py3.12
+
+      - name: Install Ansible and ansible-lint
+        run: pip install ansible-core ansible-lint
+
+      - name: Cache Galaxy requirements
+        uses: actions/cache@v4
+        with:
+          path: .ansible
+          key: galaxy-${{ runner.os }}-${{ hashFiles('requirements.yml') }}
 
       - name: Install Galaxy requirements
         run: make deps
@@ -81,8 +93,20 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Cache pip wheels
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py3.12
+
       - name: Install Ansible
         run: pip install ansible-core
+
+      - name: Cache Galaxy requirements
+        uses: actions/cache@v4
+        with:
+          path: .ansible
+          key: galaxy-${{ runner.os }}-${{ hashFiles('requirements.yml') }}
 
       - name: Install Galaxy requirements
         run: make deps
@@ -116,7 +140,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run CI
-        run: make ci
+        run: make syntax test
 
   windows:
     runs-on: windows-latest

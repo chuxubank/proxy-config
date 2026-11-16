@@ -4,6 +4,8 @@
 
 - =playbook.yml= runs the local, VPS, Proxmox, and OpenWrt plays.
 - =server.yml= runs only the =vps_group= play.
+- =arch.yml= bootstraps Arch Linux and CachyOS hosts with the =arch_bootstrap=
+  role: =ansible-playbook arch.yml --inventory <host>, -u <user> --ask-become-pass=.
 - =inventory.yml= contains static hosts and groups.
 - =host_vars/= contains host-specific service placement and connection settings.
 - =group_vars/= contains group-level settings and secret paths.
@@ -26,8 +28,10 @@ certificates, generated profiles, or runtime logs.
   make cleanup       # explicitly remove unused images and APT downloads
   make pve           # apply the Proxmox play
   make openwrt       # apply the OpenWrt play
+  make arch          # bootstrap an Arch Linux or CachyOS host (LIMIT=<host>)
+  make lint          # run ansible-lint (production profile)
   make test          # run all local validation
-  make ci            # syntax plus tests
+  make ci            # syntax, lint, and tests
 #+end_src
 
 All targets accept =LIMIT=, =TAGS=, =SKIP_TAGS=, and =EXTRA= where applicable.
@@ -54,9 +58,9 @@ Run the following before applying changes:
   make diff LIMIT=<host>
 #+end_src
 
-CI validates Ansible syntax, service selection/templates, sing-box profiles, and
-rendered profiles with the Linux, macOS, and Windows sing-box binaries where
-available.
+CI validates Ansible syntax, =ansible-lint= (=production= profile), service
+selection/templates with Docker Compose, sing-box profiles, and rendered
+profiles with the Linux, macOS, and Windows sing-box binaries where available.
 
 * Disk cleanup
 

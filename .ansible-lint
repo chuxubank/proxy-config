@@ -1,0 +1,17 @@
+---
+profile: production
+
+exclude_paths:
+  - .ansible/
+  - .github/
+  - .pi/
+  - docs/
+  - files/
+  - mcp/
+  - roles/server/files/
+
+skip_list:
+  # Public role parameters intentionally keep domain names (proxy_*, openwrt_*, xray_*)
+  # rather than duplicating role directory names, and sing-box_client uses a hyphen.
+  - var-naming[no-role-prefix]
+  - role-name

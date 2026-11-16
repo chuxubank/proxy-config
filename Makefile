@@ -16,7 +16,7 @@ CHECK_FLAGS      = $(LIMIT_FLAG) $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
-.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade pull \
+.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade arch pull \
         reload mcp lint cleanup test-services test ci
 
 help: ## Show this help
@@ -31,6 +31,7 @@ syntax: ## Fast parse validation without querying dynamic inventory
 	ansible-playbook mcp.yml --inventory inventory.yml --syntax-check $(EXTRA)
 	ansible-playbook server.yml --inventory inventory.yml --syntax-check $(EXTRA)
 	ansible-playbook cleanup.yml --inventory inventory.yml --syntax-check $(EXTRA)
+	ansible-playbook arch.yml --inventory inventory.yml --syntax-check $(EXTRA)
 
 check: ## Dry-run against the inventory (no changes)
 	$(ANSIBLE_PLAYBOOK) --check $(CHECK_FLAGS)
@@ -56,6 +57,14 @@ openwrt: ## Apply the OpenWrt play
 openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_sysupgrade=true $(EXTRA)
 
+arch: ## Bootstrap an Arch Linux or CachyOS host (set LIMIT=<host>)
+	@test -n "$(LIMIT)" || { echo "Set LIMIT=<host> (e.g. make arch LIMIT=localhost or LIMIT=archbox)" >&2; exit 1; }
+	@if [ "$(LIMIT)" = "localhost" ]; then \
+	  ansible-playbook arch.yml --inventory inventory.yml --limit localhost $(ROLE_FLAGS); \
+	else \
+	  ansible-playbook arch.yml --inventory '$(LIMIT),' $(ROLE_FLAGS); \
+	fi
+
 pull: ## Pull images and recreate containers that use a new one
 	ansible-playbook server.yml $(LIMIT_FLAG) --tags pull $(EXTRA)
 
@@ -70,7 +79,7 @@ mcp: ## Probe MCP servers through ansible.mcp
 
 lint: ## Run ansible-lint if available
 	@if command -v ansible-lint >/dev/null 2>&1; then \
-	  ansible-lint $(PLAYBOOK); \
+	  ansible-lint; \
 	elif [ -n "$$CI" ]; then \
 	  echo "ansible-lint is required in CI" >&2; \
 	  exit 1; \
@@ -87,4 +96,4 @@ test: test-services ## Render and validate sing-box client profiles
 	  || { echo "sing-box not installed; needed for profile checks" >&2; exit 1; }
 	ansible-playbook tests/sing-box.yml --inventory tests/inventory.yml $(EXTRA)
 
-ci: syntax test ## CI checks (syntax and sing-box profile validation)
+ci: syntax lint test ## CI checks (syntax, lint, and profile/service validation)

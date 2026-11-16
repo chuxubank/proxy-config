@@ -43,10 +43,12 @@ in the repository.
 | =make cleanup= | Explicitly clean unused VPS images and APT downloads; preserve data |
 | =make pve= | Apply Proxmox workload management |
 | =make openwrt= | Apply the OpenWrt client play |
+| =make arch= | Bootstrap Arch Linux or CachyOS hosts |
 | =make check= | Run the complete playbook in check mode |
 | =make diff= | Run check mode with diffs |
+| =make lint= | Run =ansible-lint= across playbooks, roles, and tests |
 | =make test= | Run service/template tests and sing-box profile validation |
-| =make ci= | Run syntax checks and the complete test suite |
+| =make ci= | Run syntax checks, lint, and the complete test suite |
 
 Use =LIMIT=, =TAGS=, =SKIP_TAGS=, and =EXTRA= to refine a command. VPS commands
 use the dedicated =server.yml= playbook, so native Ansible limit patterns cannot
@@ -74,10 +76,14 @@ host_vars/                Host-specific placement and connection settings
 group_vars/               Group settings and secret paths
 playbook.yml              Main playbook for all environments
 server.yml                VPS-only playbook
+arch.yml                  Arch Linux / CachyOS bootstrap playbook
+cleanup.yml               Explicit VPS image and APT cache cleanup
+files/shadowrocket.conf   Standalone Shadowrocket ruleset template
 roles/server/             Docker Compose proxy server
 roles/sing-box_client/    Native sing-box client and profile exports
 roles/xray_client/        Native Xray client
 roles/openwrt/            OpenWrt base configuration
 roles/pve_openwrt/        Proxmox/OpenWrt workload management
+roles/arch_bootstrap/     Arch Linux / CachyOS base packages and mirror setup
 tests/                    Template and profile validation
 #+end_example
