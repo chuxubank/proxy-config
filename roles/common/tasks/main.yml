@@ -1,14 +1,14 @@
 ---
 - name: Check if Docker is installed
-  command: docker --version
-  register: docker_installed
-  ignore_errors: true
+  ansible.builtin.command: docker --version
+  register: common_docker_installed
+  failed_when: false
   changed_when: false
 
 - name: Install Docker (only if not installed)
-  include_role:
+  ansible.builtin.include_role:
     name: geerlingguy.docker
-  when: docker_installed.rc != 0
+  when: common_docker_installed.rc != 0
 
 - name: Ensure rsync is installed
   become: "{{ use_become | default(true) }}"

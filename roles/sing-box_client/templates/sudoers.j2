@@ -1,1 +1,1 @@
-{{ ansible_facts['user_id'] }} ALL=(root) NOPASSWD: {{ brew_path }}/bin/sing-box run *
+{{ ansible_facts["user_id"] }} ALL=(root) NOPASSWD: {{ brew_path }}/bin/sing-box run --config-directory {{ sing_box_config_dir }} --directory {{ brew_path }}/var/lib/sing-box --disable-color

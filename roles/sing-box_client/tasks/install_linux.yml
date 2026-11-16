@@ -1,4 +1,4 @@
-- name: Install sing-box
+- name: Install sing-box # noqa: package-latest
   become: "{{ use_become | default(true) }}"
   ansible.builtin.package:
     name:

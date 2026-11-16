@@ -1,6 +1,8 @@
 ---
 # false stops/disables the host service and skips install/config/export tasks.
 sing_box_service_enabled: true
+# Steady-state level. trace and debug are noisy on OpenWrt and iOS PacketTunnel.
+sing_box_log_level: info
 
 sing_box_tailscale_auth_token: >-
   {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='auth-key-sing-box') }}

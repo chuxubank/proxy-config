@@ -1,3 +1,6 @@
 ---
 # false stops/disables the host service and skips install/config tasks.
 xray_service_enabled: true
+# warning avoids per-connection debug logs; DNS query logging stays off.
+xray_log_level: warning
+xray_dns_log: false

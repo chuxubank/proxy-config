@@ -2,6 +2,11 @@
 
 * Xray client
 
+The Xray client is an optional local SOCKS5 and share-link client. Workstation
+traffic normally uses sing-box. This client listens on =127.0.0.1:10800= and
+prints VLESS share links when it is enabled. Set =xray_service_enabled= to
+=false= to stop it without removing the package or rendered files.
+
 The Xray client configuration is rendered to:
 
 #+begin_src sh :results output silent
@@ -14,7 +19,9 @@ Validate it with:
   xray run -confdir=$HOME/.config/xray/ -dump
 #+end_src
 
-Logs are stored under =~/Library/Logs/xray/= on macOS.
+Logs are stored under =~/Library/Logs/xray/= on macOS. =xray_log_level=
+defaults to =warning= and =xray_dns_log= defaults to =false=, so routine runs
+do not record per-connection or DNS debug logs.
 
 * sing-box
 
@@ -26,6 +33,9 @@ Workstation and OpenWrt use a configuration directory. The rendered profile is
   # OpenWrt:
   sing-box check -C /etc/sing-box
 #+end_src
+
+=sing_box_log_level= defaults to =info=. =debug= and =trace= are available for
+short troubleshooting, but they are noisy on OpenWrt and iOS PacketTunnel.
 
 The profile uses binary rule sets from
 [[https://github.com/SagerNet/sing-geosite/tree/rule-set][SagerNet/sing-geosite/rule-set]].

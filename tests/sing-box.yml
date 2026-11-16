@@ -214,6 +214,30 @@
           - sing_box_ci_workstation.services | length > 0
         quiet: true
 
+    - name: Assert default log level and only referenced rule sets
+      vars:
+        rule_set_tags: "{{ item.route.rule_set | map(attribute='tag') | list }}"
+      ansible.builtin.assert:
+        that:
+          - item.log.level == 'info'
+          - "'geosite-category-ads-all' not in rule_set_tags"
+          - "'geosite-geolocation-!cn' not in rule_set_tags"
+          - "'geosite-geolocation-cn' in rule_set_tags"
+          - "'geosite-google' in rule_set_tags"
+          - "'geosite-google-cn' in rule_set_tags"
+          - "'geosite-apple-cn' in rule_set_tags"
+          - "'geoip-cn' in rule_set_tags"
+          - rule_set_tags | length == 5
+        quiet: true
+      loop:
+        - "{{ sing_box_ci_workstation }}"
+        - "{{ sing_box_ci_iv }}"
+        - "{{ sing_box_ci_windows }}"
+        - "{{ sing_box_ci_icloud }}"
+        - "{{ sing_box_ci_openwrt }}"
+      loop_control:
+        label: "{{ item.inbounds[0].stack }}"
+
     - name: Assert Windows profile drops logs and keeps API
       ansible.builtin.assert:
         that:

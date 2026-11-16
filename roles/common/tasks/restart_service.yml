@@ -6,7 +6,10 @@
     EOF
   environment:
     HOMEBREW_NO_AUTO_UPDATE: "1"
-  when: ansible_facts['system'] == 'Darwin'
+  changed_when: true
+  when:
+    - ansible_facts['system'] == 'Darwin'
+    - not ansible_check_mode
 
 - name: Restart service via systemd
   become: "{{ use_become | default(true) }}"

@@ -1,0 +1,64 @@
+---
+# Reconcile a Homebrew LaunchAgent only when it is stopped or its plist drifted.
+# Check mode reports that drift and does not restart the live service.
+- name: Inspect Homebrew service state
+  ansible.builtin.command:
+    argv:
+      - brew
+      - services
+      - info
+      - "{{ common_service_name }}"
+      - --json
+  environment:
+    HOMEBREW_NO_AUTO_UPDATE: "1"
+  register: common_macos_service_info
+  changed_when: false
+  check_mode: false
+  failed_when: false
+
+- name: Parse Homebrew service info
+  ansible.builtin.set_fact:
+    common_macos_service_entry: |-
+      {{
+        ((common_macos_service_info.stdout | from_json | first) | default({}, true))
+        if (
+          common_macos_service_info.rc == 0
+          and (common_macos_service_info.stdout | default('') | trim | length) > 0
+        )
+        else {}
+      }}
+  changed_when: false
+
+- name: Stat installed Homebrew service plist
+  ansible.builtin.stat:
+    path: "{{ common_macos_service_entry.file }}"
+  register: common_macos_service_plist_stat
+  check_mode: false
+  when: common_macos_service_entry.file | default('', true) | length > 0
+
+- name: Read installed Homebrew service plist
+  ansible.builtin.slurp:
+    src: "{{ common_macos_service_entry.file }}"
+  register: common_macos_service_plist
+  check_mode: false
+  when: common_macos_service_plist_stat.stat.exists | default(false)
+
+- name: Decide whether the Homebrew service needs reconciliation
+  ansible.builtin.set_fact:
+    common_macos_service_needs_reconcile: |-
+      {{
+        not (common_macos_service_entry.running | default(false, true) | bool)
+        or not (common_macos_service_plist_stat.stat.exists | default(false))
+        or (
+          (common_macos_service_plist.content | b64decode | trim)
+          != (common_service_plist_content | trim)
+        )
+      }}
+  changed_when: false
+
+- name: Request macOS Homebrew service reconciliation
+  ansible.builtin.debug:
+    msg: Reconcile the configured Homebrew service
+  changed_when: true
+  notify: "{{ common_service_restart_handler }}"
+  when: common_macos_service_needs_reconcile | bool

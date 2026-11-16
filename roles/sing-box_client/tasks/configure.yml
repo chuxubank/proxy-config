@@ -133,10 +133,21 @@
     - not sing_box_on_openwrt
     - ansible_facts['system'] == 'Linux'
 
-# Reuse the existing custom-plist handler; normal runs also re-enable a stopped job.
-- name: Request sing-box macOS service reconciliation
-  ansible.builtin.debug:
-    msg: Reconcile the configured Homebrew service
-  changed_when: true
-  notify: Restart sing-box service
+# Render in this role: include_role templates lookups from the common role.
+- name: Render sing-box macOS service plist
+  ansible.builtin.set_fact:
+    sing_box_macos_service_plist: "{{ lookup('template', sing_box_service_template) }}"
+  changed_when: false
+  when: ansible_facts['system'] == 'Darwin'
+
+# Reuse the custom-plist restart handler. Stopped jobs and drifted plists are
+# reconciled; a running job whose plist matches is left unchanged.
+- name: Ensure sing-box macOS Homebrew service
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: ensure_macos_service
+  vars:
+    common_service_name: sing-box
+    common_service_plist_content: "{{ sing_box_macos_service_plist }}"
+    common_service_restart_handler: Restart sing-box service
   when: ansible_facts['system'] == 'Darwin'
