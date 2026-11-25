@@ -352,19 +352,22 @@
       "tag": "direct"
     }
   ],
-{% if not sing_box_on_openwrt %}
   "endpoints": [
     {
       "type": "tailscale",
       "tag": "ts-ep",
       "auth_key": "{{ sing_box_tailscale_auth_token }}",
+{% if sing_box_on_openwrt %}
+      "relay_server_port": {{ sing_box_tailscale_relay_server_port | int }},
+      "advertise_tags": {{ sing_box_tailscale_advertise_tags | to_json }}
+{% else %}
       "accept_routes": true,
       "exit_node_allow_lan_access": true,
       "advertise_exit_node": true,
       "ssh_server": true
+{% endif %}
     }
   ],
-{% endif %}
 {% if not sing_box_icloud_profile and not sing_box_on_openwrt %}
   "services": [
     {

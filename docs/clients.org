@@ -44,9 +44,49 @@ prefer a suitable rule set over a one-off domain rule.
 
 Non-OpenWrt profiles enable Tailscale SSH on the =ts-ep= endpoint. The tailnet
 SSH ACL still decides who can connect and which local user the session uses.
-OpenWrt stays on sing-box 1.13 and does not render this endpoint. On iOS App
-Store, TestFlight, tvOS, and the macOS App Store build, sing-box ignores the
+The same endpoint accepts advertised routes, keeps LAN access when an exit node
+is selected, and advertises itself as an exit node. On iOS App Store,
+TestFlight, tvOS, and the macOS App Store build, sing-box ignores the SSH
 server instead of failing the profile.
+
+** OpenWrt peer relay
+
+OpenWrt stays on sing-box 1.13 and renders one =ts-ep= endpoint. =ssh_server=
+is a 1.14 field, so this endpoint does not set it, and it does not set
+=advertise_exit_node=, =accept_routes=, or =exit_node_allow_lan_access=. It is
+not an exit node. Routes for =100.64.0.0/10= and =ts.net= stay absent; the
+relay listens on the host UDP port and does not depend on those routes.
+
+=sing_box_tailscale_relay_server_port= defaults to =40000=.
+=sing_box_tailscale_advertise_tags= defaults to =["tag:relay"]=. Both are role
+defaults, so host or group vars can override them. =auth_key= still comes from
+=sing_box_tailscale_auth_token=. That auth key must be allowed to request every
+advertised tag, or the node fails to register. Do not change its pass path.
+
+Tailnet policy must grant =tailscale.com/cap/relay= with =dst= set to the
+advertised tag. =src= is whichever nodes may use the relay. For the default
+tag:
+
+#+begin_src json
+{
+  "grants": [
+    {
+      "src": ["autogroup:member"],
+      "dst": ["tag:relay"],
+      "app": {
+        "tailscale.com/cap/relay": []
+      }
+    }
+  ]
+}
+#+end_src
+
+If the tag changes, point =dst= at that tag. This playbook does not edit the
+tailnet policy.
+
+Allow UDP =sing_box_tailscale_relay_server_port= on the OpenWrt firewall when
+input is not already accepted. The OpenWrt role does not add or change that
+firewall rule.
 
 * Native service switches
 
