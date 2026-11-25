@@ -52,6 +52,32 @@
     - not sing_box_on_openwrt
     - not sing_box_on_windows
 
+- name: Resolve OpenWrt Tailscale relay addresses
+  when: sing_box_on_openwrt
+  block:
+    - name: Record relay static endpoints
+      ansible.builtin.set_fact:
+        sing_box_tailscale_relay_static_endpoints: >-
+          {{
+            query(
+              'community.dns.lookup',
+              sing_box_tailscale_relay_ddns,
+              type='A',
+              search=false,
+              nxdomain_handling='fail'
+            )
+            | product([sing_box_tailscale_relay_server_port | string])
+            | map('join', ':')
+            | list
+          }}
+
+    - name: Require a resolved relay address
+      ansible.builtin.assert:
+        that:
+          - sing_box_tailscale_relay_static_endpoints | length > 0
+        fail_msg: >-
+          {{ sing_box_asus_pass_path }} ddns did not resolve to an IPv4 address.
+
 - name: Setup sing-box config
   ansible.builtin.template:
     src: config.json.j2

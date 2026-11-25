@@ -7,5 +7,6 @@ collections:
   - name: ansible.posix
   - name: ansible.utils
   - name: community.docker
+  - name: community.dns
   - name: community.general
   - name: community.proxmox

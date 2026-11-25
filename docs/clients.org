@@ -63,6 +63,12 @@ defaults, so host or group vars can override them. =auth_key= still comes from
 =sing_box_tailscale_auth_token=. That auth key must be allowed to request every
 advertised tag, or the node fails to register. Do not change its pass path.
 
+The public relay address is not stored. =Network/Home/ASUS= subkey =ddns=,
+overridable with =sing_box_asus_pass_path=, holds the DDNS hostname. Rendering
+the OpenWrt profile resolves its A records with =community.dns= and writes
+=relay_server_static_endpoints= as =ip:port=. Run the OpenWrt play again after
+the public address changes. The field accepts an IP, not the hostname.
+
 Tailnet policy must grant =tailscale.com/cap/relay= with =dst= set to the
 advertised tag. =src= is whichever nodes may use the relay. For the default
 tag:

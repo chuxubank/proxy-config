@@ -14,6 +14,8 @@
     sing_box_ci_render_dir: "{{ playbook_dir }}/.render"
     sing_box_tailscale_auth_token: tskey-auth-ci000000000000000000000000
     sing_box_tailscale_relay_server_port: 40000
+    sing_box_tailscale_relay_static_endpoints:
+      - 203.0.113.15:40000
     sing_box_tailscale_advertise_tags:
       - tag:relay
     sing_box_invalley_server: proxy.example.test
@@ -90,6 +92,8 @@
         mode: "0600"
       vars:
         sing_box_tailscale_relay_server_port: 40001
+        sing_box_tailscale_relay_static_endpoints:
+          - 198.51.100.20:40001
         sing_box_tailscale_advertise_tags:
           - tag:relay-ci
 
@@ -320,6 +324,7 @@
           - tailscale_endpoint.advertise_exit_node | bool
           - tailscale_endpoint.ssh_server | bool
           - tailscale_endpoint.relay_server_port is not defined
+          - tailscale_endpoint.relay_server_static_endpoints is not defined
           - tailscale_endpoint.advertise_tags is not defined
         quiet: true
       loop:
@@ -355,6 +360,7 @@
           {{ sing_box_ci_openwrt_override.endpoints | selectattr('tag', 'equalto', 'ts-ep') | first }}
       ansible.builtin.assert:
         that:
+          - client_defaults.sing_box_asus_pass_path == 'Network/Home/ASUS'
           - client_defaults.sing_box_tailscale_relay_server_port | int == 40000
           - client_defaults.sing_box_tailscale_advertise_tags == ['tag:relay']
           - sing_box_ci_openwrt.endpoints | length == 1
@@ -362,6 +368,7 @@
           - tailscale_endpoint.tag == "ts-ep"
           - tailscale_endpoint.auth_key == sing_box_tailscale_auth_token
           - tailscale_endpoint.relay_server_port | int == 40000
+          - tailscale_endpoint.relay_server_static_endpoints == ['203.0.113.15:40000']
           - tailscale_endpoint.advertise_tags == ['tag:relay']
           - tailscale_endpoint.ssh_server is not defined
           - tailscale_endpoint.advertise_exit_node is not defined
@@ -369,6 +376,7 @@
           - tailscale_endpoint.exit_node_allow_lan_access is not defined
           - sing_box_ci_openwrt_override.endpoints | length == 1
           - override_endpoint.relay_server_port | int == 40001
+          - override_endpoint.relay_server_static_endpoints == ['198.51.100.20:40001']
           - override_endpoint.advertise_tags == ['tag:relay-ci']
           - override_endpoint.ssh_server is not defined
           - override_endpoint.advertise_exit_node is not defined
