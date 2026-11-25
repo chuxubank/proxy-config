@@ -96,6 +96,10 @@ has time to boot and become reachable:
 
 The OpenWrt guest is a same-LAN side gateway. It does not run DHCP; clients use
 its address as gateway and DNS while the main router remains the primary router.
+=make openwrt= connects to the LAN address in =Network/Home/OpenWrt/ssh=. From
+the WAN, =make openwrt-wan= uses the =ddns= subkey of =Network/Home/ASUS= on TCP
+8022. That port is the ASUS forward, not the address written into the LAN
+configuration.
 
 * MCP
 

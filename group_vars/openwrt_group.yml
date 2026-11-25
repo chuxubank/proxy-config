@@ -1,13 +1,28 @@
 ---
 openwrt_pass_path: "Network/Home/OpenWrt/ssh"
+openwrt_asus_pass_path: "Network/Home/ASUS"
 
-ansible_host: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='ip') }}"
+# LAN address used by the side-router configuration. It is not the SSH target
+# when openwrt_via_wan is set.
+openwrt_lan_ip: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='ip') }}"
+# ASUS forwards TCP 8022 to the OpenWrt SSH port. The hostname is the ddns
+# subkey, not a stored public address.
+openwrt_wan_host: "{{ lookup('community.general.passwordstore', openwrt_asus_pass_path, subkey='ddns') }}"
+openwrt_wan_port: 8022
+openwrt_via_wan: false
+
+ansible_host: "{{ openwrt_wan_host if openwrt_via_wan | bool else openwrt_lan_ip }}"
 ansible_user: >-
   {{
     lookup('community.general.passwordstore', openwrt_pass_path, subkey='user')
     | default('root', true)
   }}
-ansible_port: "{{ lookup('community.general.passwordstore', openwrt_pass_path, subkey='port') | default(22, true) }}"
+ansible_port: >-
+  {{
+    openwrt_wan_port
+    if openwrt_via_wan | bool
+    else lookup('community.general.passwordstore', openwrt_pass_path, subkey='port') | default(22, true)
+  }}
 ansible_password: "{{ lookup('community.general.passwordstore', openwrt_pass_path) }}"
 ansible_python_interpreter: /usr/bin/python3
 ansible_pipelining: true

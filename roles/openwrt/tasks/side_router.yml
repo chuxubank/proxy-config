@@ -57,7 +57,7 @@
 - name: Apply OpenWrt LAN address if it is not live
   ansible.builtin.shell: |
     set -euo pipefail
-    if ip -4 addr show {{ openwrt_lan_device }} | grep -q '{{ ansible_host }}'; then
+    if ip -4 addr show {{ openwrt_lan_device }} | grep -q '{{ openwrt_lan_ip }}'; then
       exit 0
     fi
     ifup lan

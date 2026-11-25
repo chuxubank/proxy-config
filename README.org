@@ -43,6 +43,7 @@ in the repository.
 | =make cleanup= | Explicitly clean unused VPS images and APT downloads; preserve data |
 | =make pve= | Apply Proxmox workload management |
 | =make openwrt= | Apply the OpenWrt client play |
+| =make openwrt-wan= | Apply the OpenWrt play through the WAN SSH forward |
 | =make arch= | Bootstrap Arch Linux or CachyOS hosts |
 | =make check= | Run the complete playbook in check mode |
 | =make diff= | Run check mode with diffs |

@@ -16,7 +16,7 @@ CHECK_FLAGS      = $(LIMIT_FLAG) $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ROLE_FLAGS       = $(TAGS_FLAG) $(SKIP_TAGS_FLAG) $(EXTRA)
 ANSIBLE_PLAYBOOK = ansible-playbook $(PLAYBOOK)
 
-.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-upgrade arch pull \
+.PHONY: help deps syntax check diff local local-install server pve openwrt openwrt-wan openwrt-upgrade arch pull \
         reload mcp lint cleanup test-services test ci
 
 help: ## Show this help
@@ -53,6 +53,9 @@ pve: ## Apply the Proxmox play
 
 openwrt: ## Apply the OpenWrt play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt $(EXTRA)
+
+openwrt-wan: ## Apply the OpenWrt play through the WAN SSH forward
+	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_via_wan=true $(EXTRA)
 
 openwrt-upgrade: ## Sysupgrade OpenWrt then apply the guest play
 	$(ANSIBLE_PLAYBOOK) --limit OpenWrt -e openwrt_sysupgrade=true $(EXTRA)
