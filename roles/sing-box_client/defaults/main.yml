@@ -8,10 +8,10 @@ sing_box_tailscale_auth_token: >-
   {{ lookup('community.general.passwordstore', 'Network/Tailscale', subkey='auth-key-sing-box') }}
 
 # OpenWrt sing-box 1.13 peer relay. Only that profile's ts-ep reads these.
-# sing_box_tailscale_auth_token must be allowed to request every advertised
-# tag. Tailnet policy needs a tailscale.com/cap/relay grant whose dst is that
-# tag. Allow this UDP port on the host firewall; the OpenWrt role does not add
-# that rule. See docs/clients.org.
+# The endpoint does not advertise a tag. Assign the tag and the
+# tailscale.com/cap/relay grant in the Tailscale admin console. Allow this
+# UDP port on the host firewall; the OpenWrt role does not add that rule.
+# See docs/clients.org.
 # The DDNS hostname is resolved with community.dns while rendering the
 # OpenWrt profile. sing-box accepts only ip:port in
 # relay_server_static_endpoints. The lookup needs dnspython.
@@ -19,8 +19,6 @@ sing_box_asus_pass_path: "Network/Home/ASUS"
 sing_box_tailscale_relay_ddns: >-
   {{ lookup('community.general.passwordstore', sing_box_asus_pass_path, subkey='ddns') }}
 sing_box_tailscale_relay_server_port: 40000
-sing_box_tailscale_advertise_tags:
-  - tag:relay
 
 sing_box_invalley_server: >-
   {{ lookup('community.general.passwordstore', invalley_pass_path, subkey='url') }}

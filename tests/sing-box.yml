@@ -16,8 +16,6 @@
     sing_box_tailscale_relay_server_port: 40000
     sing_box_tailscale_relay_static_endpoints:
       - 203.0.113.15:40000
-    sing_box_tailscale_advertise_tags:
-      - tag:relay
     sing_box_invalley_server: proxy.example.test
     sing_box_invalley_uuid: 00000000-0000-4000-8000-000000000001
     sing_box_invalley_ws_path: /ray/ci-test
@@ -94,8 +92,6 @@
         sing_box_tailscale_relay_server_port: 40001
         sing_box_tailscale_relay_static_endpoints:
           - 198.51.100.20:40001
-        sing_box_tailscale_advertise_tags:
-          - tag:relay-ci
 
     - name: Restore workstation template branch
       ansible.builtin.set_fact:
@@ -205,11 +201,17 @@
 
     - name: Assert every profile routes selected suffix domains directly
       vars:
-        direct_route: >-
-          {{ item.route.rules | selectattr('outbound', 'defined') |
-             selectattr('outbound', 'equalto', 'direct') | first }}
         direct_domains: >-
-          {{ direct_route.rules | selectattr('domain_suffix', 'defined') | map(attribute='domain_suffix') | flatten }}
+          {{
+            item.route.rules
+            | selectattr('outbound', 'defined')
+            | selectattr('outbound', 'equalto', 'direct')
+            | map(attribute='rules')
+            | flatten
+            | selectattr('domain_suffix', 'defined')
+            | map(attribute='domain_suffix')
+            | flatten
+          }}
       ansible.builtin.assert:
         that:
           - "'b2clogin.com' in direct_domains"
@@ -348,6 +350,9 @@
           - "'100.64.0.0/10' not in (sing_box_ci_openwrt | to_json)"
           - "'\"ts.net\"' not in (sing_box_ci_openwrt | to_json)"
           - "'ts-ep' not in (sing_box_ci_openwrt.route | to_json)"
+          - sing_box_ci_openwrt.endpoints[0].detour == 'proxy-self'
+          - sing_box_ci_workstation.endpoints[0].detour is not defined
+          - sing_box_ci_workstation.route.rules[0].action == 'sniff'
         quiet: true
 
     - name: Assert OpenWrt relay defaults and the rendered peer relay endpoint
@@ -362,14 +367,14 @@
         that:
           - client_defaults.sing_box_asus_pass_path == 'Network/Home/ASUS'
           - client_defaults.sing_box_tailscale_relay_server_port | int == 40000
-          - client_defaults.sing_box_tailscale_advertise_tags == ['tag:relay']
+          - client_defaults.sing_box_tailscale_advertise_tags is not defined
           - sing_box_ci_openwrt.endpoints | length == 1
           - tailscale_endpoint.type == "tailscale"
           - tailscale_endpoint.tag == "ts-ep"
           - tailscale_endpoint.auth_key == sing_box_tailscale_auth_token
           - tailscale_endpoint.relay_server_port | int == 40000
           - tailscale_endpoint.relay_server_static_endpoints == ['203.0.113.15:40000']
-          - tailscale_endpoint.advertise_tags == ['tag:relay']
+          - tailscale_endpoint.advertise_tags is not defined
           - tailscale_endpoint.ssh_server is not defined
           - tailscale_endpoint.advertise_exit_node is not defined
           - tailscale_endpoint.accept_routes is not defined
@@ -377,7 +382,7 @@
           - sing_box_ci_openwrt_override.endpoints | length == 1
           - override_endpoint.relay_server_port | int == 40001
           - override_endpoint.relay_server_static_endpoints == ['198.51.100.20:40001']
-          - override_endpoint.advertise_tags == ['tag:relay-ci']
+          - override_endpoint.advertise_tags is not defined
           - override_endpoint.ssh_server is not defined
           - override_endpoint.advertise_exit_node is not defined
           - override_endpoint.accept_routes is not defined
